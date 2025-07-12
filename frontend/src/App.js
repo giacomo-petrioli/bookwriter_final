@@ -107,11 +107,18 @@ const BookWriter = () => {
       const response = await axios.post(`${API}/generate-outline`, {
         project_id: currentProject.id
       });
-      setOutline(response.data.outline);
-      setCurrentStep(3);
+      
+      if (response.data && response.data.outline) {
+        setOutline(response.data.outline);
+        setCurrentStep(3);
+      } else {
+        throw new Error("Invalid response from server");
+      }
+      
     } catch (error) {
       console.error("Error generating outline:", error);
-      alert("Error generating outline");
+      const errorMessage = error.response?.data?.detail || error.message || "Error generating outline";
+      alert(`Error: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
