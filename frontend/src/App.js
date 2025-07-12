@@ -313,7 +313,8 @@ const BookWriter = () => {
       description: "",
       pages: 100,
       chapters: 10,
-      language: "English"
+      language: "English",
+      writing_style: "story"
     });
     setOutline("");
     setAllChapters({});
