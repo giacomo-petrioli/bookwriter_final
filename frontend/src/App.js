@@ -36,6 +36,7 @@ const BookWriter = () => {
       ['blockquote', 'code-block'],
       [{ 'list': 'ordered'}, { 'list': 'bullet' }],
       [{ 'indent': '-1'}, { 'indent': '+1' }],
+      [{ 'align': [] }],
       ['link'],
       ['clean']
     ],
@@ -43,8 +44,19 @@ const BookWriter = () => {
 
   const quillFormats = [
     'header', 'bold', 'italic', 'underline', 'strike', 'blockquote',
-    'code-block', 'list', 'bullet', 'indent', 'link'
+    'code-block', 'list', 'bullet', 'indent', 'link', 'align'
   ];
+
+  // Custom styles for better spacing
+  const editorStyle = {
+    height: '400px',
+    marginBottom: '50px',
+    '& .ql-editor': {
+      lineHeight: '1.6',
+      fontSize: '16px',
+      fontFamily: 'Georgia, serif'
+    }
+  };
 
   useEffect(() => {
     loadProjects();
