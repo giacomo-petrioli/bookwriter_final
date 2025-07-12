@@ -1061,6 +1061,10 @@ As we stand at this technological crossroads, understanding the implications of 
             ("Update Chapter", self.test_update_chapter),
             ("Export Book", self.test_export_book),
             ("Generate All Chapters", self.test_generate_all_chapters),
+            ("Story Style Project", self.test_story_style_project),
+            ("Descriptive Style Project", self.test_descriptive_style_project),
+            ("Enhanced Content Quality", self.test_enhanced_content_quality),
+            ("Gemini Model Performance", self.test_gemini_model_performance),
         ]
         
         for test_name, test_func in tests:
