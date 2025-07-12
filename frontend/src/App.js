@@ -29,7 +29,7 @@ const BookWriter = () => {
   const [savingChapter, setSavingChapter] = useState(false);
   const [exportingBook, setExportingBook] = useState(false);
 
-  // Rich text editor configuration
+  // Rich text editor configuration for better HTML formatting
   const quillModules = {
     toolbar: [
       [{ 'header': [1, 2, 3, false] }],
@@ -48,14 +48,39 @@ const BookWriter = () => {
     'code-block', 'list', 'bullet', 'indent', 'link', 'align'
   ];
 
-  // Custom styles for better spacing
+  // Custom styles for better spacing and formatting
   const editorStyle = {
-    height: '400px',
-    marginBottom: '50px',
     '& .ql-editor': {
-      lineHeight: '1.6',
+      lineHeight: '1.8',
       fontSize: '16px',
-      fontFamily: 'Georgia, serif'
+      fontFamily: 'Georgia, serif',
+      padding: '20px',
+    },
+    '& .ql-editor h2': {
+      marginTop: '30px',
+      marginBottom: '15px',
+      fontSize: '1.5em',
+      fontWeight: 'bold',
+      color: '#2c3e50',
+    },
+    '& .ql-editor h3': {
+      marginTop: '25px',
+      marginBottom: '12px',
+      fontSize: '1.3em',
+      fontWeight: '600',
+      color: '#34495e',
+    },
+    '& .ql-editor p': {
+      marginBottom: '15px',
+      lineHeight: '1.7',
+    },
+    '& .ql-editor ul, & .ql-editor ol': {
+      marginBottom: '15px',
+      paddingLeft: '25px',
+    },
+    '& .ql-editor li': {
+      marginBottom: '8px',
+      lineHeight: '1.6',
     }
   };
 
