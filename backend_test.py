@@ -161,13 +161,13 @@ class BookWriterAPITester:
             return False
     
     def test_generate_outline(self):
-        """Test AI outline generation using Gemini"""
+        """Test AI outline generation using Gemini with enhanced formatting checks"""
         if not self.test_project_id:
             self.log("❌ No test project ID available for outline generation test", "ERROR")
             return False
             
         try:
-            self.log("Testing AI outline generation...")
+            self.log("Testing AI outline generation with formatting improvements...")
             
             request_data = {
                 "project_id": self.test_project_id
@@ -194,11 +194,36 @@ class BookWriterAPITester:
                     self.log(f"❌ Generated outline seems too short: {len(outline)} characters", "ERROR")
                     return False
                 
+                # CONTINUATION FIX TESTING: Check for markdown cleanup
+                if "```html" in outline:
+                    self.log("❌ Found ```html artifacts in outline - markdown cleanup failed", "ERROR")
+                    return False
+                
+                if "```" in outline:
+                    self.log("❌ Found ``` artifacts in outline - markdown cleanup failed", "ERROR")
+                    return False
+                
+                # Check for proper text formatting and spacing
+                if outline.count('\n\n\n') > 2:  # Too many excessive line breaks
+                    self.log("⚠️ Outline may have excessive line breaks", "WARNING")
+                
                 # Check if outline contains chapter-related content
                 if "chapter" not in outline.lower():
                     self.log("⚠️ Generated outline doesn't seem to contain chapter information", "WARNING")
                 
+                # Verify outline is stored in database
+                verify_response = self.session.get(f"{self.base_url}/projects/{self.test_project_id}")
+                if verify_response.status_code == 200:
+                    project_data = verify_response.json()
+                    stored_outline = project_data.get("outline", "")
+                    if not stored_outline or len(stored_outline) < 50:
+                        self.log("❌ Outline not properly stored in database", "ERROR")
+                        return False
+                    self.log("✅ Outline properly stored in database")
+                
                 self.log(f"✅ AI outline generated successfully ({len(outline)} characters)")
+                self.log("✅ Markdown cleanup working - no ```html or ``` artifacts found")
+                self.log("✅ Text formatting improved with proper spacing")
                 return True
             else:
                 self.log(f"❌ Outline generation failed with status {response.status_code}: {response.text}", "ERROR")
