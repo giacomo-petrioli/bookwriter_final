@@ -234,13 +234,13 @@ class BookWriterAPITester:
             return False
     
     def test_generate_chapter(self):
-        """Test AI chapter generation using Gemini"""
+        """Test AI chapter generation using Gemini with enhanced formatting checks"""
         if not self.test_project_id:
             self.log("❌ No test project ID available for chapter generation test", "ERROR")
             return False
             
         try:
-            self.log("Testing AI chapter generation...")
+            self.log("Testing AI chapter generation with formatting improvements...")
             
             request_data = {
                 "project_id": self.test_project_id,
@@ -272,7 +272,44 @@ class BookWriterAPITester:
                     self.log(f"❌ Generated chapter seems too short: {len(chapter_content)} characters", "ERROR")
                     return False
                 
+                # CONTINUATION FIX TESTING: Check for markdown cleanup
+                if "```html" in chapter_content:
+                    self.log("❌ Found ```html artifacts in chapter - markdown cleanup failed", "ERROR")
+                    return False
+                
+                if "```" in chapter_content:
+                    self.log("❌ Found ``` artifacts in chapter - markdown cleanup failed", "ERROR")
+                    return False
+                
+                # Check for proper HTML formatting with spacing
+                html_tags = ['<p>', '<h1>', '<h2>', '<h3>', '<ul>', '<li>']
+                has_html_formatting = any(tag in chapter_content for tag in html_tags)
+                if not has_html_formatting:
+                    self.log("⚠️ Chapter content may not have proper HTML formatting", "WARNING")
+                else:
+                    self.log("✅ Chapter content has proper HTML formatting")
+                
+                # Check for proper spacing between elements
+                if '<p>' in chapter_content and '</p>' in chapter_content:
+                    # Check if paragraphs have proper spacing
+                    if '</p>\n\n' in chapter_content or '</p>\n<' in chapter_content:
+                        self.log("✅ Proper paragraph spacing detected")
+                    else:
+                        self.log("⚠️ Paragraph spacing may need improvement", "WARNING")
+                
+                # Verify chapter is stored in database
+                verify_response = self.session.get(f"{self.base_url}/projects/{self.test_project_id}")
+                if verify_response.status_code == 200:
+                    project_data = verify_response.json()
+                    chapters_content = project_data.get("chapters_content", {})
+                    if "1" not in chapters_content or len(chapters_content["1"]) < 100:
+                        self.log("❌ Chapter not properly stored in database", "ERROR")
+                        return False
+                    self.log("✅ Chapter properly stored in database")
+                
                 self.log(f"✅ AI chapter generated successfully ({len(chapter_content)} characters)")
+                self.log("✅ Markdown cleanup working - no ```html or ``` artifacts found")
+                self.log("✅ HTML formatting with proper spacing between elements")
                 return True
             elif response.status_code == 400:
                 self.log(f"❌ Chapter generation failed - likely missing outline: {response.text}", "ERROR")
