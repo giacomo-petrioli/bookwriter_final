@@ -385,7 +385,7 @@ const BookWriter = () => {
                         <h4 className="font-semibold text-gray-800">{project.title}</h4>
                         <p className="text-gray-600 text-sm mt-1 line-clamp-2">{project.description}</p>
                         <div className="text-xs text-gray-500 mt-2">
-                          {project.chapters} chapters • {project.pages} pages • {project.language}
+                          {project.chapters} chapters • {project.pages} pages • {project.language} • {project.writing_style === 'story' ? '📚 Story' : '📖 Descriptive'}
                         </div>
                       </div>
                     ))}
