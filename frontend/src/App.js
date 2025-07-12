@@ -148,10 +148,63 @@ const BookWriter = () => {
       
     } catch (error) {
       console.error("Error generating chapters:", error);
-      alert("Error generating chapters");
+      alert("Error generating chapters. Please try again.");
     } finally {
       setGeneratingAllChapters(false);
       setChapterProgress(0);
+    }
+  };
+
+  const saveChapter = async () => {
+    if (!currentProject || !chapterContent) return;
+
+    setSavingChapter(true);
+    try {
+      await axios.put(`${API}/update-chapter`, {
+        project_id: currentProject.id,
+        chapter_number: currentChapter,
+        content: chapterContent
+      });
+      
+      // Update local state
+      setAllChapters(prev => ({
+        ...prev,
+        [currentChapter]: chapterContent
+      }));
+      
+      alert("Chapter saved successfully!");
+    } catch (error) {
+      console.error("Error saving chapter:", error);
+      alert("Error saving chapter. Please try again.");
+    } finally {
+      setSavingChapter(false);
+    }
+  };
+
+  const exportBook = async () => {
+    if (!currentProject) return;
+
+    setExportingBook(true);
+    try {
+      const response = await axios.get(`${API}/export-book/${currentProject.id}`);
+      
+      // Create and download HTML file
+      const blob = new Blob([response.data.html], { type: 'text/html' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = response.data.filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      alert("Book exported successfully!");
+    } catch (error) {
+      console.error("Error exporting book:", error);
+      alert("Error exporting book. Please try again.");
+    } finally {
+      setExportingBook(false);
     }
   };
 
