@@ -155,19 +155,25 @@ const BookWriter = () => {
         project_id: currentProject.id
       });
       
-      setAllChapters(response.data.chapters);
-      setCurrentChapter(1);
-      setChapterContent(response.data.chapters["1"] || "");
-      
-      // Update current project with chapters
-      setCurrentProject(prev => ({
-        ...prev,
-        chapters_content: response.data.chapters
-      }));
+      if (response.data && response.data.chapters) {
+        setAllChapters(response.data.chapters);
+        setCurrentChapter(1);
+        setChapterContent(response.data.chapters["1"] || "");
+        
+        // Update current project with chapters
+        setCurrentProject(prev => ({
+          ...prev,
+          chapters_content: response.data.chapters
+        }));
+      } else {
+        throw new Error("Invalid response from server");
+      }
       
     } catch (error) {
       console.error("Error generating chapters:", error);
-      alert("Error generating chapters. Please try again.");
+      const errorMessage = error.response?.data?.detail || error.message || "Error generating chapters";
+      alert(`Error: ${errorMessage}. Please try again.`);
+      setCurrentStep(3.5); // Go back to the generation step
     } finally {
       setGeneratingAllChapters(false);
       setChapterProgress(0);
