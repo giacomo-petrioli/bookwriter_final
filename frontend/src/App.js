@@ -185,22 +185,37 @@ const BookWriter = () => {
 
     setSavingChapter(true);
     try {
-      await axios.put(`${API}/update-chapter`, {
+      const response = await axios.put(`${API}/update-chapter`, {
         project_id: currentProject.id,
         chapter_number: currentChapter,
         content: chapterContent
       });
       
-      // Update local state
-      setAllChapters(prev => ({
-        ...prev,
-        [currentChapter]: chapterContent
-      }));
+      if (response.data) {
+        // Update local state
+        setAllChapters(prev => ({
+          ...prev,
+          [currentChapter]: chapterContent
+        }));
+        
+        // Update current project
+        setCurrentProject(prev => ({
+          ...prev,
+          chapters_content: {
+            ...prev.chapters_content,
+            [currentChapter]: chapterContent
+          }
+        }));
+        
+        alert("Chapter saved successfully!");
+      } else {
+        throw new Error("Invalid response from server");
+      }
       
-      alert("Chapter saved successfully!");
     } catch (error) {
       console.error("Error saving chapter:", error);
-      alert("Error saving chapter. Please try again.");
+      const errorMessage = error.response?.data?.detail || error.message || "Error saving chapter";
+      alert(`Error: ${errorMessage}. Please try again.`);
     } finally {
       setSavingChapter(false);
     }
