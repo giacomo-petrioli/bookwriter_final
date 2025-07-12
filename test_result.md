@@ -312,12 +312,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "AI outline generation with Gemini integration"
-    - "AI chapter generation with Gemini"
-    - "Book export functionality"
-    - "Chapter writing and navigation interface"
-    - "AI outline generation and editing interface"
-  stuck_tasks: []
+    - "Enhanced content generation with improved word count"
+  stuck_tasks:
+    - "Enhanced content generation with improved word count"
   test_all: false
   test_priority: "high_first"
 
