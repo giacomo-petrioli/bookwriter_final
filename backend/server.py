@@ -119,22 +119,47 @@ async def generate_outline(request: OutlineRequest):
             system_message="You are an expert book writing assistant. You create detailed, well-structured book outlines."
         ).with_model("gemini", "gemini-2.0-flash-lite")
         
-        # Create detailed prompt for outline generation
+        # Create detailed prompt for outline generation based on writing style
+        if project_obj.writing_style == "story":
+            style_instructions = """Create a story-focused outline that:
+- Focuses on narrative flow and character development
+- Avoids excessive sub-chapters or technical divisions
+- Emphasizes plot progression and story arcs
+- Uses engaging, fluid chapter transitions
+- Maintains narrative continuity throughout"""
+        else:  # descriptive
+            style_instructions = """Create a descriptive/informational outline that:
+- Uses clear chapter divisions and sub-sections
+- Focuses on detailed explanations and analysis
+- Includes structured information hierarchy
+- Uses informative headings and subheadings
+- Organizes content logically for reference"""
+
         prompt = f"""Create a detailed book outline for the following book:
 
 Title: {project_obj.title}
 Description: {project_obj.description}
-Target Pages: {project_obj.pages}
-Number of Chapters: {project_obj.chapters}
+Target Pages: {project_obj.pages} pages
+Number of Chapters: {project_obj.chapters} chapters
 Language: {project_obj.language}
+Writing Style: {project_obj.writing_style}
+
+{style_instructions}
 
 Please create a comprehensive outline that includes:
-1. Chapter titles
-2. Brief chapter summaries (2-3 sentences each)
-3. Key points to cover in each chapter
-4. Estimated page distribution
+1. Chapter titles that fit the {project_obj.writing_style} style
+2. Brief chapter summaries (3-4 sentences each)
+3. Key points or plot elements for each chapter
+4. Estimated word count: {(project_obj.pages * 275) // project_obj.chapters} words per chapter
 
-Format the response as a structured outline that's easy to read and edit."""
+IMPORTANT: Return the outline in clean, well-formatted HTML with proper spacing:
+- Use <h2> for chapter titles
+- Use <h3> for any sub-sections (only if descriptive style)
+- Use <p> for descriptions and summaries
+- Use <ul> and <li> for key points
+- Ensure proper spacing between elements
+
+Format the response as structured HTML that's easy to read and edit."""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
