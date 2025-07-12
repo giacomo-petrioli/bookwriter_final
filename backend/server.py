@@ -429,7 +429,7 @@ async def update_chapter(request: ChapterUpdate):
 
 @api_router.get("/export-book/{project_id}")
 async def export_book(project_id: str):
-    """Export book as HTML"""
+    """Export book as HTML with proper formatting"""
     try:
         project = await db.book_projects.find_one({"id": project_id})
         if not project:
@@ -437,41 +437,121 @@ async def export_book(project_id: str):
         
         project_obj = BookProject(**project)
         
-        # Create HTML content
-        html_content = f"""
-<!DOCTYPE html>
-<html>
+        # Create well-formatted HTML content
+        html_content = f"""<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{project_obj.title}</title>
     <style>
         body {{
             font-family: Georgia, serif;
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 40px 20px;
+            line-height: 1.8;
+            color: #333;
+            background-color: #fff;
+        }}
+        
+        h1 {{
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }}
+        
+        h2 {{
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }}
+        
+        h3 {{
+            color: #7f8c8d;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }}
+        
+        p {{
+            margin-bottom: 20px;
+            text-align: justify;
+            text-indent: 30px;
+        }}
+        
+        .book-info {{
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            border-left: 5px solid #3498db;
+        }}
+        
+        .book-info h1 {{
+            border-bottom: none;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }}
+        
+        .book-info p {{
+            margin-bottom: 10px;
+            text-indent: 0;
+        }}
+        
+        .outline {{
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            border-left: 5px solid #28a745;
+        }}
+        
+        .chapter {{
+            margin-bottom: 60px;
+            padding: 20px 0;
+            border-bottom: 1px solid #e9ecef;
+            page-break-after: always;
+        }}
+        
+        .chapter:last-child {{
+            border-bottom: none;
+        }}
+        
+        .chapter h2 {{
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 25px;
+        }}
+        
+        ul {{
+            margin-bottom: 20px;
+            padding-left: 40px;
+        }}
+        
+        li {{
+            margin-bottom: 8px;
             line-height: 1.6;
         }}
-        h1 {{
-            color: #333;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
+        
+        strong {{
+            color: #2c3e50;
         }}
-        h2 {{
-            color: #555;
-            margin-top: 30px;
+        
+        em {{
+            color: #7f8c8d;
         }}
-        h3 {{
-            color: #666;
-        }}
-        .book-info {{
-            background: #f5f5f5;
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 30px;
-        }}
-        .chapter {{
-            margin-bottom: 40px;
-            page-break-after: always;
+        
+        @media print {{
+            body {{
+                padding: 20px;
+            }}
+            .chapter {{
+                page-break-after: always;
+            }}
         }}
     </style>
 </head>
@@ -482,40 +562,55 @@ async def export_book(project_id: str):
         <p><strong>Language:</strong> {project_obj.language}</p>
         <p><strong>Chapters:</strong> {project_obj.chapters}</p>
         <p><strong>Target Pages:</strong> {project_obj.pages}</p>
+        <p><strong>Generated On:</strong> {datetime.now().strftime("%B %d, %Y")}</p>
     </div>
     
     <div class="outline">
-        <h2>Book Outline</h2>
-        {project_obj.outline or "No outline available"}
+        <h2>📖 Book Outline</h2>
+        <div>{project_obj.outline or "No outline available"}</div>
     </div>
     
     <div class="chapters">
-        <h2>Chapters</h2>
-"""
+        <h2>📚 Chapters</h2>"""
         
-        # Add chapters
+        # Add chapters with proper formatting
         if project_obj.chapters_content:
             for i in range(1, project_obj.chapters + 1):
                 chapter_content = project_obj.chapters_content.get(str(i), "")
-                html_content += f"""
+                if chapter_content:
+                    html_content += f"""
         <div class="chapter">
             <h2>Chapter {i}</h2>
             {chapter_content}
-        </div>
-"""
+        </div>"""
+                else:
+                    html_content += f"""
+        <div class="chapter">
+            <h2>Chapter {i}</h2>
+            <p><em>This chapter has not been generated yet.</em></p>
+        </div>"""
         else:
-            html_content += "<p>No chapters generated yet.</p>"
+            html_content += "<p><em>No chapters have been generated yet.</em></p>"
         
         html_content += """
     </div>
+    
+    <div style="text-align: center; margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+        <p><em>Generated with AI Book Writer</em></p>
+    </div>
 </body>
-</html>
-"""
+</html>"""
+        
+        # Create safe filename
+        safe_filename = "".join(c for c in project_obj.title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+        safe_filename = safe_filename.replace(' ', '_')
+        if not safe_filename:
+            safe_filename = f"book_{project_obj.id}"
         
         return {
             "html": html_content,
             "title": project_obj.title,
-            "filename": f"{project_obj.title.replace(' ', '_')}.html"
+            "filename": f"{safe_filename}.html"
         }
         
     except Exception as e:
