@@ -143,11 +143,11 @@ backend:
 
   - task: "AI chapter generation with Gemini"
     implemented: true
-    working: true
+    working: "needs_improvement"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "unknown"
         agent: "main"
@@ -158,6 +158,9 @@ backend:
       - working: "needs_improvement"
         agent: "main"
         comment: "CONTINUATION FIX: Enhanced markdown cleanup, improved HTML formatting with proper spacing between elements. Added better paragraph spacing, heading spacing, and list formatting. Fixed text formatting issues where everything was attached without proper spacing. Need to retest with improved formatting."
+      - working: "needs_improvement"
+        agent: "testing"
+        comment: "COMPREHENSIVE TESTING COMPLETED: AI chapter generation working well with formatting improvements but needs word count enhancement. ✅ Generated 21038 character chapter successfully. ✅ Markdown cleanup working perfectly - no ```html or ``` artifacts found. ✅ HTML formatting with proper spacing between elements. ✅ Chapter properly stored in database. ✅ Writing style selection implemented. ❌ ISSUE: Generated chapters don't meet 250-300 words per page requirement (story: 3170 words vs expected ~6875, descriptive: 2647 words vs expected ~6875). Need to enhance prompts to generate more substantial content per chapter."
 
   - task: "Outline and chapter content editing endpoints"
     implemented: true
