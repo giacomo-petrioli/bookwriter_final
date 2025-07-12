@@ -405,27 +405,24 @@ async def generate_all_chapters(request: OutlineRequest):
 Title: {project_obj.title}
 Description: {project_obj.description}
 Language: {project_obj.language}
-Target Length: Approximately {estimated_words_per_chapter} words
+Writing Style: {project_obj.writing_style}
+Target Length: {estimated_words_per_chapter} words (this is important - write substantial content!)
+
+{style_instructions}
 
 Book Outline:
 {project_obj.outline}
 
-Please write a complete, engaging chapter using HTML formatting that:
-1. Follows the outline structure for Chapter {chapter_num}
-2. Is approximately {estimated_words_per_chapter} words
-3. Uses HTML tags for formatting:
-   - <h1> for chapter titles
-   - <h2> for main section headings  
-   - <h3> for subsection headings
-   - <p> for paragraphs
-   - <strong> for bold text
-   - <em> for italic text
-   - <ul> and <li> for bullet points when appropriate
-4. Has a compelling introduction and conclusion
-5. Maintains consistent tone and style
-6. Is written in {project_obj.language}
+Please write a complete, engaging chapter that:
+1. Follows the outline for Chapter {chapter_num}
+2. Contains approximately {estimated_words_per_chapter} words (aim for 250-300 words per page)
+3. Maintains the {project_obj.writing_style} style throughout
+4. Is written in {project_obj.language}
+5. Has compelling content that advances the book's purpose
 
-Focus specifically on Chapter {chapter_num} content based on the outline. Return properly formatted HTML content."""
+{formatting_instructions}
+
+Focus specifically on Chapter {chapter_num} content. Write substantial, engaging content that meets the word count requirement."""
 
                 user_message = UserMessage(text=prompt)
                 response = await chat.send_message(user_message)
