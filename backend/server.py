@@ -236,17 +236,32 @@ Focus specifically on Chapter {chapter_num} content based on the outline. Return
                 
                 # Clean up the response - remove markdown code blocks and improve formatting
                 cleaned_response = response.strip()
+                
+                # Remove various markdown code block patterns
                 if cleaned_response.startswith('```html'):
-                    cleaned_response = cleaned_response[7:]  # Remove ```html
+                    cleaned_response = cleaned_response[7:]
+                elif cleaned_response.startswith('```'):
+                    cleaned_response = cleaned_response[3:]
+                
                 if cleaned_response.endswith('```'):
-                    cleaned_response = cleaned_response[:-3]  # Remove ```
+                    cleaned_response = cleaned_response[:-3]
+                
+                # Remove any remaining markdown artifacts
+                cleaned_response = cleaned_response.replace('```html', '').replace('```', '')
                 cleaned_response = cleaned_response.strip()
                 
-                # Ensure proper paragraph spacing
-                cleaned_response = cleaned_response.replace('<p>', '\n<p>').replace('</p>', '</p>\n')
-                cleaned_response = cleaned_response.replace('<h1>', '\n<h1>').replace('</h1>', '</h1>\n')
-                cleaned_response = cleaned_response.replace('<h2>', '\n<h2>').replace('</h2>', '</h2>\n')
-                cleaned_response = cleaned_response.replace('<h3>', '\n<h3>').replace('</h3>', '</h3>\n')
+                # Ensure proper HTML formatting with better spacing
+                cleaned_response = cleaned_response.replace('<p>', '\n<p>').replace('</p>', '</p>\n\n')
+                cleaned_response = cleaned_response.replace('<h1>', '\n\n<h1>').replace('</h1>', '</h1>\n\n')
+                cleaned_response = cleaned_response.replace('<h2>', '\n\n<h2>').replace('</h2>', '</h2>\n\n')
+                cleaned_response = cleaned_response.replace('<h3>', '\n\n<h3>').replace('</h3>', '</h3>\n\n')
+                cleaned_response = cleaned_response.replace('<ul>', '\n<ul>').replace('</ul>', '</ul>\n\n')
+                cleaned_response = cleaned_response.replace('<li>', '\n  <li>').replace('</li>', '</li>')
+                
+                # Clean up excessive line breaks
+                cleaned_response = cleaned_response.replace('\n\n\n\n', '\n\n\n')
+                cleaned_response = cleaned_response.replace('\n\n\n\n', '\n\n')
+                cleaned_response = cleaned_response.strip()
                 
                 # Store the chapter
                 all_chapters[str(chapter_num)] = cleaned_response
