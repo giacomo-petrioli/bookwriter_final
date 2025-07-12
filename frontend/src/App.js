@@ -228,21 +228,27 @@ const BookWriter = () => {
     try {
       const response = await axios.get(`${API}/export-book/${currentProject.id}`);
       
-      // Create and download HTML file
-      const blob = new Blob([response.data.html], { type: 'text/html' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = response.data.filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      if (response.data && response.data.html) {
+        // Create and download HTML file
+        const blob = new Blob([response.data.html], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = response.data.filename || `${currentProject.title.replace(/[^a-zA-Z0-9]/g, '_')}.html`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        alert("Book exported successfully!");
+      } else {
+        throw new Error("Invalid response from server");
+      }
       
-      alert("Book exported successfully!");
     } catch (error) {
       console.error("Error exporting book:", error);
-      alert("Error exporting book. Please try again.");
+      const errorMessage = error.response?.data?.detail || error.message || "Error exporting book";
+      alert(`Error: ${errorMessage}. Please try again.`);
     } finally {
       setExportingBook(false);
     }
