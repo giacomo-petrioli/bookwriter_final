@@ -137,13 +137,25 @@ Format the response as a structured outline that's easy to read and edit."""
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
         
-        # Clean up the response - remove markdown code blocks
+        # Clean up the response - remove markdown code blocks and improve formatting
         cleaned_response = response.strip()
+        
+        # Remove various markdown code block patterns
         if cleaned_response.startswith('```html'):
-            cleaned_response = cleaned_response[7:]  # Remove ```html
+            cleaned_response = cleaned_response[7:]
+        elif cleaned_response.startswith('```'):
+            cleaned_response = cleaned_response[3:]
+        
         if cleaned_response.endswith('```'):
-            cleaned_response = cleaned_response[:-3]  # Remove ```
+            cleaned_response = cleaned_response[:-3]
+        
+        # Remove any remaining markdown artifacts
+        cleaned_response = cleaned_response.replace('```html', '').replace('```', '')
         cleaned_response = cleaned_response.strip()
+        
+        # Ensure proper line spacing for readability
+        cleaned_response = cleaned_response.replace('\n\n\n', '\n\n')  # Remove excessive line breaks
+        cleaned_response = cleaned_response.replace('\n', '\n\n')  # Add proper paragraph spacing
         
         # Update project with generated outline
         await db.book_projects.update_one(
