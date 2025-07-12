@@ -94,12 +94,44 @@ const BookWriter = () => {
         project_id: currentProject.id,
         outline: outline
       });
-      setCurrentStep(4);
+      // Don't automatically move to step 4 - user will click generate all chapters
+      setCurrentStep(3.5); // Intermediate step for batch generation
     } catch (error) {
       console.error("Error updating outline:", error);
       alert("Error updating outline");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateAllChapters = async () => {
+    if (!currentProject) return;
+
+    setGeneratingAllChapters(true);
+    setChapterProgress(0);
+    setCurrentStep(4); // Move to writing step
+    
+    try {
+      const response = await axios.post(`${API}/generate-all-chapters`, {
+        project_id: currentProject.id
+      });
+      
+      setAllChapters(response.data.chapters);
+      setCurrentChapter(1);
+      setChapterContent(response.data.chapters["1"] || "");
+      
+      // Update current project with chapters
+      setCurrentProject(prev => ({
+        ...prev,
+        chapters_content: response.data.chapters
+      }));
+      
+    } catch (error) {
+      console.error("Error generating chapters:", error);
+      alert("Error generating chapters");
+    } finally {
+      setGeneratingAllChapters(false);
+      setChapterProgress(0);
     }
   };
 
