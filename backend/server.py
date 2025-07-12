@@ -355,7 +355,39 @@ async def generate_all_chapters(request: OutlineRequest):
         
         # Initialize storage for all chapters
         all_chapters = {}
-        estimated_words_per_chapter = (project_obj.pages * 250) // project_obj.chapters
+        estimated_words_per_chapter = (project_obj.pages * 275) // project_obj.chapters
+        
+        # Create style-specific instructions
+        if project_obj.writing_style == "story":
+            style_instructions = """Write in a fluid, narrative style that:
+- Focuses on storytelling and character development
+- Uses natural dialogue and descriptive prose
+- Maintains narrative flow without excessive sub-headings
+- Creates immersive scenes and situations
+- Keeps the reader engaged with the story progression
+- Uses minimal structural breaks within chapters"""
+            
+            formatting_instructions = """Use minimal HTML formatting for story flow:
+- <p> for paragraphs (the main content)
+- <em> for emphasis or thoughts
+- <strong> for important dialogue or key moments
+- Avoid excessive <h2> or <h3> tags within chapters
+- Focus on smooth paragraph transitions"""
+        else:  # descriptive
+            style_instructions = """Write in a descriptive, informational style that:
+- Provides detailed explanations and analysis
+- Uses clear structure and organization
+- Includes examples and case studies when relevant
+- Maintains an informative and engaging tone
+- Breaks down complex topics into digestible sections"""
+            
+            formatting_instructions = """Use structured HTML formatting:
+- <h2> for main section headings within chapters
+- <h3> for subsection headings
+- <p> for paragraphs
+- <ul> and <li> for bullet points and lists
+- <strong> for key terms and concepts
+- <em> for emphasis"""
         
         # Generate each chapter sequentially
         for chapter_num in range(1, project_obj.chapters + 1):
