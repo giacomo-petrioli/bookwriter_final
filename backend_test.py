@@ -537,6 +537,443 @@ class BookWriterAPITester:
         except Exception as e:
             self.log(f"❌ Generate all chapters test failed: {str(e)}", "ERROR")
             return False
+
+    def test_update_chapter(self):
+        """Test updating chapter content"""
+        if not self.test_project_id:
+            self.log("❌ No test project ID available for chapter update test", "ERROR")
+            return False
+            
+        try:
+            self.log("Testing chapter update...")
+            
+            updated_chapter = """
+# Chapter 1: The Dawn of AI in the Workplace
+
+The workplace as we know it is undergoing a fundamental transformation. Artificial intelligence, once confined to the realm of science fiction, has become an integral part of modern business operations. From chatbots handling customer service to machine learning algorithms optimizing supply chains, AI is reshaping how we work, collaborate, and create value.
+
+## The Evolution of Work
+
+Throughout history, technological advances have consistently altered the nature of work. The industrial revolution mechanized manual labor, the computer age digitized information processing, and now the AI revolution is augmenting human intelligence itself. This latest transformation promises to be the most profound yet, touching every aspect of professional life.
+
+## Current State of AI Adoption
+
+Today's organizations are implementing AI solutions across diverse functions:
+- Customer service automation
+- Predictive analytics for decision-making
+- Process optimization and efficiency improvements
+- Quality control and error detection
+- Personalized user experiences
+
+As we stand at this technological crossroads, understanding the implications of AI integration becomes crucial for workers, managers, and society as a whole.
+"""
+            
+            request_data = {
+                "project_id": self.test_project_id,
+                "chapter_number": 1,
+                "content": updated_chapter
+            }
+            
+            response = self.session.put(f"{self.base_url}/update-chapter", json=request_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if data.get("message") != "Chapter updated successfully":
+                    self.log(f"❌ Unexpected update response: {data}", "ERROR")
+                    return False
+                
+                # Verify the update by fetching the project
+                verify_response = self.session.get(f"{self.base_url}/projects/{self.test_project_id}")
+                if verify_response.status_code == 200:
+                    project_data = verify_response.json()
+                    chapters_content = project_data.get("chapters_content", {})
+                    if "1" in chapters_content and updated_chapter.strip() in chapters_content["1"]:
+                        self.log("✅ Chapter updated and verified successfully")
+                        return True
+                    else:
+                        self.log("❌ Chapter update not reflected in project data", "ERROR")
+                        return False
+                else:
+                    self.log("⚠️ Could not verify chapter update", "WARNING")
+                    return True  # Update call succeeded even if verification failed
+                
+            else:
+                self.log(f"❌ Chapter update failed with status {response.status_code}: {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Chapter update test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_story_style_project(self):
+        """Test creating and generating content for a story-style project"""
+        try:
+            self.log("Testing story style project creation and content generation...")
+            
+            # Create story-style project
+            story_project_data = {
+                "title": "The Last Guardian of Memory",
+                "description": "A science fiction story about a librarian who discovers she's the last person capable of preserving human memories in a world where digital storage is failing.",
+                "pages": 200,
+                "chapters": 8,
+                "language": "English",
+                "writing_style": "story"
+            }
+            
+            response = self.session.post(f"{self.base_url}/projects", json=story_project_data)
+            
+            if response.status_code != 200:
+                self.log(f"❌ Story project creation failed: {response.text}", "ERROR")
+                return False
+                
+            story_project = response.json()
+            story_project_id = story_project.get("id")
+            
+            # Verify writing_style is set correctly
+            if story_project.get("writing_style") != "story":
+                self.log(f"❌ Writing style not set correctly: expected 'story', got {story_project.get('writing_style')}", "ERROR")
+                return False
+            
+            self.log("✅ Story-style project created successfully")
+            
+            # Generate outline for story project
+            outline_request = {"project_id": story_project_id}
+            outline_response = self.session.post(f"{self.base_url}/generate-outline", json=outline_request)
+            
+            if outline_response.status_code != 200:
+                self.log(f"❌ Story outline generation failed: {outline_response.text}", "ERROR")
+                return False
+                
+            outline_data = outline_response.json()
+            story_outline = outline_data.get("outline", "")
+            
+            # Check story-specific outline characteristics
+            if len(story_outline) < 500:
+                self.log(f"❌ Story outline too short: {len(story_outline)} characters", "ERROR")
+                return False
+                
+            # Story outlines should be narrative-focused without excessive sub-sections
+            h3_count = story_outline.count('<h3>')
+            if h3_count > 5:  # Story style should have minimal sub-sections
+                self.log(f"⚠️ Story outline may have too many sub-sections ({h3_count} <h3> tags)", "WARNING")
+            
+            # Check for narrative elements
+            narrative_keywords = ['character', 'story', 'plot', 'journey', 'adventure', 'conflict', 'resolution']
+            found_narrative = any(keyword in story_outline.lower() for keyword in narrative_keywords)
+            if not found_narrative:
+                self.log("⚠️ Story outline may lack narrative elements", "WARNING")
+            else:
+                self.log("✅ Story outline contains narrative elements")
+                
+            self.log("✅ Story-style outline generated successfully")
+            
+            # Generate a chapter for story project
+            chapter_request = {"project_id": story_project_id, "chapter_number": 1}
+            chapter_response = self.session.post(f"{self.base_url}/generate-chapter", json=chapter_request)
+            
+            if chapter_response.status_code != 200:
+                self.log(f"❌ Story chapter generation failed: {chapter_response.text}", "ERROR")
+                return False
+                
+            chapter_data = chapter_response.json()
+            story_chapter = chapter_data.get("chapter_content", "")
+            
+            # Check word count (should be 250-300 words per page)
+            estimated_words = len(story_chapter.split())
+            expected_words_per_chapter = (200 * 275) // 8  # 6875 words per chapter
+            
+            if estimated_words < expected_words_per_chapter * 0.7:  # Allow 30% variance
+                self.log(f"❌ Story chapter word count too low: {estimated_words} words (expected ~{expected_words_per_chapter})", "ERROR")
+                return False
+            elif estimated_words >= expected_words_per_chapter * 0.7:
+                self.log(f"✅ Story chapter meets word count requirement: {estimated_words} words")
+            
+            # Story chapters should have fluid narrative with minimal structural breaks
+            h2_count = story_chapter.count('<h2>')
+            if h2_count > 3:  # Story style should have minimal headings within chapters
+                self.log(f"⚠️ Story chapter may have too many structural breaks ({h2_count} <h2> tags)", "WARNING")
+            else:
+                self.log("✅ Story chapter has appropriate narrative flow")
+                
+            # Check for story elements
+            story_elements = ['dialogue', 'scene', 'character', 'emotion', 'action']
+            found_story_elements = any(element in story_chapter.lower() for element in story_elements)
+            if found_story_elements:
+                self.log("✅ Story chapter contains narrative elements")
+            
+            self.log("✅ Story-style project testing completed successfully")
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Story style project test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_descriptive_style_project(self):
+        """Test creating and generating content for a descriptive-style project"""
+        try:
+            self.log("Testing descriptive style project creation and content generation...")
+            
+            # Create descriptive-style project
+            descriptive_project_data = {
+                "title": "Complete Guide to Sustainable Urban Planning",
+                "description": "A comprehensive handbook covering sustainable urban development practices, environmental considerations, and policy frameworks for modern city planning.",
+                "pages": 300,
+                "chapters": 12,
+                "language": "English",
+                "writing_style": "descriptive"
+            }
+            
+            response = self.session.post(f"{self.base_url}/projects", json=descriptive_project_data)
+            
+            if response.status_code != 200:
+                self.log(f"❌ Descriptive project creation failed: {response.text}", "ERROR")
+                return False
+                
+            descriptive_project = response.json()
+            descriptive_project_id = descriptive_project.get("id")
+            
+            # Verify writing_style is set correctly
+            if descriptive_project.get("writing_style") != "descriptive":
+                self.log(f"❌ Writing style not set correctly: expected 'descriptive', got {descriptive_project.get('writing_style')}", "ERROR")
+                return False
+            
+            self.log("✅ Descriptive-style project created successfully")
+            
+            # Generate outline for descriptive project
+            outline_request = {"project_id": descriptive_project_id}
+            outline_response = self.session.post(f"{self.base_url}/generate-outline", json=outline_request)
+            
+            if outline_response.status_code != 200:
+                self.log(f"❌ Descriptive outline generation failed: {outline_response.text}", "ERROR")
+                return False
+                
+            outline_data = outline_response.json()
+            descriptive_outline = outline_data.get("outline", "")
+            
+            # Check descriptive-specific outline characteristics
+            if len(descriptive_outline) < 500:
+                self.log(f"❌ Descriptive outline too short: {len(descriptive_outline)} characters", "ERROR")
+                return False
+                
+            # Descriptive outlines should have clear structure with headings and sub-sections
+            h2_count = descriptive_outline.count('<h2>')
+            h3_count = descriptive_outline.count('<h3>')
+            ul_count = descriptive_outline.count('<ul>')
+            
+            if h2_count < 5:  # Descriptive style should have clear chapter divisions
+                self.log(f"⚠️ Descriptive outline may lack sufficient structure ({h2_count} <h2> tags)", "WARNING")
+            else:
+                self.log(f"✅ Descriptive outline has good structure ({h2_count} chapters, {h3_count} sub-sections)")
+                
+            if ul_count < 2:  # Should have some lists for organization
+                self.log("⚠️ Descriptive outline may lack organized lists", "WARNING")
+            else:
+                self.log("✅ Descriptive outline includes organized lists")
+                
+            self.log("✅ Descriptive-style outline generated successfully")
+            
+            # Generate a chapter for descriptive project
+            chapter_request = {"project_id": descriptive_project_id, "chapter_number": 1}
+            chapter_response = self.session.post(f"{self.base_url}/generate-chapter", json=chapter_request)
+            
+            if chapter_response.status_code != 200:
+                self.log(f"❌ Descriptive chapter generation failed: {chapter_response.text}", "ERROR")
+                return False
+                
+            chapter_data = chapter_response.json()
+            descriptive_chapter = chapter_data.get("chapter_content", "")
+            
+            # Check word count (should be 250-300 words per page)
+            estimated_words = len(descriptive_chapter.split())
+            expected_words_per_chapter = (300 * 275) // 12  # 6875 words per chapter
+            
+            if estimated_words < expected_words_per_chapter * 0.7:  # Allow 30% variance
+                self.log(f"❌ Descriptive chapter word count too low: {estimated_words} words (expected ~{expected_words_per_chapter})", "ERROR")
+                return False
+            elif estimated_words >= expected_words_per_chapter * 0.7:
+                self.log(f"✅ Descriptive chapter meets word count requirement: {estimated_words} words")
+            
+            # Descriptive chapters should have organized sections with proper headings
+            h2_count = descriptive_chapter.count('<h2>')
+            h3_count = descriptive_chapter.count('<h3>')
+            ul_count = descriptive_chapter.count('<ul>')
+            strong_count = descriptive_chapter.count('<strong>')
+            
+            if h2_count < 2:  # Descriptive style should have section headings
+                self.log(f"⚠️ Descriptive chapter may lack sufficient section organization ({h2_count} <h2> tags)", "WARNING")
+            else:
+                self.log(f"✅ Descriptive chapter has good organization ({h2_count} sections, {h3_count} sub-sections)")
+                
+            if strong_count < 3:  # Should emphasize key terms
+                self.log("⚠️ Descriptive chapter may lack emphasis on key terms", "WARNING")
+            else:
+                self.log("✅ Descriptive chapter emphasizes key terms and concepts")
+                
+            self.log("✅ Descriptive-style project testing completed successfully")
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Descriptive style project test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_enhanced_content_quality(self):
+        """Test enhanced content quality and HTML formatting"""
+        if not self.test_project_id:
+            self.log("❌ No test project ID available for content quality test", "ERROR")
+            return False
+            
+        try:
+            self.log("Testing enhanced content quality and HTML formatting...")
+            
+            # Get the project to check its content
+            response = self.session.get(f"{self.base_url}/projects/{self.test_project_id}")
+            
+            if response.status_code != 200:
+                self.log(f"❌ Could not retrieve project for content quality test", "ERROR")
+                return False
+                
+            project_data = response.json()
+            outline = project_data.get("outline", "")
+            chapters_content = project_data.get("chapters_content", {})
+            
+            # Test outline HTML formatting
+            if outline:
+                html_tags_in_outline = ['<h2>', '<h3>', '<p>', '<ul>', '<li>']
+                found_tags = [tag for tag in html_tags_in_outline if tag in outline]
+                
+                if len(found_tags) < 3:
+                    self.log(f"❌ Outline lacks proper HTML formatting (found: {found_tags})", "ERROR")
+                    return False
+                else:
+                    self.log(f"✅ Outline has proper HTML formatting with tags: {found_tags}")
+                    
+                # Check for proper spacing
+                if '</p>\n\n' in outline or '</h2>\n\n' in outline:
+                    self.log("✅ Outline has proper element spacing")
+                else:
+                    self.log("⚠️ Outline spacing could be improved", "WARNING")
+            
+            # Test chapter content quality
+            if chapters_content:
+                for chapter_num, content in chapters_content.items():
+                    word_count = len(content.split())
+                    
+                    # Check word count meets enhanced requirements (250-300 words per page)
+                    if word_count < 1000:  # Minimum substantial content
+                        self.log(f"❌ Chapter {chapter_num} word count too low: {word_count} words", "ERROR")
+                        return False
+                    else:
+                        self.log(f"✅ Chapter {chapter_num} has substantial content: {word_count} words")
+                    
+                    # Check HTML formatting
+                    html_elements = ['<p>', '<h2>', '<strong>', '<em>']
+                    found_elements = [elem for elem in html_elements if elem in content]
+                    
+                    if len(found_elements) < 2:
+                        self.log(f"❌ Chapter {chapter_num} lacks proper HTML formatting", "ERROR")
+                        return False
+                    else:
+                        self.log(f"✅ Chapter {chapter_num} has proper HTML formatting")
+                    
+                    # Check for proper paragraph spacing
+                    if '</p>\n\n' in content:
+                        self.log(f"✅ Chapter {chapter_num} has proper paragraph spacing")
+                    else:
+                        self.log(f"⚠️ Chapter {chapter_num} spacing could be improved", "WARNING")
+            
+            self.log("✅ Enhanced content quality verification completed")
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Content quality test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_gemini_model_performance(self):
+        """Test Gemini 2.0 Flash Lite model performance"""
+        try:
+            self.log("Testing Gemini 2.0 Flash Lite model performance...")
+            
+            # Create a small test project for performance testing
+            perf_project_data = {
+                "title": "Model Performance Test",
+                "description": "A test project to verify Gemini 2.0 Flash Lite model performance and response quality.",
+                "pages": 50,
+                "chapters": 3,
+                "language": "English",
+                "writing_style": "descriptive"
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{self.base_url}/projects", json=perf_project_data)
+            
+            if response.status_code != 200:
+                self.log(f"❌ Performance test project creation failed", "ERROR")
+                return False
+                
+            perf_project = response.json()
+            perf_project_id = perf_project.get("id")
+            
+            # Test outline generation performance
+            outline_start = time.time()
+            outline_request = {"project_id": perf_project_id}
+            outline_response = self.session.post(f"{self.base_url}/generate-outline", json=outline_request)
+            outline_time = time.time() - outline_start
+            
+            if outline_response.status_code != 200:
+                self.log(f"❌ Performance outline generation failed", "ERROR")
+                return False
+                
+            outline_data = outline_response.json()
+            outline_content = outline_data.get("outline", "")
+            
+            # Check response time (should be reasonable for Gemini 2.0 Flash Lite)
+            if outline_time > 30:  # 30 seconds threshold
+                self.log(f"⚠️ Outline generation took {outline_time:.2f}s (may be slow)", "WARNING")
+            else:
+                self.log(f"✅ Outline generation completed in {outline_time:.2f}s")
+            
+            # Check content quality
+            if len(outline_content) < 300:
+                self.log(f"❌ Generated outline quality insufficient: {len(outline_content)} chars", "ERROR")
+                return False
+            else:
+                self.log(f"✅ Generated outline quality good: {len(outline_content)} chars")
+            
+            # Test chapter generation performance
+            chapter_start = time.time()
+            chapter_request = {"project_id": perf_project_id, "chapter_number": 1}
+            chapter_response = self.session.post(f"{self.base_url}/generate-chapter", json=chapter_request)
+            chapter_time = time.time() - chapter_start
+            
+            if chapter_response.status_code != 200:
+                self.log(f"❌ Performance chapter generation failed", "ERROR")
+                return False
+                
+            chapter_data = chapter_response.json()
+            chapter_content = chapter_data.get("chapter_content", "")
+            
+            # Check response time
+            if chapter_time > 45:  # 45 seconds threshold for chapter
+                self.log(f"⚠️ Chapter generation took {chapter_time:.2f}s (may be slow)", "WARNING")
+            else:
+                self.log(f"✅ Chapter generation completed in {chapter_time:.2f}s")
+            
+            # Check content length and quality
+            word_count = len(chapter_content.split())
+            if word_count < 500:
+                self.log(f"❌ Generated chapter quality insufficient: {word_count} words", "ERROR")
+                return False
+            else:
+                self.log(f"✅ Generated chapter quality good: {word_count} words")
+            
+            total_time = time.time() - start_time
+            self.log(f"✅ Gemini model performance test completed in {total_time:.2f}s total")
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Gemini model performance test failed: {str(e)}", "ERROR")
+            return False
         """Test updating chapter content"""
         if not self.test_project_id:
             self.log("❌ No test project ID available for chapter update test", "ERROR")
