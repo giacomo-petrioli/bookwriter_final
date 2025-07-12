@@ -153,75 +153,7 @@ Format the response as a structured outline that's easy to read and edit."""
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating outline: {str(e)}")
 
-@api_router.post("/generate-chapter")
-async def generate_chapter(request: ChapterRequest):
-    """Generate a specific chapter using Gemini AI"""
-    try:
-        # Get project details
-        project = await db.book_projects.find_one({"id": request.project_id})
-        if not project:
-            raise HTTPException(status_code=404, detail="Project not found")
-        
-        project_obj = BookProject(**project)
-        
-        if not project_obj.outline:
-            raise HTTPException(status_code=400, detail="Project must have an outline before generating chapters")
-        
-        # Initialize Gemini chat
-        chat = LlmChat(
-            api_key=os.environ.get('GEMINI_API_KEY'),
-            session_id=f"chapter_{project_obj.id}_{request.chapter_number}",
-            system_message="You are an expert book writer. You write engaging, well-structured chapters based on outlines."
-        ).with_model("gemini", "gemini-2.0-flash-lite")
-        
-        # Create prompt for chapter generation
-        estimated_words = (project_obj.pages * 250) // project_obj.chapters  # ~250 words per page
-        
-        prompt = f"""Write Chapter {request.chapter_number} for the following book:
 
-Title: {project_obj.title}
-Description: {project_obj.description}
-Language: {project_obj.language}
-Target Length: Approximately {estimated_words} words
-
-Book Outline:
-{project_obj.outline}
-
-Please write a complete, engaging chapter that:
-1. Follows the outline structure
-2. Is approximately {estimated_words} words
-3. Has a compelling introduction and conclusion
-4. Uses appropriate headings and structure
-5. Maintains consistent tone and style
-6. Is written in {project_obj.language}
-
-Focus specifically on Chapter {request.chapter_number} content based on the outline."""
-
-        user_message = UserMessage(text=prompt)
-        response = await chat.send_message(user_message)
-        
-        # Update project with generated chapter
-        current_chapters = project_obj.chapters_content or {}
-        current_chapters[str(request.chapter_number)] = response
-        
-        await db.book_projects.update_one(
-            {"id": request.project_id},
-            {
-                "$set": {
-                    "chapters_content": current_chapters,
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
-        
-        return {
-            "chapter_content": response,
-            "chapter_number": request.chapter_number,
-            "project_id": request.project_id
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generating chapter: {str(e)}")
 
 @api_router.put("/update-chapter")
 async def update_chapter(request: ChapterUpdate):
