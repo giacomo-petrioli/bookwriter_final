@@ -175,6 +175,114 @@ Format the response as a structured outline that's easy to read and edit."""
 
 
 
+@api_router.post("/generate-chapter")
+async def generate_chapter(request: ChapterRequest):
+    """Generate a specific chapter using Gemini AI"""
+    try:
+        # Get project details
+        project = await db.book_projects.find_one({"id": request.project_id})
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        project_obj = BookProject(**project)
+        
+        if not project_obj.outline:
+            raise HTTPException(status_code=400, detail="Project must have an outline before generating chapters")
+        
+        # Initialize Gemini chat for this chapter
+        chat = LlmChat(
+            api_key=os.environ.get('GEMINI_API_KEY'),
+            session_id=f"chapter_{project_obj.id}_{request.chapter_number}",
+            system_message="You are an expert book writer. You write engaging, well-structured chapters based on outlines. Use HTML formatting for headings, bold text, and structure."
+        ).with_model("gemini", "gemini-2.0-flash-lite")
+        
+        # Calculate estimated words per chapter
+        estimated_words_per_chapter = (project_obj.pages * 250) // project_obj.chapters
+        
+        # Create prompt for chapter generation with HTML formatting
+        prompt = f"""Write Chapter {request.chapter_number} for the following book:
+
+Title: {project_obj.title}
+Description: {project_obj.description}
+Language: {project_obj.language}
+Target Length: Approximately {estimated_words_per_chapter} words
+
+Book Outline:
+{project_obj.outline}
+
+Please write a complete, engaging chapter using HTML formatting that:
+1. Follows the outline structure for Chapter {request.chapter_number}
+2. Is approximately {estimated_words_per_chapter} words
+3. Uses HTML tags for formatting:
+   - <h1> for chapter titles
+   - <h2> for main section headings  
+   - <h3> for subsection headings
+   - <p> for paragraphs
+   - <strong> for bold text
+   - <em> for italic text
+   - <ul> and <li> for bullet points when appropriate
+4. Has a compelling introduction and conclusion
+5. Maintains consistent tone and style
+6. Is written in {project_obj.language}
+
+Focus specifically on Chapter {request.chapter_number} content based on the outline. Return properly formatted HTML content."""
+
+        user_message = UserMessage(text=prompt)
+        response = await chat.send_message(user_message)
+        
+        # Clean up the response - remove markdown code blocks and improve formatting
+        cleaned_response = response.strip()
+        
+        # Remove various markdown code block patterns
+        if cleaned_response.startswith('```html'):
+            cleaned_response = cleaned_response[7:]
+        elif cleaned_response.startswith('```'):
+            cleaned_response = cleaned_response[3:]
+        
+        if cleaned_response.endswith('```'):
+            cleaned_response = cleaned_response[:-3]
+        
+        # Remove any remaining markdown artifacts
+        cleaned_response = cleaned_response.replace('```html', '').replace('```', '')
+        cleaned_response = cleaned_response.strip()
+        
+        # Ensure proper HTML formatting with better spacing
+        cleaned_response = cleaned_response.replace('<p>', '\n<p>').replace('</p>', '</p>\n\n')
+        cleaned_response = cleaned_response.replace('<h1>', '\n\n<h1>').replace('</h1>', '</h1>\n\n')
+        cleaned_response = cleaned_response.replace('<h2>', '\n\n<h2>').replace('</h2>', '</h2>\n\n')
+        cleaned_response = cleaned_response.replace('<h3>', '\n\n<h3>').replace('</h3>', '</h3>\n\n')
+        cleaned_response = cleaned_response.replace('<ul>', '\n<ul>').replace('</ul>', '</ul>\n\n')
+        cleaned_response = cleaned_response.replace('<li>', '\n  <li>').replace('</li>', '</li>')
+        
+        # Clean up excessive line breaks
+        cleaned_response = cleaned_response.replace('\n\n\n\n', '\n\n\n')
+        cleaned_response = cleaned_response.replace('\n\n\n\n', '\n\n')
+        cleaned_response = cleaned_response.strip()
+        
+        # Update project with the generated chapter
+        current_chapters = project.get("chapters_content", {})
+        current_chapters[str(request.chapter_number)] = cleaned_response
+        
+        await db.book_projects.update_one(
+            {"id": request.project_id},
+            {
+                "$set": {
+                    "chapters_content": current_chapters,
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        return {
+            "chapter_content": cleaned_response,
+            "chapter_number": request.chapter_number,
+            "project_id": request.project_id
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating chapter: {str(e)}")
+
+
 @api_router.post("/generate-all-chapters")
 async def generate_all_chapters(request: OutlineRequest):
     """Generate all chapters for a book project using Gemini AI"""
