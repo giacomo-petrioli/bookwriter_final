@@ -22,6 +22,9 @@ const BookWriter = () => {
   const [outline, setOutline] = useState("");
   const [currentChapter, setCurrentChapter] = useState(1);
   const [chapterContent, setChapterContent] = useState("");
+  const [allChapters, setAllChapters] = useState({});
+  const [generatingAllChapters, setGeneratingAllChapters] = useState(false);
+  const [chapterProgress, setChapterProgress] = useState(0);
 
   useEffect(() => {
     loadProjects();
