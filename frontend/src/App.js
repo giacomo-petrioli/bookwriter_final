@@ -25,6 +25,8 @@ const BookWriter = () => {
   const [allChapters, setAllChapters] = useState({});
   const [generatingAllChapters, setGeneratingAllChapters] = useState(false);
   const [chapterProgress, setChapterProgress] = useState(0);
+  const [savingChapter, setSavingChapter] = useState(false);
+  const [exportingBook, setExportingBook] = useState(false);
 
   // Rich text editor configuration
   const quillModules = {
