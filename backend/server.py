@@ -37,6 +37,7 @@ class BookProject(BaseModel):
     pages: int
     chapters: int
     language: str
+    writing_style: str = "story"  # "story" or "descriptive"
     outline: Optional[str] = None
     chapters_content: Optional[dict] = {}
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -48,6 +49,7 @@ class BookProjectCreate(BaseModel):
     pages: int
     chapters: int
     language: str
+    writing_style: str = "story"  # "story" or "descriptive"
 
 class OutlineRequest(BaseModel):
     project_id: str
