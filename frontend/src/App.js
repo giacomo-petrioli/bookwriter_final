@@ -183,7 +183,9 @@ const BookWriter = () => {
       language: "English"
     });
     setOutline("");
-    setChapterContent("");
+    setAllChapters({});
+    setGeneratingAllChapters(false);
+    setChapterProgress(0);
     setCurrentChapter(1);
   };
 
