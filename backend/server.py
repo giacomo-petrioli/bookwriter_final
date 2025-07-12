@@ -137,18 +137,26 @@ Format the response as a structured outline that's easy to read and edit."""
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
         
+        # Clean up the response - remove markdown code blocks
+        cleaned_response = response.strip()
+        if cleaned_response.startswith('```html'):
+            cleaned_response = cleaned_response[7:]  # Remove ```html
+        if cleaned_response.endswith('```'):
+            cleaned_response = cleaned_response[:-3]  # Remove ```
+        cleaned_response = cleaned_response.strip()
+        
         # Update project with generated outline
         await db.book_projects.update_one(
             {"id": request.project_id},
             {
                 "$set": {
-                    "outline": response,
+                    "outline": cleaned_response,
                     "updated_at": datetime.utcnow()
                 }
             }
         )
         
-        return {"outline": response, "project_id": request.project_id}
+        return {"outline": cleaned_response, "project_id": request.project_id}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating outline: {str(e)}")
