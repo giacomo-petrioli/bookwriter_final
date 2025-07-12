@@ -622,6 +622,8 @@ As we stand at this technological crossroads, understanding the implications of 
             ("Generate AI Chapter", self.test_generate_chapter),
             ("Update Outline", self.test_update_outline),
             ("Update Chapter", self.test_update_chapter),
+            ("Export Book", self.test_export_book),
+            ("Generate All Chapters", self.test_generate_all_chapters),
         ]
         
         for test_name, test_func in tests:
