@@ -155,6 +155,95 @@ Format the response as a structured outline that's easy to read and edit."""
 
 
 
+@api_router.post("/generate-all-chapters")
+async def generate_all_chapters(request: OutlineRequest):
+    """Generate all chapters for a book project using Gemini AI"""
+    try:
+        # Get project details
+        project = await db.book_projects.find_one({"id": request.project_id})
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        project_obj = BookProject(**project)
+        
+        if not project_obj.outline:
+            raise HTTPException(status_code=400, detail="Project must have an outline before generating chapters")
+        
+        # Initialize storage for all chapters
+        all_chapters = {}
+        estimated_words_per_chapter = (project_obj.pages * 250) // project_obj.chapters
+        
+        # Generate each chapter sequentially
+        for chapter_num in range(1, project_obj.chapters + 1):
+            try:
+                # Initialize Gemini chat for each chapter
+                chat = LlmChat(
+                    api_key=os.environ.get('GEMINI_API_KEY'),
+                    session_id=f"batch_chapter_{project_obj.id}_{chapter_num}",
+                    system_message="You are an expert book writer. You write engaging, well-structured chapters based on outlines. Use HTML formatting for headings, bold text, and structure."
+                ).with_model("gemini", "gemini-2.0-flash-lite")
+                
+                # Create prompt for chapter generation with HTML formatting
+                prompt = f"""Write Chapter {chapter_num} for the following book:
+
+Title: {project_obj.title}
+Description: {project_obj.description}
+Language: {project_obj.language}
+Target Length: Approximately {estimated_words_per_chapter} words
+
+Book Outline:
+{project_obj.outline}
+
+Please write a complete, engaging chapter using HTML formatting that:
+1. Follows the outline structure for Chapter {chapter_num}
+2. Is approximately {estimated_words_per_chapter} words
+3. Uses HTML tags for formatting:
+   - <h1> for chapter titles
+   - <h2> for main section headings  
+   - <h3> for subsection headings
+   - <p> for paragraphs
+   - <strong> for bold text
+   - <em> for italic text
+   - <ul> and <li> for bullet points when appropriate
+4. Has a compelling introduction and conclusion
+5. Maintains consistent tone and style
+6. Is written in {project_obj.language}
+
+Focus specifically on Chapter {chapter_num} content based on the outline. Return properly formatted HTML content."""
+
+                user_message = UserMessage(text=prompt)
+                response = await chat.send_message(user_message)
+                
+                # Store the chapter
+                all_chapters[str(chapter_num)] = response
+                
+                # Small delay to avoid rate limiting
+                await asyncio.sleep(1)
+                
+            except Exception as chapter_error:
+                raise HTTPException(status_code=500, detail=f"Error generating chapter {chapter_num}: {str(chapter_error)}")
+        
+        # Update project with all generated chapters
+        await db.book_projects.update_one(
+            {"id": request.project_id},
+            {
+                "$set": {
+                    "chapters_content": all_chapters,
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        return {
+            "message": f"Successfully generated all {project_obj.chapters} chapters",
+            "chapters_generated": len(all_chapters),
+            "project_id": request.project_id,
+            "chapters": all_chapters
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating all chapters: {str(e)}")
+
 @api_router.put("/update-chapter")
 async def update_chapter(request: ChapterUpdate):
     """Update chapter content"""
