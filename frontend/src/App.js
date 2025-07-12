@@ -17,7 +17,8 @@ const BookWriter = () => {
     description: "",
     pages: 100,
     chapters: 10,
-    language: "English"
+    language: "English",
+    writing_style: "story"
   });
   const [outline, setOutline] = useState("");
   const [currentChapter, setCurrentChapter] = useState(1);
