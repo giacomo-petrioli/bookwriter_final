@@ -434,19 +434,21 @@ const BookWriter = () => {
               </div>
 
               <p className="text-gray-600 mb-6">
-                Review and edit your AI-generated outline. You can modify it before proceeding to write chapters.
+                Review and edit your AI-generated outline. You can modify it before proceeding to generate all chapters.
               </p>
 
               <div className="mb-6">
-                <textarea
+                <ReactQuill
                   value={outline}
-                  onChange={(e) => setOutline(e.target.value)}
-                  rows="20"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
+                  onChange={setOutline}
+                  modules={quillModules}
+                  formats={quillFormats}
+                  style={{ height: '400px', marginBottom: '50px' }}
+                  placeholder="Your book outline will appear here..."
                 />
               </div>
 
-              <div className="flex space-x-4">
+              <div className="flex space-x-4 mt-16">
                 <button
                   onClick={generateOutline}
                   disabled={loading}
@@ -460,7 +462,55 @@ const BookWriter = () => {
                   disabled={loading}
                   className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50"
                 >
-                  {loading ? "Saving..." : "Approve Outline & Start Writing →"}
+                  {loading ? "Saving..." : "Save Outline →"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3.5: Generate All Chapters */}
+          {currentStep === 3.5 && (
+            <div className="bg-white rounded-2xl shadow-xl p-8">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-3xl font-bold text-gray-800">Ready to Generate Your Book</h2>
+                <button
+                  onClick={() => setCurrentStep(3)}
+                  className="text-gray-500 hover:text-gray-700 text-sm"
+                >
+                  ← Edit Outline
+                </button>
+              </div>
+
+              <div className="text-center">
+                <p className="text-lg text-gray-600 mb-8">
+                  Your outline is ready! Now let's generate all {currentProject?.chapters} chapters using AI. 
+                  This process may take a few minutes as we create comprehensive content for each chapter.
+                </p>
+                
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 mb-8">
+                  <h3 className="font-semibold text-gray-800 mb-2">What happens next:</h3>
+                  <ul className="text-gray-600 text-left space-y-2">
+                    <li>• AI will generate all {currentProject?.chapters} chapters based on your outline</li>
+                    <li>• Each chapter will be properly formatted with headings and structure</li>
+                    <li>• You can edit any chapter content after generation</li>
+                    <li>• Estimated time: {currentProject?.chapters ? Math.ceil(currentProject.chapters * 0.5) : 5} minutes</li>
+                  </ul>
+                </div>
+                
+                <button
+                  onClick={generateAllChapters}
+                  disabled={generatingAllChapters}
+                  className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 px-8 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all transform hover:scale-105 disabled:opacity-50 text-lg"
+                >
+                  {generatingAllChapters ? (
+                    <span className="flex items-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Generating All Chapters...
+                    </span>
+                  ) : "🚀 Generate All Chapters with AI"}
                 </button>
               </div>
             </div>
