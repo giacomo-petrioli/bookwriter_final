@@ -26,6 +26,24 @@ const BookWriter = () => {
   const [generatingAllChapters, setGeneratingAllChapters] = useState(false);
   const [chapterProgress, setChapterProgress] = useState(0);
 
+  // Rich text editor configuration
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      ['blockquote', 'code-block'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      ['link'],
+      ['clean']
+    ],
+  };
+
+  const quillFormats = [
+    'header', 'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'code-block', 'list', 'bullet', 'indent', 'link'
+  ];
+
   useEffect(() => {
     loadProjects();
   }, []);
