@@ -292,6 +292,100 @@ async def update_chapter(request: ChapterUpdate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating chapter: {str(e)}")
 
+@api_router.get("/export-book/{project_id}")
+async def export_book(project_id: str):
+    """Export book as HTML"""
+    try:
+        project = await db.book_projects.find_one({"id": project_id})
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        project_obj = BookProject(**project)
+        
+        # Create HTML content
+        html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{project_obj.title}</title>
+    <style>
+        body {{
+            font-family: Georgia, serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }}
+        h1 {{
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }}
+        h2 {{
+            color: #555;
+            margin-top: 30px;
+        }}
+        h3 {{
+            color: #666;
+        }}
+        .book-info {{
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }}
+        .chapter {{
+            margin-bottom: 40px;
+            page-break-after: always;
+        }}
+    </style>
+</head>
+<body>
+    <div class="book-info">
+        <h1>{project_obj.title}</h1>
+        <p><strong>Description:</strong> {project_obj.description}</p>
+        <p><strong>Language:</strong> {project_obj.language}</p>
+        <p><strong>Chapters:</strong> {project_obj.chapters}</p>
+        <p><strong>Target Pages:</strong> {project_obj.pages}</p>
+    </div>
+    
+    <div class="outline">
+        <h2>Book Outline</h2>
+        {project_obj.outline or "No outline available"}
+    </div>
+    
+    <div class="chapters">
+        <h2>Chapters</h2>
+"""
+        
+        # Add chapters
+        if project_obj.chapters_content:
+            for i in range(1, project_obj.chapters + 1):
+                chapter_content = project_obj.chapters_content.get(str(i), "")
+                html_content += f"""
+        <div class="chapter">
+            <h2>Chapter {i}</h2>
+            {chapter_content}
+        </div>
+"""
+        else:
+            html_content += "<p>No chapters generated yet.</p>"
+        
+        html_content += """
+    </div>
+</body>
+</html>
+"""
+        
+        return {
+            "html": html_content,
+            "title": project_obj.title,
+            "filename": f"{project_obj.title.replace(' ', '_')}.html"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error exporting book: {str(e)}")
+
 @api_router.put("/update-outline")
 async def update_outline(request: dict):
     """Update project outline"""
