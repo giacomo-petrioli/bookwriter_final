@@ -520,12 +520,12 @@ const BookWriter = () => {
           {currentStep === 4 && currentProject && (
             <div className="bg-white rounded-2xl shadow-xl p-8">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-800">Write Your Book</h2>
+                <h2 className="text-3xl font-bold text-gray-800">Your Complete Book</h2>
                 <button
-                  onClick={() => setCurrentStep(3)}
+                  onClick={() => setCurrentStep(3.5)}
                   className="text-gray-500 hover:text-gray-700 text-sm"
                 >
-                  ← Back to Outline
+                  ← Back
                 </button>
               </div>
 
@@ -537,8 +537,8 @@ const BookWriter = () => {
                       key={chapterNum}
                       onClick={() => {
                         setCurrentChapter(chapterNum);
-                        if (currentProject.chapters_content && currentProject.chapters_content[chapterNum]) {
-                          setChapterContent(currentProject.chapters_content[chapterNum]);
+                        if (allChapters && allChapters[chapterNum]) {
+                          setChapterContent(allChapters[chapterNum]);
                         } else {
                           setChapterContent("");
                         }
@@ -550,7 +550,7 @@ const BookWriter = () => {
                       }`}
                     >
                       Chapter {chapterNum}
-                      {currentProject.chapters_content && currentProject.chapters_content[chapterNum] && " ✓"}
+                      {allChapters && allChapters[chapterNum] && " ✓"}
                     </button>
                   ))}
                 </div>
@@ -562,28 +562,28 @@ const BookWriter = () => {
                   <h3 className="text-xl font-semibold text-gray-800">
                     Chapter {currentChapter}
                   </h3>
-                  <button
-                    onClick={() => generateChapter(currentChapter)}
-                    disabled={loading}
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50"
-                  >
-                    {loading ? "Generating..." : "✨ Generate with AI"}
-                  </button>
+                  <div className="text-sm text-gray-500">
+                    Progress: {allChapters ? Object.keys(allChapters).length : 0} of {currentProject.chapters} chapters
+                  </div>
                 </div>
 
-                <textarea
+                <ReactQuill
                   value={chapterContent}
-                  onChange={(e) => setChapterContent(e.target.value)}
-                  rows="25"
-                  placeholder={`Chapter ${currentChapter} content will appear here. Click "Generate with AI" to create content based on your outline.`}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  onChange={setChapterContent}
+                  modules={quillModules}
+                  formats={quillFormats}
+                  style={{ height: '500px', marginBottom: '50px' }}
+                  placeholder={`Chapter ${currentChapter} content will appear here after generating all chapters.`}
                 />
               </div>
 
               {/* Chapter Actions */}
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center mt-16">
                 <div className="text-sm text-gray-500">
-                  Progress: {currentProject.chapters_content ? Object.keys(currentProject.chapters_content).length : 0} of {currentProject.chapters} chapters written
+                  {allChapters && Object.keys(allChapters).length === currentProject.chapters 
+                    ? "All chapters generated! You can edit any chapter above."
+                    : "Generate all chapters first to start editing content."
+                  }
                 </div>
                 
                 <div className="flex space-x-4">
