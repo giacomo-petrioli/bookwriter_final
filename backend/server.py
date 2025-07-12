@@ -222,8 +222,22 @@ Focus specifically on Chapter {chapter_num} content based on the outline. Return
                 user_message = UserMessage(text=prompt)
                 response = await chat.send_message(user_message)
                 
+                # Clean up the response - remove markdown code blocks and improve formatting
+                cleaned_response = response.strip()
+                if cleaned_response.startswith('```html'):
+                    cleaned_response = cleaned_response[7:]  # Remove ```html
+                if cleaned_response.endswith('```'):
+                    cleaned_response = cleaned_response[:-3]  # Remove ```
+                cleaned_response = cleaned_response.strip()
+                
+                # Ensure proper paragraph spacing
+                cleaned_response = cleaned_response.replace('<p>', '\n<p>').replace('</p>', '</p>\n')
+                cleaned_response = cleaned_response.replace('<h1>', '\n<h1>').replace('</h1>', '</h1>\n')
+                cleaned_response = cleaned_response.replace('<h2>', '\n<h2>').replace('</h2>', '</h2>\n')
+                cleaned_response = cleaned_response.replace('<h3>', '\n<h3>').replace('</h3>', '</h3>\n')
+                
                 # Store the chapter
-                all_chapters[str(chapter_num)] = response
+                all_chapters[str(chapter_num)] = cleaned_response
                 
                 # Small delay to avoid rate limiting
                 await asyncio.sleep(1)
