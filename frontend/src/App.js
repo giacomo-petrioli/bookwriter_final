@@ -160,6 +160,7 @@ const BookWriter = () => {
       setOutline(project.outline);
       if (project.chapters_content && Object.keys(project.chapters_content).length > 0) {
         setCurrentStep(4);
+        setAllChapters(project.chapters_content);
         const firstChapter = Object.keys(project.chapters_content)[0];
         setCurrentChapter(parseInt(firstChapter));
         setChapterContent(project.chapters_content[firstChapter]);
