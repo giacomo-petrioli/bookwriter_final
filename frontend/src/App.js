@@ -129,15 +129,28 @@ const BookWriter = () => {
 
     setLoading(true);
     try {
-      await axios.put(`${API}/update-outline`, {
+      const response = await axios.put(`${API}/update-outline`, {
         project_id: currentProject.id,
         outline: outline
       });
-      // Don't automatically move to step 4 - user will click generate all chapters
-      setCurrentStep(3.5); // Intermediate step for batch generation
+      
+      if (response.data) {
+        // Update current project
+        setCurrentProject(prev => ({
+          ...prev,
+          outline: outline
+        }));
+        
+        // Move to step 3.5 for batch generation
+        setCurrentStep(3.5);
+      } else {
+        throw new Error("Invalid response from server");
+      }
+      
     } catch (error) {
       console.error("Error updating outline:", error);
-      alert("Error updating outline");
+      const errorMessage = error.response?.data?.detail || error.message || "Error updating outline";
+      alert(`Error: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
