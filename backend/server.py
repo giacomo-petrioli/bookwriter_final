@@ -223,36 +223,65 @@ async def generate_chapter(request: ChapterRequest):
             system_message="You are an expert book writer. You write engaging, well-structured chapters based on outlines. Use HTML formatting for headings, bold text, and structure."
         ).with_model("gemini", "gemini-2.0-flash-lite")
         
-        # Calculate estimated words per chapter
-        estimated_words_per_chapter = (project_obj.pages * 250) // project_obj.chapters
+        # Calculate estimated words per chapter (250-300 words per page)
+        estimated_words_per_chapter = (project_obj.pages * 275) // project_obj.chapters
         
-        # Create prompt for chapter generation with HTML formatting
+        # Create style-specific prompt for chapter generation
+        if project_obj.writing_style == "story":
+            style_instructions = """Write in a fluid, narrative style that:
+- Focuses on storytelling and character development
+- Uses natural dialogue and descriptive prose
+- Maintains narrative flow without excessive sub-headings
+- Creates immersive scenes and situations
+- Keeps the reader engaged with the story progression
+- Uses minimal structural breaks within chapters"""
+            
+            formatting_instructions = """Use minimal HTML formatting for story flow:
+- <p> for paragraphs (the main content)
+- <em> for emphasis or thoughts
+- <strong> for important dialogue or key moments
+- Avoid excessive <h2> or <h3> tags within chapters
+- Focus on smooth paragraph transitions"""
+        else:  # descriptive
+            style_instructions = """Write in a descriptive, informational style that:
+- Provides detailed explanations and analysis
+- Uses clear structure and organization
+- Includes examples and case studies when relevant
+- Maintains an informative and engaging tone
+- Breaks down complex topics into digestible sections"""
+            
+            formatting_instructions = """Use structured HTML formatting:
+- <h2> for main section headings within chapters
+- <h3> for subsection headings
+- <p> for paragraphs
+- <ul> and <li> for bullet points and lists
+- <strong> for key terms and concepts
+- <em> for emphasis"""
+
+        # Create prompt for chapter generation
         prompt = f"""Write Chapter {request.chapter_number} for the following book:
 
 Title: {project_obj.title}
 Description: {project_obj.description}
 Language: {project_obj.language}
-Target Length: Approximately {estimated_words_per_chapter} words
+Writing Style: {project_obj.writing_style}
+Target Length: {estimated_words_per_chapter} words (this is important - write substantial content!)
+
+{style_instructions}
 
 Book Outline:
 {project_obj.outline}
 
-Please write a complete, engaging chapter using HTML formatting that:
-1. Follows the outline structure for Chapter {request.chapter_number}
-2. Is approximately {estimated_words_per_chapter} words
-3. Uses HTML tags for formatting:
-   - <h1> for chapter titles
-   - <h2> for main section headings  
-   - <h3> for subsection headings
-   - <p> for paragraphs
-   - <strong> for bold text
-   - <em> for italic text
-   - <ul> and <li> for bullet points when appropriate
-4. Has a compelling introduction and conclusion
-5. Maintains consistent tone and style
-6. Is written in {project_obj.language}
+Please write a complete, engaging chapter that:
+1. Follows the outline for Chapter {request.chapter_number}
+2. Contains approximately {estimated_words_per_chapter} words (aim for 250-300 words per page)
+3. Maintains the {project_obj.writing_style} style throughout
+4. Is written in {project_obj.language}
+5. Has compelling content that advances the book's purpose
 
-Focus specifically on Chapter {request.chapter_number} content based on the outline. Return properly formatted HTML content."""
+{formatting_instructions}
+
+Focus specifically on Chapter {request.chapter_number} content. Write substantial, engaging content that meets the word count requirement."""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
