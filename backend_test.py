@@ -386,7 +386,157 @@ class BookWriterAPITester:
             self.log(f"❌ Outline update test failed: {str(e)}", "ERROR")
             return False
     
-    def test_update_chapter(self):
+    def test_export_book(self):
+        """Test book export functionality with enhanced HTML template"""
+        if not self.test_project_id:
+            self.log("❌ No test project ID available for export test", "ERROR")
+            return False
+            
+        try:
+            self.log("Testing book export functionality...")
+            
+            response = self.session.get(f"{self.base_url}/export-book/{self.test_project_id}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                required_fields = ["html", "title", "filename"]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if missing_fields:
+                    self.log(f"❌ Missing fields in export response: {missing_fields}", "ERROR")
+                    return False
+                
+                html_content = data.get("html", "")
+                if len(html_content) < 1000:  # Expect substantial HTML content
+                    self.log(f"❌ Generated HTML seems too short: {len(html_content)} characters", "ERROR")
+                    return False
+                
+                # Check for enhanced HTML template features
+                required_html_elements = [
+                    "<!DOCTYPE html>",
+                    "<style>",
+                    "font-family: Georgia, serif",
+                    "max-width: 800px",
+                    "margin: 0 auto",
+                    ".book-info",
+                    ".outline",
+                    ".chapter"
+                ]
+                
+                missing_elements = []
+                for element in required_html_elements:
+                    if element not in html_content:
+                        missing_elements.append(element)
+                
+                if missing_elements:
+                    self.log(f"❌ Missing HTML template elements: {missing_elements}", "ERROR")
+                    return False
+                
+                # Check for proper CSS styling
+                if "background: linear-gradient" not in html_content:
+                    self.log("⚠️ Enhanced CSS styling may be missing", "WARNING")
+                
+                if "page-break-after: always" not in html_content:
+                    self.log("⚠️ Print-friendly CSS may be missing", "WARNING")
+                
+                # Check filename generation
+                filename = data.get("filename", "")
+                if not filename.endswith(".html"):
+                    self.log(f"❌ Invalid filename format: {filename}", "ERROR")
+                    return False
+                
+                # Check title in response
+                title = data.get("title", "")
+                if not title:
+                    self.log("❌ Missing title in export response", "ERROR")
+                    return False
+                
+                self.log(f"✅ Book export successful ({len(html_content)} characters HTML)")
+                self.log("✅ Enhanced HTML template with proper styling detected")
+                self.log(f"✅ Proper file download handling - filename: {filename}")
+                return True
+            else:
+                self.log(f"❌ Book export failed with status {response.status_code}: {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Book export test failed: {str(e)}", "ERROR")
+            return False
+    
+    def test_generate_all_chapters(self):
+        """Test generating all chapters at once"""
+        if not self.test_project_id:
+            self.log("❌ No test project ID available for generate all chapters test", "ERROR")
+            return False
+            
+        try:
+            self.log("Testing generate all chapters functionality...")
+            
+            request_data = {
+                "project_id": self.test_project_id
+            }
+            
+            # This is a longer operation, so increase timeout
+            response = self.session.post(f"{self.base_url}/generate-all-chapters", json=request_data, timeout=120)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                required_fields = ["message", "chapters_generated", "project_id", "chapters"]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if missing_fields:
+                    self.log(f"❌ Missing fields in generate-all-chapters response: {missing_fields}", "ERROR")
+                    return False
+                
+                if data.get("project_id") != self.test_project_id:
+                    self.log(f"❌ Project ID mismatch in response", "ERROR")
+                    return False
+                
+                chapters_generated = data.get("chapters_generated", 0)
+                if chapters_generated < 1:
+                    self.log(f"❌ No chapters generated: {chapters_generated}", "ERROR")
+                    return False
+                
+                chapters = data.get("chapters", {})
+                if not isinstance(chapters, dict):
+                    self.log(f"❌ Chapters should be a dictionary, got {type(chapters)}", "ERROR")
+                    return False
+                
+                # Check each chapter for formatting improvements
+                for chapter_num, chapter_content in chapters.items():
+                    if "```html" in chapter_content or "```" in chapter_content:
+                        self.log(f"❌ Found markdown artifacts in chapter {chapter_num}", "ERROR")
+                        return False
+                    
+                    if len(chapter_content) < 200:
+                        self.log(f"❌ Chapter {chapter_num} seems too short", "ERROR")
+                        return False
+                
+                # Verify chapters are stored in database
+                verify_response = self.session.get(f"{self.base_url}/projects/{self.test_project_id}")
+                if verify_response.status_code == 200:
+                    project_data = verify_response.json()
+                    stored_chapters = project_data.get("chapters_content", {})
+                    if len(stored_chapters) != chapters_generated:
+                        self.log("❌ Chapters not properly stored in database", "ERROR")
+                        return False
+                    self.log("✅ All chapters properly stored in database")
+                
+                self.log(f"✅ Generated all {chapters_generated} chapters successfully")
+                self.log("✅ All chapters have proper formatting without markdown artifacts")
+                return True
+            elif response.status_code == 400:
+                self.log(f"❌ Generate all chapters failed - likely missing outline: {response.text}", "ERROR")
+                return False
+            else:
+                self.log(f"❌ Generate all chapters failed with status {response.status_code}: {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Generate all chapters test failed: {str(e)}", "ERROR")
+            return False
         """Test updating chapter content"""
         if not self.test_project_id:
             self.log("❌ No test project ID available for chapter update test", "ERROR")
