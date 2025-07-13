@@ -1368,73 +1368,7 @@ As we stand at this technological crossroads, understanding the implications of 
         except Exception as e:
             self.log(f"❌ Enhanced HTML export test failed: {str(e)}", "ERROR")
             return False
-        """Test updating chapter content"""
-        if not self.test_project_id:
-            self.log("❌ No test project ID available for chapter update test", "ERROR")
-            return False
-            
-        try:
-            self.log("Testing chapter update...")
-            
-            updated_chapter = """
-# Chapter 1: The Dawn of AI in the Workplace
 
-The workplace as we know it is undergoing a fundamental transformation. Artificial intelligence, once confined to the realm of science fiction, has become an integral part of modern business operations. From chatbots handling customer service to machine learning algorithms optimizing supply chains, AI is reshaping how we work, collaborate, and create value.
-
-## The Evolution of Work
-
-Throughout history, technological advances have consistently altered the nature of work. The industrial revolution mechanized manual labor, the computer age digitized information processing, and now the AI revolution is augmenting human intelligence itself. This latest transformation promises to be the most profound yet, touching every aspect of professional life.
-
-## Current State of AI Adoption
-
-Today's organizations are implementing AI solutions across diverse functions:
-- Customer service automation
-- Predictive analytics for decision-making
-- Process optimization and efficiency improvements
-- Quality control and error detection
-- Personalized user experiences
-
-As we stand at this technological crossroads, understanding the implications of AI integration becomes crucial for workers, managers, and society as a whole.
-"""
-            
-            request_data = {
-                "project_id": self.test_project_id,
-                "chapter_number": 1,
-                "content": updated_chapter
-            }
-            
-            response = self.session.put(f"{self.base_url}/update-chapter", json=request_data)
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                if data.get("message") != "Chapter updated successfully":
-                    self.log(f"❌ Unexpected update response: {data}", "ERROR")
-                    return False
-                
-                # Verify the update by fetching the project
-                verify_response = self.session.get(f"{self.base_url}/projects/{self.test_project_id}")
-                if verify_response.status_code == 200:
-                    project_data = verify_response.json()
-                    chapters_content = project_data.get("chapters_content", {})
-                    if "1" in chapters_content and updated_chapter.strip() in chapters_content["1"]:
-                        self.log("✅ Chapter updated and verified successfully")
-                        return True
-                    else:
-                        self.log("❌ Chapter update not reflected in project data", "ERROR")
-                        return False
-                else:
-                    self.log("⚠️ Could not verify chapter update", "WARNING")
-                    return True  # Update call succeeded even if verification failed
-                
-            else:
-                self.log(f"❌ Chapter update failed with status {response.status_code}: {response.text}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Chapter update test failed: {str(e)}", "ERROR")
-            return False
-    
     def run_all_tests(self):
         """Run all backend API tests"""
         self.log("=" * 60)
