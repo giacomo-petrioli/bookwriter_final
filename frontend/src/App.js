@@ -43,6 +43,11 @@ const BookWriter = () => {
     ],
   };
 
+  const quillFormats = [
+    'header', 'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'code-block', 'list', 'bullet', 'indent', 'link', 'align'
+  ];
+
   // Helper function to get writing style display
   const getWritingStyleDisplay = (style) => {
     const styleMap = {
