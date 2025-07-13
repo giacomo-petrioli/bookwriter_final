@@ -748,6 +748,24 @@ const BookWriter = () => {
                   </ul>
                 </div>
                 
+                {/* Progress Bar for Chapter Generation */}
+                {generatingAllChapters && (
+                  <div className="mb-8">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-600">
+                        Generating Chapter {generatingChapterNum} of {currentProject?.chapters}
+                      </span>
+                      <span className="text-sm text-gray-600">{chapterProgress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-green-600 to-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${chapterProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+                
                 <button
                   onClick={generateAllChapters}
                   disabled={generatingAllChapters}
