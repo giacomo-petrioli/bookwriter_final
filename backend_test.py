@@ -968,11 +968,405 @@ As we stand at this technological crossroads, understanding the implications of 
                 self.log(f"✅ Generated chapter quality good: {word_count} words")
             
             total_time = time.time() - start_time
-            self.log(f"✅ Gemini model performance test completed in {total_time:.2f}s total")
+            self.log(f"✅ Gemini 2.5 Flash-Lite model performance test completed in {total_time:.2f}s total")
             return True
             
         except Exception as e:
-            self.log(f"❌ Gemini model performance test failed: {str(e)}", "ERROR")
+            self.log(f"❌ Gemini 2.5 Flash-Lite model performance test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_new_writing_styles(self):
+        """Test all new writing styles: academic, technical, biography, self_help, children, poetry, business"""
+        try:
+            self.log("Testing new writing styles...")
+            
+            # Define test projects for each new writing style
+            new_styles = {
+                "academic": {
+                    "title": "Research Methods in Social Sciences",
+                    "description": "A comprehensive academic study of research methodologies used in social science disciplines.",
+                    "pages": 200,
+                    "chapters": 8
+                },
+                "technical": {
+                    "title": "Complete Guide to Cloud Computing",
+                    "description": "Technical manual covering cloud infrastructure, deployment strategies, and best practices.",
+                    "pages": 300,
+                    "chapters": 12
+                },
+                "biography": {
+                    "title": "The Life of Marie Curie",
+                    "description": "A biographical account of Marie Curie's life, discoveries, and impact on science.",
+                    "pages": 250,
+                    "chapters": 10
+                },
+                "self_help": {
+                    "title": "Mastering Personal Productivity",
+                    "description": "A self-help guide to improving personal productivity and achieving life goals.",
+                    "pages": 180,
+                    "chapters": 9
+                },
+                "children": {
+                    "title": "Adventures in the Magic Forest",
+                    "description": "A children's story about friendship and adventure in an enchanted forest.",
+                    "pages": 60,
+                    "chapters": 6
+                },
+                "poetry": {
+                    "title": "Seasons of the Heart",
+                    "description": "A collection of poems exploring emotions, nature, and human experiences.",
+                    "pages": 120,
+                    "chapters": 4
+                },
+                "business": {
+                    "title": "Strategic Leadership in Digital Age",
+                    "description": "Business strategies for leadership and management in the digital transformation era.",
+                    "pages": 280,
+                    "chapters": 14
+                }
+            }
+            
+            style_results = {}
+            
+            for style, project_data in new_styles.items():
+                self.log(f"Testing {style} writing style...")
+                
+                # Create project with specific writing style
+                project_data.update({
+                    "language": "English",
+                    "writing_style": style
+                })
+                
+                response = self.session.post(f"{self.base_url}/projects", json=project_data)
+                
+                if response.status_code != 200:
+                    self.log(f"❌ {style} project creation failed: {response.text}", "ERROR")
+                    style_results[style] = False
+                    continue
+                
+                project = response.json()
+                project_id = project.get("id")
+                
+                # Verify writing_style is set correctly
+                if project.get("writing_style") != style:
+                    self.log(f"❌ {style} writing style not set correctly", "ERROR")
+                    style_results[style] = False
+                    continue
+                
+                # Generate outline for this style
+                outline_request = {"project_id": project_id}
+                outline_response = self.session.post(f"{self.base_url}/generate-outline", json=outline_request)
+                
+                if outline_response.status_code != 200:
+                    self.log(f"❌ {style} outline generation failed: {outline_response.text}", "ERROR")
+                    style_results[style] = False
+                    continue
+                
+                outline_data = outline_response.json()
+                outline_content = outline_data.get("outline", "")
+                
+                # Verify outline has substantial content
+                if len(outline_content) < 500:
+                    self.log(f"❌ {style} outline too short: {len(outline_content)} characters", "ERROR")
+                    style_results[style] = False
+                    continue
+                
+                # Generate a chapter for this style
+                chapter_request = {"project_id": project_id, "chapter_number": 1}
+                chapter_response = self.session.post(f"{self.base_url}/generate-chapter", json=chapter_request)
+                
+                if chapter_response.status_code != 200:
+                    self.log(f"❌ {style} chapter generation failed: {chapter_response.text}", "ERROR")
+                    style_results[style] = False
+                    continue
+                
+                chapter_data = chapter_response.json()
+                chapter_content = chapter_data.get("chapter_content", "")
+                
+                # Verify chapter has substantial content
+                if len(chapter_content) < 800:
+                    self.log(f"❌ {style} chapter too short: {len(chapter_content)} characters", "ERROR")
+                    style_results[style] = False
+                    continue
+                
+                # Check for style-specific characteristics
+                style_passed = True
+                
+                if style == "academic":
+                    # Academic style should have formal language and structure
+                    academic_keywords = ['research', 'study', 'analysis', 'methodology', 'evidence', 'conclusion']
+                    if not any(keyword in chapter_content.lower() for keyword in academic_keywords):
+                        self.log(f"⚠️ {style} chapter may lack academic characteristics", "WARNING")
+                
+                elif style == "technical":
+                    # Technical style should have procedural language
+                    technical_keywords = ['step', 'process', 'procedure', 'implementation', 'configuration', 'system']
+                    if not any(keyword in chapter_content.lower() for keyword in technical_keywords):
+                        self.log(f"⚠️ {style} chapter may lack technical characteristics", "WARNING")
+                
+                elif style == "biography":
+                    # Biography should have narrative elements about a person
+                    bio_keywords = ['life', 'born', 'career', 'achievement', 'experience', 'journey']
+                    if not any(keyword in chapter_content.lower() for keyword in bio_keywords):
+                        self.log(f"⚠️ {style} chapter may lack biographical characteristics", "WARNING")
+                
+                elif style == "self_help":
+                    # Self-help should have motivational and actionable content
+                    selfhelp_keywords = ['you', 'your', 'achieve', 'improve', 'success', 'goal', 'strategy']
+                    if not any(keyword in chapter_content.lower() for keyword in selfhelp_keywords):
+                        self.log(f"⚠️ {style} chapter may lack self-help characteristics", "WARNING")
+                
+                elif style == "children":
+                    # Children's content should be simple and engaging
+                    children_keywords = ['adventure', 'friend', 'fun', 'discover', 'magic', 'story']
+                    if not any(keyword in chapter_content.lower() for keyword in children_keywords):
+                        self.log(f"⚠️ {style} chapter may lack children's characteristics", "WARNING")
+                
+                elif style == "poetry":
+                    # Poetry should have creative and artistic language
+                    poetry_keywords = ['emotion', 'heart', 'soul', 'beauty', 'imagery', 'metaphor']
+                    if not any(keyword in chapter_content.lower() for keyword in poetry_keywords):
+                        self.log(f"⚠️ {style} chapter may lack poetic characteristics", "WARNING")
+                
+                elif style == "business":
+                    # Business should have professional and strategic content
+                    business_keywords = ['strategy', 'management', 'leadership', 'organization', 'market', 'business']
+                    if not any(keyword in chapter_content.lower() for keyword in business_keywords):
+                        self.log(f"⚠️ {style} chapter may lack business characteristics", "WARNING")
+                
+                style_results[style] = style_passed
+                self.log(f"✅ {style} writing style test completed successfully")
+                
+                # Small delay between style tests
+                time.sleep(2)
+            
+            # Check overall results
+            passed_styles = sum(1 for result in style_results.values() if result)
+            total_styles = len(style_results)
+            
+            if passed_styles == total_styles:
+                self.log(f"✅ All {total_styles} new writing styles working correctly")
+                return True
+            else:
+                self.log(f"❌ {total_styles - passed_styles} writing styles failed", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ New writing styles test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_pdf_export(self):
+        """Test PDF export functionality"""
+        if not self.test_project_id:
+            self.log("❌ No test project ID available for PDF export test", "ERROR")
+            return False
+            
+        try:
+            self.log("Testing PDF export functionality...")
+            
+            response = self.session.get(f"{self.base_url}/export-book-pdf/{self.test_project_id}")
+            
+            if response.status_code == 200:
+                # Check if response is PDF content
+                content_type = response.headers.get('content-type', '')
+                if 'application/pdf' not in content_type:
+                    self.log(f"❌ PDF export returned wrong content type: {content_type}", "ERROR")
+                    return False
+                
+                # Check if response has content
+                content_length = len(response.content)
+                if content_length < 1000:  # PDF should be substantial
+                    self.log(f"❌ PDF export content too small: {content_length} bytes", "ERROR")
+                    return False
+                
+                # Check for PDF file header
+                if not response.content.startswith(b'%PDF'):
+                    self.log("❌ PDF export doesn't contain valid PDF header", "ERROR")
+                    return False
+                
+                # Check Content-Disposition header for filename
+                content_disposition = response.headers.get('content-disposition', '')
+                if 'attachment' not in content_disposition or '.pdf' not in content_disposition:
+                    self.log(f"❌ PDF export missing proper download headers: {content_disposition}", "ERROR")
+                    return False
+                
+                self.log(f"✅ PDF export successful ({content_length} bytes)")
+                self.log("✅ PDF has proper content type and headers")
+                self.log("✅ PDF contains valid PDF structure")
+                return True
+            else:
+                self.log(f"❌ PDF export failed with status {response.status_code}: {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ PDF export test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_docx_export(self):
+        """Test DOCX export functionality"""
+        if not self.test_project_id:
+            self.log("❌ No test project ID available for DOCX export test", "ERROR")
+            return False
+            
+        try:
+            self.log("Testing DOCX export functionality...")
+            
+            response = self.session.get(f"{self.base_url}/export-book-docx/{self.test_project_id}")
+            
+            if response.status_code == 200:
+                # Check if response is DOCX content
+                content_type = response.headers.get('content-type', '')
+                expected_docx_type = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                if expected_docx_type not in content_type:
+                    self.log(f"❌ DOCX export returned wrong content type: {content_type}", "ERROR")
+                    return False
+                
+                # Check if response has content
+                content_length = len(response.content)
+                if content_length < 1000:  # DOCX should be substantial
+                    self.log(f"❌ DOCX export content too small: {content_length} bytes", "ERROR")
+                    return False
+                
+                # Check for ZIP file header (DOCX is a ZIP file)
+                if not response.content.startswith(b'PK'):
+                    self.log("❌ DOCX export doesn't contain valid ZIP/DOCX header", "ERROR")
+                    return False
+                
+                # Check Content-Disposition header for filename
+                content_disposition = response.headers.get('content-disposition', '')
+                if 'attachment' not in content_disposition or '.docx' not in content_disposition:
+                    self.log(f"❌ DOCX export missing proper download headers: {content_disposition}", "ERROR")
+                    return False
+                
+                self.log(f"✅ DOCX export successful ({content_length} bytes)")
+                self.log("✅ DOCX has proper content type and headers")
+                self.log("✅ DOCX contains valid DOCX structure")
+                return True
+            else:
+                self.log(f"❌ DOCX export failed with status {response.status_code}: {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ DOCX export test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_chapter_title_extraction(self):
+        """Test chapter title extraction functionality"""
+        if not self.test_project_id:
+            self.log("❌ No test project ID available for chapter title extraction test", "ERROR")
+            return False
+            
+        try:
+            self.log("Testing chapter title extraction functionality...")
+            
+            # Get the project to check its outline
+            response = self.session.get(f"{self.base_url}/projects/{self.test_project_id}")
+            
+            if response.status_code != 200:
+                self.log("❌ Could not retrieve project for title extraction test", "ERROR")
+                return False
+                
+            project_data = response.json()
+            outline = project_data.get("outline", "")
+            
+            if not outline:
+                self.log("❌ No outline available for title extraction test", "ERROR")
+                return False
+            
+            # Generate a chapter to test title extraction
+            chapter_request = {"project_id": self.test_project_id, "chapter_number": 2}
+            chapter_response = self.session.post(f"{self.base_url}/generate-chapter", json=chapter_request)
+            
+            if chapter_response.status_code != 200:
+                self.log(f"❌ Chapter generation for title test failed: {chapter_response.text}", "ERROR")
+                return False
+            
+            chapter_data = chapter_response.json()
+            chapter_content = chapter_data.get("chapter_content", "")
+            chapter_title = chapter_data.get("chapter_title", "")
+            
+            # Check if chapter title was extracted and included
+            if not chapter_title:
+                self.log("❌ No chapter title returned in response", "ERROR")
+                return False
+            
+            # Check if chapter content starts with the extracted title
+            if not chapter_content.startswith('<h2>') or chapter_title not in chapter_content:
+                self.log("❌ Chapter content doesn't start with proper title", "ERROR")
+                return False
+            
+            # Check if title is meaningful (not just "Chapter X")
+            if chapter_title.strip() == f"Chapter 2":
+                self.log("⚠️ Chapter title extraction may not be working - got generic title", "WARNING")
+            else:
+                self.log(f"✅ Chapter title extracted successfully: '{chapter_title}'")
+            
+            self.log("✅ Chapter title extraction functionality working")
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Chapter title extraction test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_enhanced_html_export(self):
+        """Test enhanced HTML export with writing style display"""
+        if not self.test_project_id:
+            self.log("❌ No test project ID available for enhanced HTML export test", "ERROR")
+            return False
+            
+        try:
+            self.log("Testing enhanced HTML export with writing style display...")
+            
+            response = self.session.get(f"{self.base_url}/export-book/{self.test_project_id}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                html_content = data.get("html", "")
+                
+                if len(html_content) < 1000:
+                    self.log(f"❌ Enhanced HTML export content too short: {len(html_content)} characters", "ERROR")
+                    return False
+                
+                # Check for writing style display in HTML
+                if "Writing Style:" not in html_content:
+                    self.log("❌ Enhanced HTML export missing writing style display", "ERROR")
+                    return False
+                
+                # Check for enhanced styling elements
+                enhanced_elements = [
+                    "linear-gradient",
+                    "Georgia, serif",
+                    "max-width: 800px",
+                    "page-break-after: always",
+                    ".book-info",
+                    ".outline",
+                    ".chapter"
+                ]
+                
+                missing_elements = []
+                for element in enhanced_elements:
+                    if element not in html_content:
+                        missing_elements.append(element)
+                
+                if missing_elements:
+                    self.log(f"❌ Enhanced HTML export missing elements: {missing_elements}", "ERROR")
+                    return False
+                
+                # Check for proper book information section
+                if "Generated On:" not in html_content:
+                    self.log("❌ Enhanced HTML export missing generation date", "ERROR")
+                    return False
+                
+                self.log("✅ Enhanced HTML export includes writing style display")
+                self.log("✅ Enhanced HTML export has all required styling elements")
+                self.log("✅ Enhanced HTML export includes proper book information")
+                return True
+            else:
+                self.log(f"❌ Enhanced HTML export failed with status {response.status_code}: {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Enhanced HTML export test failed: {str(e)}", "ERROR")
             return False
         """Test updating chapter content"""
         if not self.test_project_id:
