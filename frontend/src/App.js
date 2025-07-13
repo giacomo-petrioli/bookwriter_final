@@ -531,6 +531,13 @@ const BookWriter = () => {
                   <div className="text-sm text-blue-800 space-y-1">
                     <p><strong>Story:</strong> Perfect for novels, memoirs, or narrative non-fiction. Creates flowing, immersive content with minimal structural breaks.</p>
                     <p><strong>Descriptive:</strong> Ideal for educational content, how-to guides, or reference materials. Uses clear sections and structured organization.</p>
+                    <p><strong>Academic:</strong> Best for scholarly works, research papers, or academic publications. Follows formal academic structure and methodology.</p>
+                    <p><strong>Technical:</strong> Perfect for manuals, documentation, or instructional guides. Provides step-by-step procedures and technical details.</p>
+                    <p><strong>Biography:</strong> Ideal for life stories, historical accounts, or personal profiles. Follows chronological or thematic structure.</p>
+                    <p><strong>Self-Help:</strong> Great for motivational books, personal development, or lifestyle guides. Uses encouraging tone with practical advice.</p>
+                    <p><strong>Children's:</strong> Perfect for young readers. Uses age-appropriate language with engaging characters and educational content.</p>
+                    <p><strong>Poetry:</strong> Ideal for creative works, artistic expression, or literary collections. Focuses on imagery and artistic language.</p>
+                    <p><strong>Business:</strong> Best for professional guides, business strategies, or corporate content. Uses authoritative tone with practical insights.</p>
                   </div>
                 </div>
 
