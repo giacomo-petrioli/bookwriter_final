@@ -890,14 +890,14 @@ As we stand at this technological crossroads, understanding the implications of 
             return False
 
     def test_gemini_model_performance(self):
-        """Test Gemini 2.0 Flash Lite model performance"""
+        """Test Gemini 2.5 Flash-Lite model performance"""
         try:
-            self.log("Testing Gemini 2.0 Flash Lite model performance...")
+            self.log("Testing Gemini 2.5 Flash-Lite model performance...")
             
             # Create a small test project for performance testing
             perf_project_data = {
                 "title": "Model Performance Test",
-                "description": "A test project to verify Gemini 2.0 Flash Lite model performance and response quality.",
+                "description": "A test project to verify Gemini 2.5 Flash-Lite model performance and response quality.",
                 "pages": 50,
                 "chapters": 3,
                 "language": "English",
