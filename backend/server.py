@@ -675,71 +675,64 @@ async def generate_all_chapters(request: OutlineRequest):
                     system_message="You are an expert book writer. You write engaging, well-structured chapters based on outlines. Use HTML formatting for headings, bold text, and structure. Always start each chapter with its proper title."
                 ).with_model("gemini", "gemini-2.5-flash-lite")
                 
-                # Create prompt for chapter generation with HTML formatting
-                prompt = f"""Write Chapter {chapter_num} for the following book:
+                # Enhanced prompt for chapter generation
+                prompt = f"""Write a complete and substantial Chapter {chapter_num} for the following book:
 
-Title: {project_obj.title}
-Description: {project_obj.description}
-Language: {project_obj.language}
-Writing Style: {project_obj.writing_style}
-Target Length: {estimated_words_per_chapter} words (this is important - write substantial content!)
+**BOOK DETAILS:**
+- Title: {project_obj.title}
+- Description: {project_obj.description}
+- Language: {project_obj.language}
+- Writing Style: {project_obj.writing_style}
+- Chapter Title: {chapter_title}
+- Target Length: {estimated_words_per_chapter} words (this is critical - write substantial content!)
 
+**STYLE REQUIREMENTS:**
 {style_instructions}
 
-Book Outline:
+**BOOK OUTLINE:**
 {project_obj.outline}
 
-Please write a complete, engaging chapter that:
-1. Follows the outline for Chapter {chapter_num}
-2. Contains approximately {estimated_words_per_chapter} words (aim for 250-300 words per page)
-3. Maintains the {project_obj.writing_style} style throughout
-4. Is written in {project_obj.language}
-5. Has compelling content that advances the book's purpose
+**CHAPTER REQUIREMENTS:**
+1. **START WITH CHAPTER TITLE**: Begin with <h2>{chapter_title}</h2>
+2. **Substantial Content**: Write approximately {estimated_words_per_chapter} words of engaging content
+3. **Follow Outline**: Base content on the outline for Chapter {chapter_num}
+4. **Maintain Style**: Keep consistent with the {project_obj.writing_style} writing style
+5. **Language**: Write entirely in {project_obj.language}
+6. **Engaging Content**: Create compelling, well-developed content that advances the book's purpose
 
+**FORMATTING REQUIREMENTS:**
 {formatting_instructions}
 
-Focus specifically on Chapter {chapter_num} content. Write substantial, engaging content that meets the word count requirement."""
+**CRITICAL INSTRUCTIONS:**
+- Begin immediately with the chapter title: <h2>{chapter_title}</h2>
+- Write substantial, detailed content that meets the word count requirement
+- Focus specifically on Chapter {chapter_num} based on the outline
+- Ensure the content is engaging, well-structured, and valuable to readers
+- Use proper HTML formatting throughout
+- Do not include any markdown code blocks
+
+Please write a complete, substantial chapter that fulfills all these requirements."""
 
                 user_message = UserMessage(text=prompt)
                 response = await chat.send_message(user_message)
                 
-                # Clean up the response - remove markdown code blocks and improve formatting
-                cleaned_response = response.strip()
+                # Clean up the response
+                cleaned_response = clean_ai_response(response)
                 
-                # Remove various markdown code block patterns
-                if cleaned_response.startswith('```html'):
-                    cleaned_response = cleaned_response[7:]
-                elif cleaned_response.startswith('```'):
-                    cleaned_response = cleaned_response[3:]
-                
-                if cleaned_response.endswith('```'):
-                    cleaned_response = cleaned_response[:-3]
-                
-                # Remove any remaining markdown artifacts
-                cleaned_response = cleaned_response.replace('```html', '').replace('```', '')
-                cleaned_response = cleaned_response.strip()
-                
-                # Ensure proper HTML formatting with better spacing
-                cleaned_response = cleaned_response.replace('<p>', '\n<p>').replace('</p>', '</p>\n\n')
-                cleaned_response = cleaned_response.replace('<h1>', '\n\n<h1>').replace('</h1>', '</h1>\n\n')
-                cleaned_response = cleaned_response.replace('<h2>', '\n\n<h2>').replace('</h2>', '</h2>\n\n')
-                cleaned_response = cleaned_response.replace('<h3>', '\n\n<h3>').replace('</h3>', '</h3>\n\n')
-                cleaned_response = cleaned_response.replace('<ul>', '\n<ul>').replace('</ul>', '</ul>\n\n')
-                cleaned_response = cleaned_response.replace('<li>', '\n  <li>').replace('</li>', '</li>')
-                
-                # Clean up excessive line breaks
-                cleaned_response = cleaned_response.replace('\n\n\n\n', '\n\n\n')
-                cleaned_response = cleaned_response.replace('\n\n\n\n', '\n\n')
-                cleaned_response = cleaned_response.strip()
+                # Ensure chapter starts with proper title if not already present
+                if not cleaned_response.startswith(f'<h2>{chapter_title}</h2>') and not cleaned_response.startswith('<h2>'):
+                    cleaned_response = f'<h2>{chapter_title}</h2>\n\n{cleaned_response}'
                 
                 # Store the chapter
                 all_chapters[str(chapter_num)] = cleaned_response
                 
-                # Small delay to avoid rate limiting
+                # Small delay to avoid overwhelming the API
                 await asyncio.sleep(1)
                 
-            except Exception as chapter_error:
-                raise HTTPException(status_code=500, detail=f"Error generating chapter {chapter_num}: {str(chapter_error)}")
+            except Exception as e:
+                # Log error but continue with other chapters
+                all_chapters[str(chapter_num)] = f"<h2>{chapter_titles.get(chapter_num, f'Chapter {chapter_num}')}</h2>\n\n<p><em>Error generating this chapter: {str(e)}</em></p>"
+                continue
         
         # Update project with all generated chapters
         await db.book_projects.update_one(
@@ -753,10 +746,9 @@ Focus specifically on Chapter {chapter_num} content. Write substantial, engaging
         )
         
         return {
-            "message": f"Successfully generated all {project_obj.chapters} chapters",
-            "chapters_generated": len(all_chapters),
-            "project_id": request.project_id,
-            "chapters": all_chapters
+            "message": f"Generated {len(all_chapters)} chapters",
+            "chapters_content": all_chapters,
+            "project_id": request.project_id
         }
         
     except Exception as e:
