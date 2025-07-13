@@ -1369,6 +1369,167 @@ As we stand at this technological crossroads, understanding the implications of 
             self.log(f"❌ Enhanced HTML export test failed: {str(e)}", "ERROR")
             return False
 
+    def test_outline_generation_model_fix(self):
+        """Focused test for AI outline generation after model name fix"""
+        try:
+            self.log("=" * 80)
+            self.log("FOCUSED TEST: AI OUTLINE GENERATION MODEL FIX")
+            self.log("Testing gemini-2.0-flash-lite model (was gemini-2.5-flash-lite-preview-0617)")
+            self.log("=" * 80)
+            
+            # Create test projects for both writing styles
+            test_projects = [
+                {
+                    "title": "The Future of Artificial Intelligence",
+                    "description": "An engaging story about humanity's relationship with AI and the challenges we face in an automated world.",
+                    "pages": 200,
+                    "chapters": 8,
+                    "language": "English",
+                    "writing_style": "story"
+                },
+                {
+                    "title": "Complete Guide to Machine Learning",
+                    "description": "A comprehensive guide covering machine learning algorithms, implementation strategies, and real-world applications.",
+                    "pages": 300,
+                    "chapters": 12,
+                    "language": "English", 
+                    "writing_style": "descriptive"
+                }
+            ]
+            
+            test_results = {}
+            
+            for i, project_data in enumerate(test_projects):
+                style = project_data["writing_style"]
+                self.log(f"\n--- Testing {style} style outline generation ---")
+                
+                # Create project
+                response = self.session.post(f"{self.base_url}/projects", json=project_data)
+                if response.status_code != 200:
+                    self.log(f"❌ {style} project creation failed: {response.text}", "ERROR")
+                    test_results[f"{style}_project"] = False
+                    continue
+                
+                project = response.json()
+                project_id = project.get("id")
+                self.log(f"✅ {style} project created: {project_id}")
+                
+                # Test outline generation - this is the main focus
+                self.log(f"Testing outline generation with gemini-2.0-flash-lite model...")
+                start_time = time.time()
+                
+                outline_request = {"project_id": project_id}
+                outline_response = self.session.post(f"{self.base_url}/generate-outline", json=outline_request)
+                
+                generation_time = time.time() - start_time
+                
+                if outline_response.status_code != 200:
+                    error_text = outline_response.text
+                    self.log(f"❌ {style} outline generation FAILED: {error_text}", "ERROR")
+                    
+                    # Check specifically for model not found error
+                    if "not found" in error_text.lower() or "model" in error_text.lower():
+                        self.log("❌ MODEL ERROR DETECTED - gemini-2.0-flash-lite model may not be working", "ERROR")
+                        test_results[f"{style}_model_error"] = True
+                    else:
+                        test_results[f"{style}_model_error"] = False
+                    
+                    test_results[f"{style}_outline"] = False
+                    continue
+                
+                # Model worked - no error
+                test_results[f"{style}_model_error"] = False
+                self.log(f"✅ {style} outline generation completed in {generation_time:.2f}s - NO MODEL ERROR")
+                
+                # Check outline content
+                outline_data = outline_response.json()
+                outline_content = outline_data.get("outline", "")
+                
+                if len(outline_content) < 500:
+                    self.log(f"❌ {style} outline too short: {len(outline_content)} characters", "ERROR")
+                    test_results[f"{style}_outline"] = False
+                    continue
+                
+                # Check for markdown cleanup (no ```html or ``` artifacts)
+                if "```html" in outline_content or "```" in outline_content:
+                    self.log(f"❌ {style} outline contains markdown artifacts", "ERROR")
+                    test_results[f"{style}_outline"] = False
+                    continue
+                
+                self.log(f"✅ {style} outline generated successfully ({len(outline_content)} characters)")
+                self.log("✅ No markdown artifacts found")
+                test_results[f"{style}_outline"] = True
+                
+                # Verify outline is stored in database
+                verify_response = self.session.get(f"{self.base_url}/projects/{project_id}")
+                if verify_response.status_code == 200:
+                    project_data = verify_response.json()
+                    stored_outline = project_data.get("outline", "")
+                    if stored_outline and len(stored_outline) > 100:
+                        self.log(f"✅ {style} outline properly stored in database")
+                        test_results[f"{style}_storage"] = True
+                    else:
+                        self.log(f"❌ {style} outline not properly stored in database", "ERROR")
+                        test_results[f"{style}_storage"] = False
+                else:
+                    self.log(f"❌ Could not verify {style} outline storage", "ERROR")
+                    test_results[f"{style}_storage"] = False
+                
+                # Check style-specific characteristics
+                if style == "story":
+                    # Story should have narrative elements
+                    narrative_keywords = ['chapter', 'character', 'story', 'plot', 'narrative']
+                    has_narrative = any(keyword in outline_content.lower() for keyword in narrative_keywords)
+                    if has_narrative:
+                        self.log("✅ Story outline contains narrative elements")
+                        test_results["story_characteristics"] = True
+                    else:
+                        self.log("⚠️ Story outline may lack narrative elements", "WARNING")
+                        test_results["story_characteristics"] = False
+                        
+                elif style == "descriptive":
+                    # Descriptive should have structured elements
+                    structure_count = outline_content.count('<h3>') + outline_content.count('<ul>')
+                    if structure_count >= 3:
+                        self.log(f"✅ Descriptive outline has good structure ({structure_count} structural elements)")
+                        test_results["descriptive_characteristics"] = True
+                    else:
+                        self.log(f"⚠️ Descriptive outline may lack structure ({structure_count} structural elements)", "WARNING")
+                        test_results["descriptive_characteristics"] = False
+            
+            # Summary of focused test results
+            self.log("\n" + "=" * 80)
+            self.log("FOCUSED TEST RESULTS SUMMARY")
+            self.log("=" * 80)
+            
+            model_errors = [k for k, v in test_results.items() if "model_error" in k and v]
+            if model_errors:
+                self.log("❌ CRITICAL: Model errors detected - gemini-2.0-flash-lite may not be working")
+                return False
+            else:
+                self.log("✅ SUCCESS: No model errors - gemini-2.0-flash-lite is working correctly")
+            
+            outline_successes = [k for k, v in test_results.items() if "outline" in k and v]
+            if len(outline_successes) >= 2:
+                self.log("✅ SUCCESS: Outline generation working for both writing styles")
+            else:
+                self.log("❌ ISSUE: Outline generation failed for some writing styles")
+                return False
+            
+            storage_successes = [k for k, v in test_results.items() if "storage" in k and v]
+            if len(storage_successes) >= 2:
+                self.log("✅ SUCCESS: Outline storage working properly")
+            else:
+                self.log("❌ ISSUE: Outline storage failed")
+                return False
+            
+            self.log("\n🎉 FOCUSED TEST PASSED: AI outline generation with gemini-2.0-flash-lite is working correctly!")
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Focused outline generation test failed: {str(e)}", "ERROR")
+            return False
+
     def run_all_tests(self):
         """Run all backend API tests"""
         self.log("=" * 60)
