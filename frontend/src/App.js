@@ -28,6 +28,7 @@ const BookWriter = () => {
   const [chapterProgress, setChapterProgress] = useState(0);
   const [savingChapter, setSavingChapter] = useState(false);
   const [exportingBook, setExportingBook] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
 
   // Rich text editor configuration for better HTML formatting
   const quillModules = {
