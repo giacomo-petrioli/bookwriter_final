@@ -214,8 +214,9 @@ const BookWriter = () => {
       // Generate chapters one by one to avoid timeouts
       for (let chapterNum = 1; chapterNum <= totalChapters; chapterNum++) {
         try {
-          // Update progress
+          // Update progress and current chapter being generated
           setChapterProgress(Math.round(((chapterNum - 1) / totalChapters) * 100));
+          setGeneratingChapterNum(chapterNum);
           
           const response = await axios.post(`${API}/generate-chapter`, {
             project_id: currentProject.id,
