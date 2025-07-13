@@ -515,6 +515,13 @@ const BookWriter = () => {
                     >
                       <option value="story">📚 Story - Fluid narrative, character-driven</option>
                       <option value="descriptive">📖 Descriptive - Structured, informational</option>
+                      <option value="academic">🎓 Academic - Scholarly, research-based</option>
+                      <option value="technical">⚙️ Technical - Step-by-step, instructional</option>
+                      <option value="biography">👤 Biography - Life story, chronological</option>
+                      <option value="self_help">💪 Self-Help - Motivational, actionable</option>
+                      <option value="children">🧸 Children's - Age-appropriate, engaging</option>
+                      <option value="poetry">🎭 Poetry - Creative, artistic expression</option>
+                      <option value="business">💼 Business - Professional, strategic</option>
                     </select>
                   </div>
                 </div>
