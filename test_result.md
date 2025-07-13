@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Build a web app that helps users write entire books with AI. The app should guide users through creating book projects, generating AI outlines, and writing chapters with Gemini AI assistance. CONTINUATION REQUEST: Fix several issues - app crashes after outline generation but outline is still created, need loading screens during generation, HTML code blocks appearing in edited text, export book and save chapter buttons not working, and poor text formatting with everything attached without proper spacing."
+user_problem_statement: "Build a web app that helps users write entire books with AI. The app should guide users through creating book projects, generating AI outlines, and writing chapters with Gemini AI assistance. CONTINUATION REQUEST: Fix several issues - app crashes after outline generation but outline is still created, need loading screens during generation, HTML code blocks appearing in edited text, export book and save chapter buttons not working, and poor text formatting with everything attached without proper spacing. NEW CONTINUATION REQUEST: 1 want to use Gemini 2.5 Flash-Lite instead of the model i use now, i want the user to be able to download the book in pdf or docx format and not only in html, i want the user to be able to choose between more styles, i want the prompt to be better optimized to get better result, and make sure that in each chapter is present the chapter name at the start of it"
 
 backend:
   - task: "Book project creation and management"
