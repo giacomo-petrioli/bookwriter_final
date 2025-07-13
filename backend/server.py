@@ -445,44 +445,28 @@ async def generate_outline(request: OutlineRequest):
 - Provides clear learning objectives per section
 - Includes practical applications and insights"""
         
-        # Improved prompt for better outline generation
-        prompt = f"""Create a comprehensive and detailed book outline for the following project:
+        # Optimized outline generation prompt
+        prompt = f"""Create a detailed book outline for "{project_obj.title}":
 
-**BOOK DETAILS:**
-- Title: {project_obj.title}
-- Description: {project_obj.description}
-- Target Pages: {project_obj.pages} pages
-- Number of Chapters: {project_obj.chapters} chapters
+**Book Details:**
+- {project_obj.chapters} chapters, {project_obj.pages} pages
+- Style: {project_obj.writing_style}
 - Language: {project_obj.language}
-- Writing Style: {project_obj.writing_style}
 
-**STYLE REQUIREMENTS:**
+**Requirements:**
+1. Create exactly {project_obj.chapters} chapter titles
+2. Each chapter: 3-5 sentences summary + 3-5 key points
+3. Target {(project_obj.pages * 275) // project_obj.chapters} words per chapter
+4. HTML format: <h2>Chapter [Number]: [Title]</h2> for titles
+5. Use <p> for summaries, <ul><li> for key points
+
+**Style Guide:**
 {style_instructions}
 
-**OUTLINE REQUIREMENTS:**
-1. Create exactly {project_obj.chapters} chapter titles that are compelling and relevant
-2. Each chapter should have a clear, descriptive title that fits the {project_obj.writing_style} style
-3. Include 3-5 sentences of detailed summary for each chapter
-4. Add 3-5 key points, topics, or plot elements for each chapter
-5. Ensure logical flow and progression between chapters
-6. Target approximately {(project_obj.pages * 275) // project_obj.chapters} words per chapter
+**Book Description:**
+{project_obj.description}
 
-**FORMATTING REQUIREMENTS:**
-- Use clean, well-structured HTML with proper spacing
-- Chapter titles: <h2>Chapter [Number]: [Title]</h2>
-- Chapter summaries: <p> tags with detailed descriptions
-- Key points: <ul> and <li> tags for organized lists
-- Use <h3> for sub-sections only when appropriate for the style
-- Ensure proper spacing between all elements
-
-**IMPORTANT GUIDELINES:**
-- Make each chapter title specific and engaging
-- Ensure chapter summaries provide clear direction for content generation
-- Create substantial content guidelines that will result in {(project_obj.pages * 275) // project_obj.chapters} words per chapter
-- Maintain consistency with the chosen writing style throughout
-- Write in {project_obj.language}
-
-Please generate a comprehensive outline that will guide the creation of substantial, high-quality content for each chapter."""
+Create a comprehensive outline that flows logically from chapter 1 to {project_obj.chapters}."""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
