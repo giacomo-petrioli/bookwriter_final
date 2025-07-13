@@ -43,10 +43,21 @@ const BookWriter = () => {
     ],
   };
 
-  const quillFormats = [
-    'header', 'bold', 'italic', 'underline', 'strike', 'blockquote',
-    'code-block', 'list', 'bullet', 'indent', 'link', 'align'
-  ];
+  // Helper function to get writing style display
+  const getWritingStyleDisplay = (style) => {
+    const styleMap = {
+      story: '📚 Story',
+      descriptive: '📖 Descriptive',
+      academic: '🎓 Academic',
+      technical: '⚙️ Technical',
+      biography: '👤 Biography',
+      self_help: '💪 Self-Help',
+      children: '🧸 Children\'s',
+      poetry: '🎭 Poetry',
+      business: '💼 Business'
+    };
+    return styleMap[style] || '📚 Story';
+  };
 
   // Custom styles for better spacing and formatting
   const editorStyle = {
