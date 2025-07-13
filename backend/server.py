@@ -639,7 +639,7 @@ Please write a complete, substantial chapter that fulfills all these requirement
 
 @api_router.post("/generate-all-chapters")
 async def generate_all_chapters(request: OutlineRequest):
-    """Generate all chapters for a book project using Gemini AI"""
+    """Generate all chapters for a book project using Gemini 2.5 Flash-Lite AI"""
     try:
         # Get project details
         project = await db.book_projects.find_one({"id": request.project_id})
@@ -651,51 +651,29 @@ async def generate_all_chapters(request: OutlineRequest):
         if not project_obj.outline:
             raise HTTPException(status_code=400, detail="Project must have an outline before generating chapters")
         
+        # Extract chapter titles from outline
+        chapter_titles = extract_chapter_titles(project_obj.outline)
+        
         # Initialize storage for all chapters
         all_chapters = {}
         estimated_words_per_chapter = (project_obj.pages * 275) // project_obj.chapters
         
-        # Create style-specific instructions
-        if project_obj.writing_style == "story":
-            style_instructions = """Write in a fluid, narrative style that:
-- Focuses on storytelling and character development
-- Uses natural dialogue and descriptive prose
-- Maintains narrative flow without excessive sub-headings
-- Creates immersive scenes and situations
-- Keeps the reader engaged with the story progression
-- Uses minimal structural breaks within chapters"""
-            
-            formatting_instructions = """Use minimal HTML formatting for story flow:
-- <p> for paragraphs (the main content)
-- <em> for emphasis or thoughts
-- <strong> for important dialogue or key moments
-- Avoid excessive <h2> or <h3> tags within chapters
-- Focus on smooth paragraph transitions"""
-        else:  # descriptive
-            style_instructions = """Write in a descriptive, informational style that:
-- Provides detailed explanations and analysis
-- Uses clear structure and organization
-- Includes examples and case studies when relevant
-- Maintains an informative and engaging tone
-- Breaks down complex topics into digestible sections"""
-            
-            formatting_instructions = """Use structured HTML formatting:
-- <h2> for main section headings within chapters
-- <h3> for subsection headings
-- <p> for paragraphs
-- <ul> and <li> for bullet points and lists
-- <strong> for key terms and concepts
-- <em> for emphasis"""
+        # Get style-specific instructions
+        style_instructions = get_style_instructions(project_obj.writing_style, "chapter")
+        formatting_instructions = get_style_instructions(project_obj.writing_style, "formatting")
         
         # Generate each chapter sequentially
         for chapter_num in range(1, project_obj.chapters + 1):
             try:
-                # Initialize Gemini chat for each chapter
+                # Get chapter title
+                chapter_title = chapter_titles.get(chapter_num, f"Chapter {chapter_num}")
+                
+                # Initialize Gemini chat for each chapter with updated model
                 chat = LlmChat(
                     api_key=os.environ.get('GEMINI_API_KEY'),
                     session_id=f"batch_chapter_{project_obj.id}_{chapter_num}",
-                    system_message="You are an expert book writer. You write engaging, well-structured chapters based on outlines. Use HTML formatting for headings, bold text, and structure."
-                ).with_model("gemini", "gemini-2.0-flash-lite")
+                    system_message="You are an expert book writer. You write engaging, well-structured chapters based on outlines. Use HTML formatting for headings, bold text, and structure. Always start each chapter with its proper title."
+                ).with_model("gemini", "gemini-2.5-flash-lite")
                 
                 # Create prompt for chapter generation with HTML formatting
                 prompt = f"""Write Chapter {chapter_num} for the following book:
