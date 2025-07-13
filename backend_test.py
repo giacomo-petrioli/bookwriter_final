@@ -1538,12 +1538,13 @@ As we stand at this technological crossroads, understanding the implications of 
         
         test_results = {}
         
-        # Test sequence
+        # Test sequence - prioritizing the focused outline generation test
         tests = [
             ("API Health Check", self.test_api_health),
             ("Project Creation", self.test_create_project),
             ("Get All Projects", self.test_get_projects),
             ("Get Specific Project", self.test_get_specific_project),
+            ("🎯 FOCUSED: AI Outline Generation Model Fix", self.test_outline_generation_model_fix),
             ("Generate AI Outline", self.test_generate_outline),
             ("Generate AI Chapter", self.test_generate_chapter),
             ("Update Outline", self.test_update_outline),
