@@ -276,26 +276,58 @@ const BookWriter = () => {
     }
   };
 
-  const exportBook = async () => {
+  const exportBook = async (format = 'html') => {
     if (!currentProject) return;
 
     setExportingBook(true);
     try {
-      const response = await axios.get(`${API}/export-book/${currentProject.id}`);
+      let response;
+      let filename;
       
-      if (response.data && response.data.html) {
-        // Create and download HTML file
-        const blob = new Blob([response.data.html], { type: 'text/html' });
+      if (format === 'pdf') {
+        response = await axios.get(`${API}/export-book-pdf/${currentProject.id}`, {
+          responseType: 'blob'
+        });
+        filename = `${currentProject.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+      } else if (format === 'docx') {
+        response = await axios.get(`${API}/export-book-docx/${currentProject.id}`, {
+          responseType: 'blob'
+        });
+        filename = `${currentProject.title.replace(/[^a-zA-Z0-9]/g, '_')}.docx`;
+      } else {
+        // HTML format
+        response = await axios.get(`${API}/export-book/${currentProject.id}`);
+        if (response.data && response.data.html) {
+          const blob = new Blob([response.data.html], { type: 'text/html' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = response.data.filename || `${currentProject.title.replace(/[^a-zA-Z0-9]/g, '_')}.html`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          
+          alert("Book exported successfully!");
+          return;
+        } else {
+          throw new Error("Invalid response from server");
+        }
+      }
+      
+      // Handle blob downloads (PDF and DOCX)
+      if (response.data) {
+        const blob = new Blob([response.data]);
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = response.data.filename || `${currentProject.title.replace(/[^a-zA-Z0-9]/g, '_')}.html`;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
         
-        alert("Book exported successfully!");
+        alert(`Book exported successfully as ${format.toUpperCase()}!`);
       } else {
         throw new Error("Invalid response from server");
       }
