@@ -673,7 +673,7 @@ async def generate_all_chapters(request: OutlineRequest):
                     api_key=os.environ.get('GEMINI_API_KEY'),
                     session_id=f"batch_chapter_{project_obj.id}_{chapter_num}",
                     system_message="You are an expert book writer. You write engaging, well-structured chapters based on outlines. Use HTML formatting for headings, bold text, and structure. Always start each chapter with its proper title."
-                ).with_model("gemini", "gemini-2.5-flash-lite")
+                ).with_model("gemini", "gemini-2.5-flash-lite-preview-0617")
                 
                 # Enhanced prompt for chapter generation
                 prompt = f"""Write a complete and substantial Chapter {chapter_num} for the following book:
