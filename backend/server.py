@@ -75,7 +75,301 @@ class ChapterUpdate(BaseModel):
     chapter_number: int
     content: str
 
-# Routes
+# Helper function for style-specific instructions
+def get_style_instructions(writing_style: str, content_type: str = "outline"):
+    """Get style-specific instructions for different writing styles"""
+    
+    styles = {
+        "story": {
+            "outline": """Create a story-focused outline that:
+- Develops compelling character arcs and relationships
+- Crafts engaging plot points and narrative hooks
+- Maintains consistent pacing and tension
+- Builds immersive story worlds and settings
+- Weaves subplots seamlessly into the main narrative
+- Creates emotional resonance and character growth
+- Uses natural scene and chapter transitions""",
+            "chapter": """Write in a fluid, narrative style that:
+- Focuses on storytelling and character development
+- Uses natural dialogue and descriptive prose
+- Maintains narrative flow without excessive sub-headings
+- Creates immersive scenes and situations
+- Keeps the reader engaged with story progression
+- Uses minimal structural breaks within chapters
+- Develops character emotions and relationships""",
+            "formatting": """Use minimal HTML formatting for story flow:
+- <h2> for chapter titles with chapter names
+- <p> for paragraphs (the main content)
+- <em> for emphasis, thoughts, or internal dialogue
+- <strong> for important dialogue or key moments
+- Avoid excessive <h3> tags within chapters
+- Focus on smooth paragraph transitions"""
+        },
+        "descriptive": {
+            "outline": """Create a structured informational outline that:
+- Presents clear topic hierarchies and logical flow
+- Breaks down complex concepts systematically
+- Incorporates relevant examples and case studies
+- Balances depth and accessibility of content
+- Uses consistent terminology and definitions
+- Provides clear learning objectives per section
+- Includes practical applications and insights""",
+            "chapter": """Write in a descriptive, informational style that:
+- Provides detailed explanations and analysis
+- Uses clear structure and organization
+- Includes examples and case studies when relevant
+- Maintains an informative and engaging tone
+- Breaks down complex topics into digestible sections
+- Uses logical progression from basic to advanced concepts""",
+            "formatting": """Use structured HTML formatting:
+- <h2> for chapter titles with chapter names
+- <h3> for main section headings within chapters
+- <h4> for subsection headings
+- <p> for paragraphs
+- <ul> and <li> for bullet points and lists
+- <strong> for key terms and concepts
+- <em> for emphasis"""
+        },
+        "academic": {
+            "outline": """Create an academic/research outline that:
+- Follows scholarly structure and methodology
+- Includes literature review and theoretical framework
+- Presents arguments with supporting evidence
+- Uses formal academic language and citations
+- Organizes content by research questions or hypotheses
+- Includes methodology and analysis sections
+- Provides clear research conclusions""",
+            "chapter": """Write in an academic style that:
+- Uses formal, scholarly language and tone
+- Supports arguments with evidence and citations
+- Follows academic structure and conventions
+- Includes theoretical background and context
+- Presents balanced analysis and critical thinking
+- Uses appropriate academic terminology
+- Maintains objectivity and rigor""",
+            "formatting": """Use academic HTML formatting:
+- <h2> for chapter titles with chapter names
+- <h3> for main sections (Introduction, Literature Review, etc.)
+- <h4> for subsections
+- <p> for paragraphs with academic prose
+- <ul> and <li> for structured lists
+- <strong> for key concepts and terms
+- <em> for emphasis and foreign terms"""
+        },
+        "technical": {
+            "outline": """Create a technical/manual outline that:
+- Follows step-by-step instructional structure
+- Includes prerequisites and requirements
+- Organizes content by procedures or processes
+- Uses clear, concise technical language
+- Includes troubleshooting and best practices
+- Provides practical examples and use cases
+- Follows logical workflow sequences""",
+            "chapter": """Write in a technical style that:
+- Uses clear, precise technical language
+- Provides step-by-step instructions
+- Includes practical examples and code snippets
+- Follows logical procedural flow
+- Addresses common issues and solutions
+- Uses consistent technical terminology
+- Focuses on actionable information""",
+            "formatting": """Use technical HTML formatting:
+- <h2> for chapter titles with chapter names
+- <h3> for major procedures or sections
+- <h4> for sub-procedures
+- <p> for instructions and explanations
+- <ul> and <li> for step-by-step lists
+- <strong> for important warnings or key points
+- <em> for technical terms or variables"""
+        },
+        "biography": {
+            "outline": """Create a biographical outline that:
+- Follows chronological or thematic structure
+- Focuses on key life events and milestones
+- Includes personal background and influences
+- Explores character development and growth
+- Incorporates historical and cultural context
+- Balances personal and professional aspects
+- Shows cause-and-effect relationships""",
+            "chapter": """Write in a biographical style that:
+- Narrates life events with personal insight
+- Balances factual information with story elements
+- Includes dialogue and personal anecdotes
+- Provides historical and cultural context
+- Shows character development over time
+- Uses engaging narrative techniques
+- Maintains respect for the subject""",
+            "formatting": """Use biographical HTML formatting:
+- <h2> for chapter titles with chapter names
+- <h3> for major life periods or themes
+- <p> for narrative paragraphs
+- <ul> and <li> for key achievements or events
+- <strong> for important dates and names
+- <em> for quotes and personal thoughts"""
+        },
+        "self_help": {
+            "outline": """Create a self-help outline that:
+- Focuses on practical advice and actionable steps
+- Includes motivational and inspirational content
+- Organizes content by problems and solutions
+- Uses encouraging and empowering language
+- Includes real-life examples and case studies
+- Provides exercises and practical applications
+- Builds progressive skill development""",
+            "chapter": """Write in a self-help style that:
+- Uses encouraging, motivational language
+- Provides practical, actionable advice
+- Includes personal stories and examples
+- Addresses common challenges and solutions
+- Engages readers with exercises and activities
+- Maintains an optimistic, empowering tone
+- Focuses on personal growth and development""",
+            "formatting": """Use self-help HTML formatting:
+- <h2> for chapter titles with chapter names
+- <h3> for main concepts or strategies
+- <p> for explanations and advice
+- <ul> and <li> for action steps and tips
+- <strong> for key takeaways and important points
+- <em> for motivational quotes and emphasis"""
+        },
+        "children": {
+            "outline": """Create a children's book outline that:
+- Uses age-appropriate language and concepts
+- Includes engaging characters and situations
+- Focuses on learning and entertainment
+- Incorporates moral lessons or educational content
+- Uses repetition and rhythm for engagement
+- Includes opportunities for interaction
+- Balances fun with educational value""",
+            "chapter": """Write in a children's style that:
+- Uses simple, clear language appropriate for the age group
+- Creates engaging characters and situations
+- Includes dialogue and action
+- Incorporates learning opportunities naturally
+- Uses repetition and rhythm for memorability
+- Maintains a fun, engaging tone
+- Includes moral lessons or educational content""",
+            "formatting": """Use children's book HTML formatting:
+- <h2> for chapter titles with chapter names
+- <h3> for story sections or activities
+- <p> for story text and explanations
+- <ul> and <li> for lists and activities
+- <strong> for important words or concepts
+- <em> for sound effects or emphasis"""
+        },
+        "poetry": {
+            "outline": """Create a poetry/creative outline that:
+- Organizes by themes, forms, or emotional progression
+- Includes various poetic forms and styles
+- Focuses on imagery, metaphor, and literary devices
+- Explores emotions and human experiences
+- Uses creative structure and organization
+- Incorporates rhythm and sound patterns
+- Balances different poetic techniques""",
+            "chapter": """Write in a poetic/creative style that:
+- Uses rich imagery and metaphorical language
+- Incorporates various poetic forms and techniques
+- Focuses on emotional expression and artistic beauty
+- Uses rhythm, meter, and sound patterns
+- Employs creative language and wordplay
+- Explores themes through artistic expression
+- Maintains creative and innovative approach""",
+            "formatting": """Use poetry HTML formatting:
+- <h2> for chapter titles with chapter names
+- <h3> for poem titles or sections
+- <p> for poem stanzas and creative prose
+- <ul> and <li> for structured creative elements
+- <strong> for emphasis and key imagery
+- <em> for titles and artistic emphasis"""
+        },
+        "business": {
+            "outline": """Create a business/professional outline that:
+- Focuses on practical business applications
+- Includes case studies and real-world examples
+- Organizes content by business functions or processes
+- Uses professional terminology and concepts
+- Provides actionable strategies and solutions
+- Includes metrics, data, and analysis
+- Addresses current business challenges""",
+            "chapter": """Write in a business/professional style that:
+- Uses professional, authoritative language
+- Provides practical business insights and strategies
+- Includes relevant case studies and examples
+- Focuses on actionable business solutions
+- Uses data and metrics to support points
+- Addresses current business trends and challenges
+- Maintains a professional, informative tone""",
+            "formatting": """Use business HTML formatting:
+- <h2> for chapter titles with chapter names
+- <h3> for major business concepts or strategies
+- <h4> for sub-topics and detailed points
+- <p> for explanations and analysis
+- <ul> and <li> for strategies and action items
+- <strong> for key business terms and metrics
+- <em> for emphasis and important concepts"""
+        }
+    }
+    
+    # Default to story style if unknown
+    if writing_style not in styles:
+        writing_style = "story"
+    
+    return styles[writing_style].get(content_type, styles["story"][content_type])
+
+# Helper function for cleaning AI responses
+def clean_ai_response(response: str) -> str:
+    """Clean and format AI response with proper HTML structure"""
+    cleaned_response = response.strip()
+    
+    # Remove markdown code block patterns
+    if cleaned_response.startswith('```html'):
+        cleaned_response = cleaned_response[7:]
+    elif cleaned_response.startswith('```'):
+        cleaned_response = cleaned_response[3:]
+    
+    if cleaned_response.endswith('```'):
+        cleaned_response = cleaned_response[:-3]
+    
+    # Remove markdown artifacts and improve formatting
+    cleaned_response = cleaned_response.replace('```html', '').replace('```', '')
+    cleaned_response = cleaned_response.strip()
+    
+    # Enhance HTML formatting with proper spacing
+    cleaned_response = cleaned_response.replace('<h1>', '\n\n<h1>').replace('</h1>', '</h1>\n\n')
+    cleaned_response = cleaned_response.replace('<h2>', '\n\n<h2>').replace('</h2>', '</h2>\n\n')
+    cleaned_response = cleaned_response.replace('<h3>', '\n<h3>').replace('</h3>', '</h3>\n')
+    cleaned_response = cleaned_response.replace('<h4>', '\n<h4>').replace('</h4>', '</h4>\n')
+    cleaned_response = cleaned_response.replace('<p>', '\n<p>').replace('</p>', '</p>\n\n')
+    cleaned_response = cleaned_response.replace('<ul>', '\n<ul>').replace('</ul>', '</ul>\n\n')
+    cleaned_response = cleaned_response.replace('<li>', '\n  <li>').replace('</li>', '</li>')
+    
+    # Clean up excessive spacing
+    cleaned_response = re.sub(r'\n{3,}', '\n\n', cleaned_response)
+    cleaned_response = cleaned_response.strip()
+    
+    return cleaned_response
+
+# Helper function to extract chapter titles from outline
+def extract_chapter_titles(outline: str) -> dict:
+    """Extract chapter titles from the outline HTML"""
+    chapter_titles = {}
+    
+    # Look for chapter titles in various formats
+    patterns = [
+        r'<h2[^>]*>Chapter\s+(\d+):?\s*([^<]+)</h2>',
+        r'<h2[^>]*>(\d+)\.\s*([^<]+)</h2>',
+        r'<h2[^>]*>([^<]*Chapter\s+\d+[^<]*)</h2>'
+    ]
+    
+    for pattern in patterns:
+        matches = re.findall(pattern, outline, re.IGNORECASE)
+        for match in matches:
+            if len(match) == 2:
+                chapter_num = int(match[0])
+                chapter_title = match[1].strip()
+                chapter_titles[chapter_num] = chapter_title
+    
+    return chapter_titles
 @api_router.get("/")
 async def root():
     return {"message": "AI Book Writer API"}
