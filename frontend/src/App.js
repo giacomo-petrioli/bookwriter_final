@@ -588,7 +588,7 @@ const BookWriter = () => {
                   <span>{currentProject.chapters} chapters</span>
                   <span>{currentProject.pages} pages</span>
                   <span>{currentProject.language}</span>
-                  <span>{currentProject.writing_style === 'story' ? '📚 Story' : '📖 Descriptive'}</span>
+                  <span>{getWritingStyleDisplay(currentProject.writing_style)}</span>
                 </div>
               </div>
 
