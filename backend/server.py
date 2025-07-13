@@ -534,7 +534,7 @@ Please generate a comprehensive outline that will guide the creation of substant
 
 @api_router.post("/generate-chapter")
 async def generate_chapter(request: ChapterRequest):
-    """Generate a specific chapter using Gemini AI"""
+    """Generate a specific chapter using Gemini 2.5 Flash-Lite AI"""
     try:
         # Get project details
         project = await db.book_projects.find_one({"id": request.project_id})
@@ -546,104 +546,71 @@ async def generate_chapter(request: ChapterRequest):
         if not project_obj.outline:
             raise HTTPException(status_code=400, detail="Project must have an outline before generating chapters")
         
-        # Initialize Gemini chat for this chapter
+        # Extract chapter titles from outline
+        chapter_titles = extract_chapter_titles(project_obj.outline)
+        chapter_title = chapter_titles.get(request.chapter_number, f"Chapter {request.chapter_number}")
+        
+        # Initialize Gemini chat for this chapter with updated model
         chat = LlmChat(
             api_key=os.environ.get('GEMINI_API_KEY'),
             session_id=f"chapter_{project_obj.id}_{request.chapter_number}",
-            system_message="You are an expert book writer. You write engaging, well-structured chapters based on outlines. Use HTML formatting for headings, bold text, and structure."
-        ).with_model("gemini", "gemini-2.0-flash-lite")
+            system_message="You are an expert book writer. You write engaging, well-structured chapters based on outlines. Use HTML formatting for headings, bold text, and structure. Always start each chapter with its proper title."
+        ).with_model("gemini", "gemini-2.5-flash-lite")
         
-        # Calculate estimated words per chapter (250-300 words per page)
+        # Calculate estimated words per chapter (275 words per page)
         estimated_words_per_chapter = (project_obj.pages * 275) // project_obj.chapters
         
-        # Create style-specific prompt for chapter generation
-        if project_obj.writing_style == "story":
-            style_instructions = """Write in a fluid, narrative style that:
-- Focuses on storytelling and character development
-- Uses natural dialogue and descriptive prose
-- Maintains narrative flow without excessive sub-headings
-- Creates immersive scenes and situations
-- Keeps the reader engaged with the story progression
-- Uses minimal structural breaks within chapters"""
-            
-            formatting_instructions = """Use minimal HTML formatting for story flow:
-- <p> for paragraphs (the main content)
-- <em> for emphasis or thoughts
-- <strong> for important dialogue or key moments
-- Avoid excessive <h2> or <h3> tags within chapters
-- Focus on smooth paragraph transitions"""
-        else:  # descriptive
-            style_instructions = """Write in a descriptive, informational style that:
-- Provides detailed explanations and analysis
-- Uses clear structure and organization
-- Includes examples and case studies when relevant
-- Maintains an informative and engaging tone
-- Breaks down complex topics into digestible sections"""
-            
-            formatting_instructions = """Use structured HTML formatting:
-- <h2> for main section headings within chapters
-- <h3> for subsection headings
-- <p> for paragraphs
-- <ul> and <li> for bullet points and lists
-- <strong> for key terms and concepts
-- <em> for emphasis"""
+        # Get style-specific instructions
+        style_instructions = get_style_instructions(project_obj.writing_style, "chapter")
+        formatting_instructions = get_style_instructions(project_obj.writing_style, "formatting")
+        
+        # Enhanced prompt for chapter generation
+        prompt = f"""Write a complete and substantial Chapter {request.chapter_number} for the following book:
 
-        # Create prompt for chapter generation
-        prompt = f"""Write Chapter {request.chapter_number} for the following book:
+**BOOK DETAILS:**
+- Title: {project_obj.title}
+- Description: {project_obj.description}
+- Language: {project_obj.language}
+- Writing Style: {project_obj.writing_style}
+- Chapter Title: {chapter_title}
+- Target Length: {estimated_words_per_chapter} words (this is critical - write substantial content!)
 
-Title: {project_obj.title}
-Description: {project_obj.description}
-Language: {project_obj.language}
-Writing Style: {project_obj.writing_style}
-Target Length: {estimated_words_per_chapter} words (this is important - write substantial content!)
-
+**STYLE REQUIREMENTS:**
 {style_instructions}
 
-Book Outline:
+**BOOK OUTLINE:**
 {project_obj.outline}
 
-Please write a complete, engaging chapter that:
-1. Follows the outline for Chapter {request.chapter_number}
-2. Contains approximately {estimated_words_per_chapter} words (aim for 250-300 words per page)
-3. Maintains the {project_obj.writing_style} style throughout
-4. Is written in {project_obj.language}
-5. Has compelling content that advances the book's purpose
+**CHAPTER REQUIREMENTS:**
+1. **START WITH CHAPTER TITLE**: Begin with <h2>{chapter_title}</h2>
+2. **Substantial Content**: Write approximately {estimated_words_per_chapter} words of engaging content
+3. **Follow Outline**: Base content on the outline for Chapter {request.chapter_number}
+4. **Maintain Style**: Keep consistent with the {project_obj.writing_style} writing style
+5. **Language**: Write entirely in {project_obj.language}
+6. **Engaging Content**: Create compelling, well-developed content that advances the book's purpose
 
+**FORMATTING REQUIREMENTS:**
 {formatting_instructions}
 
-Focus specifically on Chapter {request.chapter_number} content. Write substantial, engaging content that meets the word count requirement."""
+**CRITICAL INSTRUCTIONS:**
+- Begin immediately with the chapter title: <h2>{chapter_title}</h2>
+- Write substantial, detailed content that meets the word count requirement
+- Focus specifically on Chapter {request.chapter_number} based on the outline
+- Ensure the content is engaging, well-structured, and valuable to readers
+- Use proper HTML formatting throughout
+- Do not include any markdown code blocks
+
+Please write a complete, substantial chapter that fulfills all these requirements."""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
         
-        # Clean up the response - remove markdown code blocks and improve formatting
-        cleaned_response = response.strip()
+        # Clean up the response
+        cleaned_response = clean_ai_response(response)
         
-        # Remove various markdown code block patterns
-        if cleaned_response.startswith('```html'):
-            cleaned_response = cleaned_response[7:]
-        elif cleaned_response.startswith('```'):
-            cleaned_response = cleaned_response[3:]
-        
-        if cleaned_response.endswith('```'):
-            cleaned_response = cleaned_response[:-3]
-        
-        # Remove any remaining markdown artifacts
-        cleaned_response = cleaned_response.replace('```html', '').replace('```', '')
-        cleaned_response = cleaned_response.strip()
-        
-        # Ensure proper HTML formatting with better spacing
-        cleaned_response = cleaned_response.replace('<p>', '\n<p>').replace('</p>', '</p>\n\n')
-        cleaned_response = cleaned_response.replace('<h1>', '\n\n<h1>').replace('</h1>', '</h1>\n\n')
-        cleaned_response = cleaned_response.replace('<h2>', '\n\n<h2>').replace('</h2>', '</h2>\n\n')
-        cleaned_response = cleaned_response.replace('<h3>', '\n\n<h3>').replace('</h3>', '</h3>\n\n')
-        cleaned_response = cleaned_response.replace('<ul>', '\n<ul>').replace('</ul>', '</ul>\n\n')
-        cleaned_response = cleaned_response.replace('<li>', '\n  <li>').replace('</li>', '</li>')
-        
-        # Clean up excessive line breaks
-        cleaned_response = cleaned_response.replace('\n\n\n\n', '\n\n\n')
-        cleaned_response = cleaned_response.replace('\n\n\n\n', '\n\n')
-        cleaned_response = cleaned_response.strip()
+        # Ensure chapter starts with proper title if not already present
+        if not cleaned_response.startswith(f'<h2>{chapter_title}</h2>') and not cleaned_response.startswith('<h2>'):
+            cleaned_response = f'<h2>{chapter_title}</h2>\n\n{cleaned_response}'
         
         # Update project with the generated chapter
         current_chapters = project.get("chapters_content", {})
@@ -662,6 +629,7 @@ Focus specifically on Chapter {request.chapter_number} content. Write substantia
         return {
             "chapter_content": cleaned_response,
             "chapter_number": request.chapter_number,
+            "chapter_title": chapter_title,
             "project_id": request.project_id
         }
         
