@@ -564,43 +564,27 @@ async def generate_chapter(request: ChapterRequest):
         style_instructions = get_style_instructions(project_obj.writing_style, "chapter")
         formatting_instructions = get_style_instructions(project_obj.writing_style, "formatting")
         
-        # Enhanced prompt for chapter generation
-        prompt = f"""Write a complete and substantial Chapter {request.chapter_number} for the following book:
+        # Optimized prompt for faster generation
+        prompt = f"""Write Chapter {request.chapter_number} for "{project_obj.title}":
 
-**BOOK DETAILS:**
-- Title: {project_obj.title}
-- Description: {project_obj.description}
-- Language: {project_obj.language}
-- Writing Style: {project_obj.writing_style}
-- Chapter Title: {chapter_title}
-- Target Length: {estimated_words_per_chapter} words (this is critical - write substantial content!)
+**Chapter Title:** {chapter_title}
+**Target Length:** {estimated_words_per_chapter} words
+**Writing Style:** {project_obj.writing_style}
 
-**STYLE REQUIREMENTS:**
-{style_instructions}
+**Key Requirements:**
+1. Start with: <h2>{chapter_title}</h2>
+2. Write {estimated_words_per_chapter} words of engaging content
+3. Follow the outline for Chapter {request.chapter_number}
+4. Use HTML formatting (headings, paragraphs, lists)
+5. Write in {project_obj.language}
 
-**BOOK OUTLINE:**
+**Book Outline:**
 {project_obj.outline}
 
-**CHAPTER REQUIREMENTS:**
-1. **START WITH CHAPTER TITLE**: Begin with <h2>{chapter_title}</h2>
-2. **Substantial Content**: Write approximately {estimated_words_per_chapter} words of engaging content
-3. **Follow Outline**: Base content on the outline for Chapter {request.chapter_number}
-4. **Maintain Style**: Keep consistent with the {project_obj.writing_style} writing style
-5. **Language**: Write entirely in {project_obj.language}
-6. **Engaging Content**: Create compelling, well-developed content that advances the book's purpose
+**Style Instructions:**
+{style_instructions}
 
-**FORMATTING REQUIREMENTS:**
-{formatting_instructions}
-
-**CRITICAL INSTRUCTIONS:**
-- Begin immediately with the chapter title: <h2>{chapter_title}</h2>
-- Write substantial, detailed content that meets the word count requirement
-- Focus specifically on Chapter {request.chapter_number} based on the outline
-- Ensure the content is engaging, well-structured, and valuable to readers
-- Use proper HTML formatting throughout
-- Do not include any markdown code blocks
-
-Please write a complete, substantial chapter that fulfills all these requirements."""
+Write a complete chapter that follows the outline and meets the word count requirement."""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
