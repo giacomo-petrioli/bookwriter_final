@@ -913,6 +913,7 @@ async def export_book(project_id: str):
         <h1>{project_obj.title}</h1>
         <p><strong>Description:</strong> {project_obj.description}</p>
         <p><strong>Language:</strong> {project_obj.language}</p>
+        <p><strong>Writing Style:</strong> {project_obj.writing_style.title()}</p>
         <p><strong>Chapters:</strong> {project_obj.chapters}</p>
         <p><strong>Target Pages:</strong> {project_obj.pages}</p>
         <p><strong>Generated On:</strong> {datetime.now().strftime("%B %d, %Y")}</p>
@@ -933,7 +934,6 @@ async def export_book(project_id: str):
                 if chapter_content:
                     html_content += f"""
         <div class="chapter">
-            <h2>Chapter {i}</h2>
             {chapter_content}
         </div>"""
                 else:
@@ -968,6 +968,179 @@ async def export_book(project_id: str):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error exporting book: {str(e)}")
+
+@api_router.get("/export-book-pdf/{project_id}")
+async def export_book_pdf(project_id: str):
+    """Export book as PDF with proper formatting"""
+    try:
+        project = await db.book_projects.find_one({"id": project_id})
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        project_obj = BookProject(**project)
+        
+        # Create PDF buffer
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+        
+        # Get styles
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Title'],
+            fontSize=24,
+            spaceAfter=30,
+            alignment=1  # Center alignment
+        )
+        
+        heading_style = ParagraphStyle(
+            'CustomHeading',
+            parent=styles['Heading1'],
+            fontSize=16,
+            spaceAfter=12,
+            textColor=HexColor('#2c3e50')
+        )
+        
+        body_style = ParagraphStyle(
+            'CustomBody',
+            parent=styles['Normal'],
+            fontSize=12,
+            spaceAfter=12,
+            alignment=4,  # Justified
+            firstLineIndent=20
+        )
+        
+        # Build content
+        content = []
+        
+        # Title page
+        content.append(Paragraph(project_obj.title, title_style))
+        content.append(Spacer(1, 12))
+        content.append(Paragraph(f"<b>Description:</b> {project_obj.description}", body_style))
+        content.append(Paragraph(f"<b>Language:</b> {project_obj.language}", body_style))
+        content.append(Paragraph(f"<b>Writing Style:</b> {project_obj.writing_style.title()}", body_style))
+        content.append(Paragraph(f"<b>Chapters:</b> {project_obj.chapters}", body_style))
+        content.append(Paragraph(f"<b>Target Pages:</b> {project_obj.pages}", body_style))
+        content.append(Paragraph(f"<b>Generated On:</b> {datetime.now().strftime('%B %d, %Y')}", body_style))
+        content.append(PageBreak())
+        
+        # Outline
+        if project_obj.outline:
+            content.append(Paragraph("📖 Book Outline", heading_style))
+            content.append(Spacer(1, 12))
+            # Convert HTML to plain text for PDF
+            outline_text = re.sub(r'<[^>]+>', '', project_obj.outline)
+            outline_text = unescape(outline_text)
+            content.append(Paragraph(outline_text, body_style))
+            content.append(PageBreak())
+        
+        # Chapters
+        content.append(Paragraph("📚 Chapters", heading_style))
+        content.append(Spacer(1, 12))
+        
+        if project_obj.chapters_content:
+            for i in range(1, project_obj.chapters + 1):
+                chapter_content = project_obj.chapters_content.get(str(i), "")
+                if chapter_content:
+                    # Convert HTML to plain text for PDF
+                    chapter_text = re.sub(r'<[^>]+>', '', chapter_content)
+                    chapter_text = unescape(chapter_text)
+                    content.append(Paragraph(chapter_text, body_style))
+                else:
+                    content.append(Paragraph(f"Chapter {i}", heading_style))
+                    content.append(Paragraph("This chapter has not been generated yet.", body_style))
+                content.append(PageBreak())
+        
+        # Build PDF
+        doc.build(content)
+        buffer.seek(0)
+        
+        # Create safe filename
+        safe_filename = "".join(c for c in project_obj.title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+        safe_filename = safe_filename.replace(' ', '_')
+        if not safe_filename:
+            safe_filename = f"book_{project_obj.id}"
+        
+        return StreamingResponse(
+            io.BytesIO(buffer.getvalue()),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={safe_filename}.pdf"}
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error exporting book as PDF: {str(e)}")
+
+@api_router.get("/export-book-docx/{project_id}")
+async def export_book_docx(project_id: str):
+    """Export book as DOCX with proper formatting"""
+    try:
+        project = await db.book_projects.find_one({"id": project_id})
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        project_obj = BookProject(**project)
+        
+        # Create DOCX document
+        doc = Document()
+        
+        # Title page
+        title = doc.add_heading(project_obj.title, level=1)
+        title.alignment = 1  # Center alignment
+        
+        doc.add_paragraph(f"Description: {project_obj.description}")
+        doc.add_paragraph(f"Language: {project_obj.language}")
+        doc.add_paragraph(f"Writing Style: {project_obj.writing_style.title()}")
+        doc.add_paragraph(f"Chapters: {project_obj.chapters}")
+        doc.add_paragraph(f"Target Pages: {project_obj.pages}")
+        doc.add_paragraph(f"Generated On: {datetime.now().strftime('%B %d, %Y')}")
+        
+        # Page break
+        doc.add_page_break()
+        
+        # Outline
+        if project_obj.outline:
+            doc.add_heading("📖 Book Outline", level=2)
+            # Convert HTML to plain text for DOCX
+            outline_text = re.sub(r'<[^>]+>', '', project_obj.outline)
+            outline_text = unescape(outline_text)
+            doc.add_paragraph(outline_text)
+            doc.add_page_break()
+        
+        # Chapters
+        doc.add_heading("📚 Chapters", level=2)
+        
+        if project_obj.chapters_content:
+            for i in range(1, project_obj.chapters + 1):
+                chapter_content = project_obj.chapters_content.get(str(i), "")
+                if chapter_content:
+                    # Convert HTML to plain text for DOCX
+                    chapter_text = re.sub(r'<[^>]+>', '', chapter_content)
+                    chapter_text = unescape(chapter_text)
+                    doc.add_paragraph(chapter_text)
+                else:
+                    doc.add_heading(f"Chapter {i}", level=3)
+                    doc.add_paragraph("This chapter has not been generated yet.")
+                doc.add_page_break()
+        
+        # Save to buffer
+        buffer = io.BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+        
+        # Create safe filename
+        safe_filename = "".join(c for c in project_obj.title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+        safe_filename = safe_filename.replace(' ', '_')
+        if not safe_filename:
+            safe_filename = f"book_{project_obj.id}"
+        
+        return StreamingResponse(
+            io.BytesIO(buffer.getvalue()),
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f"attachment; filename={safe_filename}.docx"}
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error exporting book as DOCX: {str(e)}")
 
 @api_router.put("/update-outline")
 async def update_outline(request: dict):
