@@ -688,6 +688,13 @@ async def generate_chapter(request: ChapterRequest):
 **Target Length:** {estimated_words_per_chapter} words
 **Writing Style:** {project_obj.writing_style}
 
+**CRITICAL: Response Format Requirements:**
+- Start IMMEDIATELY with the chapter title in HTML format
+- Do NOT include any preamble, explanations, or introductory text
+- Do NOT include phrases like "Here is", "Ecco", "Voici", "Certainly", etc.
+- Do NOT include any text before the chapter title
+- Response must begin directly with: <h2>{chapter_title}</h2>
+
 **Key Requirements:**
 1. Start with: <h2>{chapter_title}</h2>
 2. Write {estimated_words_per_chapter} words of engaging content
@@ -749,7 +756,7 @@ async def generate_chapter(request: ChapterRequest):
 **Style Instructions:**
 {style_instructions}
 
-Write a complete chapter that follows the outline and meets the word count requirement. Focus on creating natural, engaging content with authentic dialogue, distinct character voices, and emotional depth. Make the narrative feel human and relatable, with proper visual structure and formatting."""
+Begin your response immediately with the chapter title. Do not include any explanatory text, preambles, or introductions."""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
