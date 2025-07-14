@@ -11,6 +11,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const BookWriter = () => {
+  const [currentView, setCurrentView] = useState('landing'); // 'landing', 'dashboard', 'writing'
   const [currentStep, setCurrentStep] = useState(1);
   const [projects, setProjects] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
@@ -69,52 +70,22 @@ const BookWriter = () => {
     return styleMap[style] || '📚 Story';
   };
 
-  // Custom styles for better spacing and formatting
-  const editorStyle = {
-    '& .ql-editor': {
-      lineHeight: '1.8',
-      fontSize: '16px',
-      fontFamily: 'Georgia, serif',
-      padding: '20px',
-    },
-    '& .ql-editor h2': {
-      marginTop: '30px',
-      marginBottom: '15px',
-      fontSize: '1.5em',
-      fontWeight: 'bold',
-      color: '#2c3e50',
-    },
-    '& .ql-editor h3': {
-      marginTop: '25px',
-      marginBottom: '12px',
-      fontSize: '1.3em',
-      fontWeight: '600',
-      color: '#34495e',
-    },
-    '& .ql-editor p': {
-      marginBottom: '15px',
-      lineHeight: '1.7',
-    },
-    '& .ql-editor ul, & .ql-editor ol': {
-      marginBottom: '15px',
-      paddingLeft: '25px',
-    },
-    '& .ql-editor li': {
-      marginBottom: '8px',
-      lineHeight: '1.6',
-    }
-  };
-
+  // Load projects on component mount
   useEffect(() => {
-    loadProjects();
-  }, []);
+    if (currentView === 'dashboard') {
+      fetchProjects();
+    }
+  }, [currentView]);
 
-  const loadProjects = async () => {
+  const fetchProjects = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(`${API}/projects`);
       setProjects(response.data);
     } catch (error) {
-      console.error("Error loading projects:", error);
+      console.error('Error fetching projects:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -122,645 +93,676 @@ const BookWriter = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'pages' || name === 'chapters' ? parseInt(value) : value
+      [name]: value
     }));
   };
 
-  const createProject = async () => {
-    if (!formData.title || !formData.description) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
-    setLoading(true);
+  const loadProject = async (projectId) => {
     try {
+      setLoading(true);
+      const response = await axios.get(`${API}/projects/${projectId}`);
+      const project = response.data;
+      setCurrentProject(project);
+      setFormData({
+        title: project.title,
+        description: project.description,
+        pages: project.pages,
+        chapters: project.chapters,
+        language: project.language,
+        writing_style: project.writing_style
+      });
+      setOutline(project.outline || "");
+      setAllChapters(project.chapters_content || {});
+      
+      // Set current chapter to first available chapter, or 1 if none
+      const availableChapters = Object.keys(project.chapters_content || {}).map(Number).sort((a, b) => a - b);
+      if (availableChapters.length > 0) {
+        setCurrentChapter(availableChapters[0]);
+        setChapterContent(project.chapters_content[availableChapters[0].toString()] || "");
+      } else {
+        setCurrentChapter(1);
+        setChapterContent("");
+      }
+      
+      if (project.outline) {
+        setCurrentStep(3);
+      } else {
+        setCurrentStep(2);
+      }
+      
+      setCurrentView('writing');
+    } catch (error) {
+      console.error('Error loading project:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createProject = async () => {
+    try {
+      setLoading(true);
       const response = await axios.post(`${API}/projects`, formData);
       setCurrentProject(response.data);
       setCurrentStep(2);
-      await loadProjects();
+      setCurrentView('writing');
     } catch (error) {
-      console.error("Error creating project:", error);
-      alert("Error creating project");
+      console.error('Error creating project:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const generateOutline = async () => {
-    if (!currentProject) return;
-
-    setLoading(true);
     try {
+      setLoading(true);
       const response = await axios.post(`${API}/generate-outline`, {
         project_id: currentProject.id
       });
-      
-      if (response.data && response.data.outline) {
-        setOutline(response.data.outline);
-        setCurrentStep(3);
-      } else {
-        throw new Error("Invalid response from server");
-      }
-      
+      setOutline(response.data.outline);
+      setCurrentStep(3);
     } catch (error) {
-      console.error("Error generating outline:", error);
-      const errorMessage = error.response?.data?.detail || error.message || "Error generating outline";
-      alert(`Error: ${errorMessage}`);
+      console.error('Error generating outline:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateOutline = async () => {
-    if (!currentProject) return;
-
-    setLoading(true);
+  const generateChapter = async (chapterNum) => {
     try {
-      const response = await axios.put(`${API}/update-outline`, {
+      setLoading(true);
+      const response = await axios.post(`${API}/generate-chapter`, {
         project_id: currentProject.id,
-        outline: outline
+        chapter_number: chapterNum
       });
       
-      if (response.data) {
-        // Update current project
-        setCurrentProject(prev => ({
-          ...prev,
-          outline: outline
-        }));
-        
-        // Move to step 3.5 for batch generation
-        setCurrentStep(3.5);
-      } else {
-        throw new Error("Invalid response from server");
+      const newChapterContent = response.data.chapter_content;
+      setAllChapters(prev => ({
+        ...prev,
+        [chapterNum]: newChapterContent
+      }));
+      
+      if (chapterNum === currentChapter) {
+        setChapterContent(newChapterContent);
       }
       
+      setCurrentStep(4);
     } catch (error) {
-      console.error("Error updating outline:", error);
-      const errorMessage = error.response?.data?.detail || error.message || "Error updating outline";
-      alert(`Error: ${errorMessage}`);
+      console.error('Error generating chapter:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveChapter = async () => {
+    try {
+      setSavingChapter(true);
+      await axios.put(`${API}/update-chapter`, {
+        project_id: currentProject.id,
+        chapter_number: currentChapter,
+        content: chapterContent
+      });
+      
+      setAllChapters(prev => ({
+        ...prev,
+        [currentChapter]: chapterContent
+      }));
+      
+      console.log('Chapter saved successfully');
+    } catch (error) {
+      console.error('Error saving chapter:', error);
+    } finally {
+      setSavingChapter(false);
+    }
+  };
+
+  const exportBook = async (format) => {
+    try {
+      setExportingBook(true);
+      setShowExportDropdown(false);
+      
+      const response = await axios.get(`${API}/export-book-${format}/${currentProject.id}`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${currentProject.title}.${format}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting book:', error);
+    } finally {
+      setExportingBook(false);
     }
   };
 
   const generateAllChapters = async () => {
-    if (!currentProject) return;
-
-    setGeneratingAllChapters(true);
-    setChapterProgress(0);
-    const generatedChapters = {};
-
     try {
+      setGeneratingAllChapters(true);
+      setChapterProgress(0);
+      
       for (let i = 1; i <= currentProject.chapters; i++) {
-        setGeneratingChapterNum(i);
-        const response = await axios.post(`${API}/generate-chapter`, {
-          project_id: currentProject.id,
-          chapter_number: i
-        });
-        
-        generatedChapters[i] = response.data.chapter_content;
-        setChapterProgress(Math.round((i / currentProject.chapters) * 100));
+        if (!allChapters[i]) {
+          setGeneratingChapterNum(i);
+          await generateChapter(i);
+          setChapterProgress(Math.round((i / currentProject.chapters) * 100));
+        }
       }
       
-      setAllChapters(generatedChapters);
       setCurrentStep(4);
-      
-      // Fix Chapter 1 editor bug - ensure Chapter 1 content is loaded immediately
-      setCurrentChapter(1);
-      if (generatedChapters[1]) {
-        setChapterContent(generatedChapters[1]);
-      } else {
-        setChapterContent("");
-      }
-      
     } catch (error) {
-      console.error("Error generating chapters:", error);
-      alert("Error generating chapters");
+      console.error('Error generating all chapters:', error);
     } finally {
       setGeneratingAllChapters(false);
       setGeneratingChapterNum(0);
     }
   };
 
-  const saveChapter = async () => {
-    if (!currentProject || !chapterContent) return;
-
-    setSavingChapter(true);
-    try {
-      const response = await axios.put(`${API}/update-chapter`, {
-        project_id: currentProject.id,
-        chapter_number: currentChapter,
-        content: chapterContent
-      });
-      
-      if (response.data) {
-        // Update local state
-        setAllChapters(prev => ({
-          ...prev,
-          [currentChapter]: chapterContent
-        }));
-        
-        // Update current project
-        setCurrentProject(prev => ({
-          ...prev,
-          chapters_content: {
-            ...prev.chapters_content,
-            [currentChapter]: chapterContent
-          }
-        }));
-        
-        alert("Chapter saved successfully!");
-      } else {
-        throw new Error("Invalid response from server");
-      }
-      
-    } catch (error) {
-      console.error("Error saving chapter:", error);
-      const errorMessage = error.response?.data?.detail || error.message || "Error saving chapter";
-      alert(`Error: ${errorMessage}. Please try again.`);
-    } finally {
-      setSavingChapter(false);
-    }
+  const switchChapter = (chapterNum) => {
+    setCurrentChapter(chapterNum);
+    setChapterContent(allChapters[chapterNum] || "");
   };
 
-  const exportBook = async (format = 'html') => {
-    if (!currentProject) return;
-
-    setExportingBook(true);
-    try {
-      let response;
-      let filename;
+  // Landing Page Component
+  const LandingPage = () => (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-purple-500/10 via-transparent to-blue-500/10"></div>
       
-      if (format === 'pdf') {
-        response = await axios.get(`${API}/export-book-pdf/${currentProject.id}`, {
-          responseType: 'blob'
-        });
-        filename = `${currentProject.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-      } else if (format === 'docx') {
-        response = await axios.get(`${API}/export-book-docx/${currentProject.id}`, {
-          responseType: 'blob'
-        });
-        filename = `${currentProject.title.replace(/[^a-zA-Z0-9]/g, '_')}.docx`;
-      } else {
-        // HTML format
-        response = await axios.get(`${API}/export-book/${currentProject.id}`);
-        if (response.data && response.data.html) {
-          const blob = new Blob([response.data.html], { type: 'text/html' });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = response.data.filename || `${currentProject.title.replace(/[^a-zA-Z0-9]/g, '_')}.html`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-          
-          alert("Book exported successfully!");
-          return;
-        } else {
-          throw new Error("Invalid response from server");
-        }
-      }
+      {/* Floating Elements */}
+      <div className="absolute top-20 left-20 w-32 h-32 bg-purple-500/20 rounded-full blur-xl animate-pulse"></div>
+      <div className="absolute bottom-40 right-20 w-24 h-24 bg-blue-500/20 rounded-full blur-xl animate-pulse delay-1000"></div>
+      <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-cyan-500/20 rounded-full blur-xl animate-pulse delay-2000"></div>
       
-      // Handle blob downloads (PDF and DOCX)
-      if (response.data) {
-        const blob = new Blob([response.data]);
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-        alert(`Book exported successfully as ${format.toUpperCase()}!`);
-      } else {
-        throw new Error("Invalid response from server");
-      }
-      
-    } catch (error) {
-      console.error("Error exporting book:", error);
-      const errorMessage = error.response?.data?.detail || error.message || "Error exporting book";
-      alert(`Error: ${errorMessage}. Please try again.`);
-    } finally {
-      setExportingBook(false);
-    }
-  };
-
-  const generateChapter = async (chapterNum) => {
-    if (!currentProject) return;
-
-    setLoading(true);
-    try {
-      const response = await axios.post(`${API}/generate-chapter`, {
-        project_id: currentProject.id,
-        chapter_number: chapterNum
-      });
-      setChapterContent(response.data.chapter_content);
-      setCurrentChapter(chapterNum);
-    } catch (error) {
-      console.error("Error generating chapter:", error);
-      alert("Error generating chapter");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadProject = async (project) => {
-    setCurrentProject(project);
-    if (project.outline) {
-      setOutline(project.outline);
-      if (project.chapters_content && Object.keys(project.chapters_content).length > 0) {
-        setCurrentStep(4);
-        setAllChapters(project.chapters_content);
-        
-        // Fix Chapter 1 editor bug - ensure Chapter 1 content is loaded immediately
-        const firstChapter = 1;
-        setCurrentChapter(firstChapter);
-        if (project.chapters_content[firstChapter]) {
-          setChapterContent(project.chapters_content[firstChapter]);
-        } else {
-          setChapterContent("");
-        }
-      } else {
-        setCurrentStep(3);
-      }
-    } else {
-      setCurrentStep(2);
-    }
-  };
-
-  const resetProject = () => {
-    setCurrentProject(null);
-    setCurrentStep(1);
-    setFormData({
-      title: "",
-      description: "",
-      pages: 100,
-      chapters: 10,
-      language: "English",
-      writing_style: "story"
-    });
-    setOutline("");
-    setAllChapters({});
-    setGeneratingAllChapters(false);
-    setChapterProgress(0);
-    setCurrentChapter(1);
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-800 mb-4">
-            ✨ AI Book Writer
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Transform your ideas into complete books with AI assistance. 
-            Just describe your vision and let AI help you write chapter by chapter.
-          </p>
-        </div>
-
-        {/* Progress Indicator */}
-        <div className="max-w-4xl mx-auto mb-8">
-          <div className="flex items-center justify-center space-x-4">
-            {[1, 2, 3, 4].map((step) => (
-              <div key={step} className="flex items-center">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                  currentStep >= step ? 'bg-purple-600' : 'bg-gray-300'
-                }`}>
-                  {step}
-                </div>
-                {step < 4 && (
-                  <div className={`w-16 h-1 ${
-                    currentStep > step ? 'bg-purple-600' : 'bg-gray-300'
-                  }`}></div>
-                )}
-              </div>
-            ))}
+      {/* Header */}
+      <nav className="relative z-10 p-6 flex justify-between items-center">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-lg">✍️</span>
           </div>
-          <div className="flex justify-between mt-2 text-sm text-gray-600 max-w-lg mx-auto">
-            <span>Setup</span>
-            <span>Details</span>
-            <span>Outline</span>
-            <span>Writing</span>
-          </div>
+          <h1 className="text-2xl font-bold text-white">AI BookWriter</h1>
         </div>
-
-        {/* Main Content */}
+        <button
+          onClick={() => setCurrentView('dashboard')}
+          className="px-6 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white hover:bg-white/20 transition-all duration-300 hover:scale-105"
+        >
+          Get Started
+        </button>
+      </nav>
+      
+      {/* Hero Section */}
+      <div className="relative z-10 container mx-auto px-6 py-20 text-center">
         <div className="max-w-4xl mx-auto">
+          <div className="inline-block px-4 py-2 bg-purple-500/20 backdrop-blur-sm rounded-full border border-purple-500/30 text-purple-200 text-sm mb-8">
+            🚀 Powered by Advanced AI Technology
+          </div>
           
-          {/* Step 1: Project Selection/Creation */}
-          {currentStep === 1 && (
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h2 className="text-3xl font-bold text-gray-800 mb-6">Start Your Book Journey</h2>
-              
-              {/* Existing Projects - Create separate section */}
-              {projects.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-xl font-semibold text-gray-700 mb-4">📚 Your Books</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {projects.map((project) => (
-                      <div 
-                        key={project.id}
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md cursor-pointer transition-shadow"
-                        onClick={() => loadProject(project)}
-                      >
-                        <h4 className="font-semibold text-gray-800">{project.title}</h4>
-                        <p className="text-gray-600 text-sm mt-1 line-clamp-2">{project.description}</p>
-                        <div className="text-xs text-gray-500 mt-2">
-                          {project.chapters} chapters • {project.pages} pages • {project.language} • {getWritingStyleDisplay(project.writing_style)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="border-t pt-6 mt-6">
-                    <h3 className="text-xl font-semibold text-gray-700 mb-4">✨ Create New Book</h3>
-                  </div>
-                </div>
-              )}
-
-              {/* New Project Form */}
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Book Title *
-                  </label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Enter your book title..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Book Description *
-                  </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows="4"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Describe what your book is about, the main themes, target audience, etc..."
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Target Pages
-                    </label>
-                    <input
-                      type="number"
-                      name="pages"
-                      value={formData.pages}
-                      onChange={handleInputChange}
-                      min="10"
-                      max="1000"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Number of Chapters
-                    </label>
-                    <input
-                      type="number"
-                      name="chapters"
-                      value={formData.chapters}
-                      onChange={handleInputChange}
-                      min="1"
-                      max="50"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Language
-                    </label>
-                    <select
-                      name="language"
-                      value={formData.language}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    >
-                      <option value="English">English</option>
-                      <option value="Spanish">Spanish</option>
-                      <option value="French">French</option>
-                      <option value="German">German</option>
-                      <option value="Italian">Italian</option>
-                      <option value="Portuguese">Portuguese</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Writing Style
-                    </label>
-                    <select
-                      name="writing_style"
-                      value={formData.writing_style}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    >
-                      <option value="story">📚 Story - Fluid narrative, character-driven</option>
-                      <option value="descriptive">📖 Descriptive - Structured, informational</option>
-                      <option value="academic">🎓 Academic - Scholarly, research-based</option>
-                      <option value="technical">⚙️ Technical - Step-by-step, instructional</option>
-                      <option value="biography">👤 Biography - Life story, chronological</option>
-                      <option value="self_help">💪 Self-Help - Motivational, actionable</option>
-                      <option value="children">🧸 Children's - Age-appropriate, engaging</option>
-                      <option value="poetry">🎭 Poetry - Creative, artistic expression</option>
-                      <option value="business">💼 Business - Professional, strategic</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">Writing Style Guide:</h4>
-                  <div className="text-sm text-blue-800 space-y-1">
-                    <p><strong>Story:</strong> Perfect for novels, memoirs, or narrative non-fiction. Creates flowing, immersive content with minimal structural breaks.</p>
-                    <p><strong>Descriptive:</strong> Ideal for educational content, how-to guides, or reference materials. Uses clear sections and structured organization.</p>
-                    <p><strong>Academic:</strong> Best for scholarly works, research papers, or academic publications. Follows formal academic structure and methodology.</p>
-                    <p><strong>Technical:</strong> Perfect for manuals, documentation, or instructional guides. Provides step-by-step procedures and technical details.</p>
-                    <p><strong>Biography:</strong> Ideal for life stories, historical accounts, or personal profiles. Follows chronological or thematic structure.</p>
-                    <p><strong>Self-Help:</strong> Great for motivational books, personal development, or lifestyle guides. Uses encouraging tone with practical advice.</p>
-                    <p><strong>Children's:</strong> Perfect for young readers. Uses age-appropriate language with engaging characters and educational content.</p>
-                    <p><strong>Poetry:</strong> Ideal for creative works, artistic expression, or literary collections. Focuses on imagery and artistic language.</p>
-                    <p><strong>Business:</strong> Best for professional guides, business strategies, or corporate content. Uses authoritative tone with practical insights.</p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={createProject}
-                  disabled={loading}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 px-6 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105 disabled:opacity-50"
-                >
-                  {loading ? "Creating Project..." : "Create Book Project →"}
-                </button>
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+            Write Your
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400"> Dreams</span>
+            <br />
+            Into Reality
+          </h1>
+          
+          <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Transform your ideas into professional books with AI-powered writing assistance. 
+            Generate outlines, create chapters, and export beautiful books in minutes.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <button
+              onClick={() => setCurrentView('dashboard')}
+              className="px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full font-semibold text-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25"
+            >
+              Start Writing Now
+            </button>
+            <button className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white font-semibold text-lg hover:bg-white/20 transition-all duration-300">
+              Watch Demo
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Features Section */}
+      <div className="relative z-10 container mx-auto px-6 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-white mb-4">Powerful Features</h2>
+          <p className="text-gray-300 text-lg">Everything you need to create professional books</p>
+        </div>
+        
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            {
+              icon: "🤖",
+              title: "AI-Powered Writing",
+              description: "Advanced AI generates high-quality content with natural dialogue and compelling narratives."
+            },
+            {
+              icon: "📚",
+              title: "Multiple Styles",
+              description: "Choose from story, academic, business, poetry, and more writing styles to match your vision."
+            },
+            {
+              icon: "🎨",
+              title: "Professional Export",
+              description: "Export your books as beautiful PDF or DOCX files with professional formatting."
+            },
+            {
+              icon: "🌍",
+              title: "Multi-Language",
+              description: "Write in English, Spanish, French, German, Italian, and Portuguese with native fluency."
+            },
+            {
+              icon: "⚡",
+              title: "Fast Generation",
+              description: "Generate complete outlines and chapters in minutes, not hours or days."
+            },
+            {
+              icon: "📖",
+              title: "Rich Editor",
+              description: "Edit and refine your content with a powerful rich text editor and real-time preview."
+            }
+          ].map((feature, index) => (
+            <div
+              key={index}
+              className="group p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-purple-500/50 transition-all duration-300 hover:bg-white/10 transform hover:scale-105"
+            >
+              <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                {feature.icon}
               </div>
+              <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
+              <p className="text-gray-300">{feature.description}</p>
             </div>
-          )}
+          ))}
+        </div>
+      </div>
+      
+      {/* CTA Section */}
+      <div className="relative z-10 container mx-auto px-6 py-20">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="p-8 bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-sm rounded-3xl border border-white/20">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+              Ready to Write Your Masterpiece?
+            </h2>
+            <p className="text-gray-300 text-lg mb-8">
+              Join thousands of writers who have transformed their ideas into professional books.
+            </p>
+            <button
+              onClick={() => setCurrentView('dashboard')}
+              className="px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full font-semibold text-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25"
+            >
+              Start Your Free Book
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/10 py-8">
+        <div className="container mx-auto px-6 text-center text-gray-400">
+          <p>&copy; 2024 AI BookWriter. Powered by advanced AI technology.</p>
+        </div>
+      </footer>
+    </div>
+  );
 
-          {/* Step 2: Generate Outline */}
-          {currentStep === 2 && currentProject && (
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-800">Generate Book Outline</h2>
-                <button
-                  onClick={resetProject}
-                  className="text-gray-500 hover:text-gray-700 text-sm"
-                >
-                  ← Back to Projects
-                </button>
-              </div>
-
-              <div className="bg-gray-50 rounded-lg p-6 mb-6">
-                <h3 className="font-semibold text-gray-800 mb-2">{currentProject.title}</h3>
-                <p className="text-gray-600 mb-4">{currentProject.description}</p>
-                <div className="flex space-x-6 text-sm text-gray-500">
-                  <span>{currentProject.chapters} chapters</span>
-                  <span>{currentProject.pages} pages</span>
-                  <span>{currentProject.language}</span>
-                  <span>{getWritingStyleDisplay(currentProject.writing_style)}</span>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <p className="text-lg text-gray-600 mb-8">
-                  Ready to generate a comprehensive outline for your book? 
-                  This will create chapter titles, summaries, and structure.
-                </p>
-                
-                <button
-                  onClick={generateOutline}
-                  disabled={loading}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 px-8 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105 disabled:opacity-50"
-                >
-                  {loading ? (
-                    <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Generating Outline...
-                    </span>
-                  ) : "✨ Generate Outline with AI"}
-                </button>
-              </div>
+  // Dashboard Component
+  const Dashboard = () => (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Header */}
+      <nav className="bg-black/20 backdrop-blur-sm border-b border-white/10 p-6">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">✍️</span>
             </div>
-          )}
-
-          {/* Step 3: Review/Edit Outline */}
-          {currentStep === 3 && outline && (
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-800">Review Your Outline</h2>
-                <button
-                  onClick={() => setCurrentStep(2)}
-                  className="text-gray-500 hover:text-gray-700 text-sm"
-                >
-                  ← Back
-                </button>
-              </div>
-
-              <p className="text-gray-600 mb-6">
-                Review and edit your AI-generated outline. You can modify it before proceeding to generate all chapters.
-              </p>
-
-              <div className="mb-6">
-                <ReactQuill
-                  value={outline}
-                  onChange={setOutline}
-                  modules={quillModules}
-                  formats={quillFormats}
-                  style={{ height: '400px', marginBottom: '50px' }}
-                  placeholder="Your book outline will appear here..."
+            <h1 className="text-2xl font-bold text-white">AI BookWriter</h1>
+          </div>
+          <button
+            onClick={() => setCurrentView('landing')}
+            className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+          >
+            ← Back to Home
+          </button>
+        </div>
+      </nav>
+      
+      <div className="container mx-auto px-6 py-8">
+        {/* Dashboard Content */}
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-white mb-2">Your Books</h2>
+            <p className="text-gray-300">Create new books or continue working on existing projects</p>
+          </div>
+          
+          {/* Create New Book Section */}
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 mb-8">
+            <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+              <span className="mr-3">✨</span>
+              Create New Book
+            </h3>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-3">
+                  Book Title *
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  placeholder="Enter your book title..."
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                 />
               </div>
-
-              <div className="flex space-x-4 mt-16">
-                <button
-                  onClick={generateOutline}
-                  disabled={loading}
-                  className="px-6 py-3 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors"
-                >
-                  🔄 Regenerate Outline
-                </button>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-3">
+                  Book Description *
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  rows="4"
+                  placeholder="Describe what your book is about..."
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    Target Pages
+                  </label>
+                  <input
+                    type="number"
+                    name="pages"
+                    value={formData.pages}
+                    onChange={handleInputChange}
+                    min="10"
+                    max="1000"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+                  />
+                </div>
                 
-                <button
-                  onClick={updateOutline}
-                  disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50"
-                >
-                  {loading ? "Saving..." : "Save Outline →"}
-                </button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    Number of Chapters
+                  </label>
+                  <input
+                    type="number"
+                    name="chapters"
+                    value={formData.chapters}
+                    onChange={handleInputChange}
+                    min="1"
+                    max="50"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    Language
+                  </label>
+                  <select
+                    name="language"
+                    value={formData.language}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+                  >
+                    <option value="English">English</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="French">French</option>
+                    <option value="German">German</option>
+                    <option value="Italian">Italian</option>
+                    <option value="Portuguese">Portuguese</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    Writing Style
+                  </label>
+                  <select
+                    name="writing_style"
+                    value={formData.writing_style}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+                  >
+                    <option value="story">📚 Story - Fluid narrative, character-driven</option>
+                    <option value="descriptive">📖 Descriptive - Structured, informational</option>
+                    <option value="academic">🎓 Academic - Scholarly, research-based</option>
+                    <option value="technical">⚙️ Technical - Step-by-step, instructional</option>
+                    <option value="biography">👤 Biography - Life story, chronological</option>
+                    <option value="self_help">💪 Self-Help - Motivational, actionable</option>
+                    <option value="children">🧸 Children's - Age-appropriate, engaging</option>
+                    <option value="poetry">🎭 Poetry - Creative, artistic expression</option>
+                    <option value="business">💼 Business - Professional, strategic</option>
+                  </select>
+                </div>
+              </div>
+              
+              <button
+                onClick={createProject}
+                disabled={!formData.title || !formData.description || loading}
+                className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-semibold text-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating Book...
+                  </span>
+                ) : (
+                  "Create Book"
+                )}
+              </button>
+            </div>
+          </div>
+          
+          {/* Existing Books */}
+          {projects.length > 0 && (
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
+              <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+                <span className="mr-3">📚</span>
+                Your Books
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projects.map((project) => (
+                  <div
+                    key={project.id}
+                    className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6 hover:border-purple-500/50 transition-all duration-300 hover:bg-white/10 transform hover:scale-105 cursor-pointer"
+                    onClick={() => loadProject(project.id)}
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="text-2xl">{getWritingStyleDisplay(project.writing_style).split(' ')[0]}</div>
+                      <div className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full">
+                        {project.language}
+                      </div>
+                    </div>
+                    
+                    <h4 className="text-lg font-semibold text-white mb-2 line-clamp-2">
+                      {project.title}
+                    </h4>
+                    
+                    <p className="text-gray-300 text-sm mb-4 line-clamp-3">
+                      {project.description}
+                    </p>
+                    
+                    <div className="flex justify-between items-center text-sm text-gray-400">
+                      <span>{project.chapters} chapters</span>
+                      <span>{project.pages} pages</span>
+                    </div>
+                    
+                    <div className="mt-4 flex justify-between items-center">
+                      <span className="text-xs text-gray-500">
+                        {project.outline ? 'Outline ready' : 'Draft'}
+                      </span>
+                      <button className="px-3 py-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm rounded-full hover:from-purple-600 hover:to-blue-600 transition-all duration-300">
+                        Continue →
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
 
-          {/* Step 3.5: Generate All Chapters */}
-          {currentStep === 3.5 && (
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-800">Ready to Generate Your Book</h2>
+  // Writing Interface Component (existing functionality)
+  const WritingInterface = () => (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Header */}
+      <nav className="bg-black/20 backdrop-blur-sm border-b border-white/10 p-6">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setCurrentView('dashboard')}
+              className="p-2 text-gray-300 hover:text-white transition-colors"
+            >
+              ← Back
+            </button>
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">✍️</span>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">{currentProject?.title}</h1>
+              <p className="text-gray-400 text-sm">{getWritingStyleDisplay(currentProject?.writing_style)}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            {currentStep >= 4 && (
+              <div className="relative">
                 <button
-                  onClick={() => setCurrentStep(3)}
-                  className="text-gray-500 hover:text-gray-700 text-sm"
+                  onClick={() => setShowExportDropdown(!showExportDropdown)}
+                  className="px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105"
                 >
-                  ← Edit Outline
+                  Export Book
                 </button>
-              </div>
-
-              <div className="text-center">
-                <p className="text-lg text-gray-600 mb-8">
-                  Your outline is ready! Now let's generate all {currentProject?.chapters} chapters using AI. 
-                  This process may take a few minutes as we create comprehensive content for each chapter.
-                </p>
-                
-                <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 mb-8">
-                  <h3 className="font-semibold text-gray-800 mb-2">What happens next:</h3>
-                  <ul className="text-gray-600 text-left space-y-2">
-                    <li>• AI will generate all {currentProject?.chapters} chapters based on your outline</li>
-                    <li>• Each chapter will be properly formatted with headings and structure</li>
-                    <li>• You can edit any chapter content after generation</li>
-                    <li>• Estimated time: {currentProject?.chapters ? Math.ceil(currentProject.chapters * 0.5) : 5} minutes</li>
-                  </ul>
-                </div>
-                
-                {/* Progress Bar for Chapter Generation */}
-                {generatingAllChapters && (
-                  <div className="mb-8">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-gray-600">
-                        Generating Chapter {generatingChapterNum} of {currentProject?.chapters}
-                      </span>
-                      <span className="text-sm text-gray-600">{chapterProgress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-green-600 to-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${chapterProgress}%` }}
-                      ></div>
-                    </div>
+                {showExportDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 shadow-xl">
+                    <button
+                      onClick={() => exportBook('pdf')}
+                      className="w-full px-4 py-2 text-left text-white hover:bg-white/20 transition-colors"
+                    >
+                      📄 Export as PDF
+                    </button>
+                    <button
+                      onClick={() => exportBook('docx')}
+                      className="w-full px-4 py-2 text-left text-white hover:bg-white/20 transition-colors"
+                    >
+                      📝 Export as DOCX
+                    </button>
+                    <button
+                      onClick={() => exportBook('html')}
+                      className="w-full px-4 py-2 text-left text-white hover:bg-white/20 transition-colors"
+                    >
+                      🌐 Export as HTML
+                    </button>
                   </div>
                 )}
-                
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+      
+      <div className="container mx-auto px-6 py-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Progress Steps */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              {[
+                { num: 1, label: "Project Setup", active: currentStep >= 1 },
+                { num: 2, label: "Generate Outline", active: currentStep >= 2 },
+                { num: 3, label: "Review Outline", active: currentStep >= 3 },
+                { num: 4, label: "Write Chapters", active: currentStep >= 4 }
+              ].map((step, index) => (
+                <div key={index} className="flex items-center">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                    step.active 
+                      ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white' 
+                      : 'bg-white/10 text-gray-400'
+                  }`}>
+                    {step.num}
+                  </div>
+                  <span className={`ml-2 font-medium ${
+                    step.active ? 'text-white' : 'text-gray-400'
+                  }`}>
+                    {step.label}
+                  </span>
+                  {index < 3 && (
+                    <div className={`w-16 h-0.5 mx-4 ${
+                      step.active ? 'bg-gradient-to-r from-purple-500 to-blue-500' : 'bg-white/10'
+                    }`} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Step Content */}
+          {currentStep === 2 && (
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
+              <h3 className="text-2xl font-bold text-white mb-6">Generate Book Outline</h3>
+              <p className="text-gray-300 mb-6">
+                Create a detailed outline for "{currentProject?.title}" with {currentProject?.chapters} chapters.
+              </p>
+              <button
+                onClick={generateOutline}
+                disabled={loading}
+                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-semibold text-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+              >
+                {loading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Generating Outline...
+                  </span>
+                ) : (
+                  "Generate Outline"
+                )}
+              </button>
+            </div>
+          )}
+          
+          {currentStep === 3 && outline && (
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
+              <h3 className="text-2xl font-bold text-white mb-6">Review Your Outline</h3>
+              <div className="bg-white/5 rounded-xl p-6 mb-6">
+                <div
+                  className="text-gray-300 prose prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: outline }}
+                />
+              </div>
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => setCurrentStep(4)}
+                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105"
+                >
+                  Continue to Writing
+                </button>
                 <button
                   onClick={generateAllChapters}
                   disabled={generatingAllChapters}
-                  className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 px-8 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all transform hover:scale-105 disabled:opacity-50 text-lg"
+                  className="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
                 >
                   {generatingAllChapters ? (
                     <span className="flex items-center">
@@ -768,246 +770,98 @@ const BookWriter = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Generating Chapter {generatingChapterNum} of {currentProject?.chapters}...
+                      Generating All Chapters... ({chapterProgress}%)
                     </span>
-                  ) : "🚀 Generate All Chapters with AI"}
+                  ) : (
+                    "Generate All Chapters"
+                  )}
                 </button>
               </div>
             </div>
           )}
-
-          {/* Step 4: Chapter Writing */}
-          {currentStep === 4 && currentProject && (
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-800">Your Complete Book</h2>
-                <button
-                  onClick={() => setCurrentStep(3.5)}
-                  className="text-gray-500 hover:text-gray-700 text-sm"
-                >
-                  ← Back
-                </button>
-              </div>
-
+          
+          {currentStep === 4 && (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               {/* Chapter Navigation */}
-              <div className="mb-6">
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {Array.from({ length: currentProject.chapters }, (_, i) => i + 1).map((chapterNum) => (
-                    <button
-                      key={chapterNum}
-                      onClick={() => {
-                        setCurrentChapter(chapterNum);
-                        if (allChapters && allChapters[chapterNum]) {
-                          setChapterContent(allChapters[chapterNum]);
-                        } else {
-                          setChapterContent("");
-                        }
-                      }}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                        currentChapter === chapterNum
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      Chapter {chapterNum}
-                      {allChapters && allChapters[chapterNum] && " ✓"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Chapter Content */}
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-semibold text-gray-800">
-                    Chapter {currentChapter}
-                  </h3>
-                  <div className="text-sm text-gray-500">
-                    Progress: {allChapters ? Object.keys(allChapters).length : 0} of {currentProject.chapters} chapters
-                  </div>
-                </div>
-
-                <ReactQuill
-                  value={chapterContent}
-                  onChange={setChapterContent}
-                  modules={quillModules}
-                  formats={quillFormats}
-                  style={{ height: '500px', marginBottom: '50px' }}
-                  placeholder={`Chapter ${currentChapter} content will appear here after generating all chapters.`}
-                />
-              </div>
-
-              {/* Chapter Actions */}
-              <div className="flex justify-between items-center mt-16">
-                <div className="text-sm text-gray-500">
-                  {allChapters && Object.keys(allChapters).length === currentProject.chapters 
-                    ? "All chapters generated! You can edit any chapter above."
-                    : "Generate all chapters first to start editing content."
-                  }
-                </div>
-                
-                <div className="flex space-x-4">
-                  <button
-                    onClick={saveChapter}
-                    disabled={savingChapter || !chapterContent}
-                    className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-                  >
-                    {savingChapter ? (
-                      <span className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Saving...
-                      </span>
-                    ) : "💾 Save Chapter"}
-                  </button>
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowExportDropdown(!showExportDropdown)}
-                      disabled={exportingBook || !allChapters || Object.keys(allChapters).length === 0}
-                      className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
-                    >
-                      {exportingBook ? (
-                        <span className="flex items-center">
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Exporting...
-                        </span>
-                      ) : (
-                        <>
-                          <span>📄 Export Book</span>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                          </svg>
-                        </>
-                      )}
-                    </button>
-                    
-                    {showExportDropdown && !exportingBook && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                        <div className="py-1">
-                          <button
-                            onClick={() => {
-                              exportBook('html');
-                              setShowExportDropdown(false);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                          >
-                            <span>🌐</span>
-                            <span>Export as HTML</span>
-                          </button>
-                          <button
-                            onClick={() => {
-                              exportBook('pdf');
-                              setShowExportDropdown(false);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                          >
-                            <span>📄</span>
-                            <span>Export as PDF</span>
-                          </button>
-                          <button
-                            onClick={() => {
-                              exportBook('docx');
-                              setShowExportDropdown(false);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                          >
-                            <span>📝</span>
-                            <span>Export as DOCX</span>
-                          </button>
+              <div className="lg:col-span-1">
+                <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
+                  <h3 className="text-lg font-bold text-white mb-4">Chapters</h3>
+                  <div className="space-y-2">
+                    {Array.from({ length: currentProject?.chapters }, (_, i) => i + 1).map((chapterNum) => (
+                      <button
+                        key={chapterNum}
+                        onClick={() => switchChapter(chapterNum)}
+                        className={`w-full text-left p-3 rounded-lg transition-all duration-300 ${
+                          currentChapter === chapterNum
+                            ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                            : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>Chapter {chapterNum}</span>
+                          {allChapters[chapterNum] && (
+                            <span className="text-green-400 text-sm">✓</span>
+                          )}
                         </div>
-                      </div>
-                    )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Chapter Editor */}
+              <div className="lg:col-span-3">
+                <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-white">Chapter {currentChapter}</h3>
+                    <div className="flex space-x-2">
+                      {!allChapters[currentChapter] && (
+                        <button
+                          onClick={() => generateChapter(currentChapter)}
+                          disabled={loading}
+                          className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+                        >
+                          {loading ? "Generating..." : "Generate Chapter"}
+                        </button>
+                      )}
+                      <button
+                        onClick={saveChapter}
+                        disabled={savingChapter}
+                        className="px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+                      >
+                        {savingChapter ? "Saving..." : "Save Chapter"}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white/5 rounded-xl">
+                    <ReactQuill
+                      value={chapterContent}
+                      onChange={setChapterContent}
+                      modules={quillModules}
+                      formats={quillFormats}
+                      className="text-white"
+                      theme="snow"
+                      style={{ height: '500px' }}
+                    />
                   </div>
                 </div>
               </div>
             </div>
           )}
-
-          {/* Loading Overlay - Enhanced */}
-          {loading && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-8 text-center max-w-md mx-4 shadow-2xl">
-                <div className="relative">
-                  <svg className="animate-spin mx-auto h-12 w-12 text-purple-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <div className="w-2 h-2 bg-purple-600 rounded-full animate-pulse"></div>
-                  </div>
-                </div>
-                <p className="text-lg font-medium text-gray-800 mb-2">✨ AI is working on your request...</p>
-                <p className="text-sm text-gray-600 mb-4">
-                  {currentStep === 2 ? "Generating your book outline..." : 
-                   currentStep === 3 ? "Saving your outline..." : 
-                   "Processing your request..."}
-                </p>
-                <div className="mt-4 text-xs text-gray-500">
-                  <div className="flex items-center justify-center">
-                    <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce mr-1"></div>
-                    <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce mr-1" style={{animationDelay: '0.1s'}}></div>
-                    <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                  </div>
-                  <p className="mt-2">This may take a few moments</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Chapter Generation Loading - Enhanced */}
-          {generatingAllChapters && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-8 text-center max-w-md mx-4 shadow-2xl">
-                <div className="relative mb-4">
-                  <svg className="animate-spin mx-auto h-16 w-16 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <div className="w-3 h-3 bg-green-600 rounded-full animate-pulse"></div>
-                  </div>
-                </div>
-                <p className="text-xl font-bold text-gray-800 mb-2">🚀 Generating Your Complete Book</p>
-                <p className="text-sm text-gray-600 mb-4">
-                  AI is writing all {currentProject?.chapters} chapters based on your outline
-                </p>
-                <div className="bg-gray-200 rounded-full h-3 mb-4">
-                  <div 
-                    className="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full transition-all duration-1000 ease-out"
-                    style={{ width: `${Math.min(100, chapterProgress)}%` }}
-                  ></div>
-                </div>
-                <div className="text-xs text-gray-500">
-                  <div className="flex items-center justify-center mb-2">
-                    <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce mr-1"></div>
-                    <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce mr-1" style={{animationDelay: '0.1s'}}></div>
-                    <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce mr-1" style={{animationDelay: '0.2s'}}></div>
-                    <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
-                  </div>
-                  <p>This may take several minutes. Please be patient while we create your book!</p>
-                  <p className="mt-2 text-gray-400">💡 Tip: Keep this tab open to ensure completion</p>
-                </div>
-              </div>
-            </div>
-          )}
-
         </div>
       </div>
     </div>
   );
-};
 
-function App() {
+  // Main render
   return (
     <div className="App">
-      <BookWriter />
+      {currentView === 'landing' && <LandingPage />}
+      {currentView === 'dashboard' && <Dashboard />}
+      {currentView === 'writing' && <WritingInterface />}
     </div>
   );
-}
+};
 
-export default App;
+export default BookWriter;
