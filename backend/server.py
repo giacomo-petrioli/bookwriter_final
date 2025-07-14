@@ -370,6 +370,46 @@ def extract_chapter_titles(outline: str) -> dict:
                 chapter_titles[chapter_num] = chapter_title
     
     return chapter_titles
+
+def generate_table_of_contents(project_obj: BookProject) -> str:
+    """Generate a table of contents with chapter titles and page numbers"""
+    toc_html = '<div class="table-of-contents">\n<h2>📚 Table of Contents</h2>\n<div class="toc-entries">\n'
+    
+    # Extract chapter titles from outline
+    chapter_titles = extract_chapter_titles(project_obj.outline or "")
+    
+    # Calculate approximate page numbers (assuming 275 words per page)
+    current_page = 1
+    words_per_page = 275
+    
+    for i in range(1, project_obj.chapters + 1):
+        # Get chapter title
+        chapter_title = chapter_titles.get(i, f"Chapter {i}")
+        
+        # Calculate page number for this chapter
+        page_number = current_page
+        
+        # Add TOC entry
+        toc_html += f'<div class="toc-entry">\n'
+        toc_html += f'  <span class="toc-chapter">Chapter {i}: {chapter_title}</span>\n'
+        toc_html += f'  <span class="toc-dots">{"." * 50}</span>\n'
+        toc_html += f'  <span class="toc-page">{page_number}</span>\n'
+        toc_html += f'</div>\n'
+        
+        # Calculate next chapter's starting page
+        if project_obj.chapters_content and str(i) in project_obj.chapters_content:
+            chapter_content = project_obj.chapters_content[str(i)]
+            # Count words in chapter (rough estimate)
+            word_count = len(chapter_content.split())
+            pages_in_chapter = max(1, word_count // words_per_page)
+            current_page += pages_in_chapter
+        else:
+            # Default pages per chapter if content not available
+            estimated_pages = max(1, (project_obj.pages // project_obj.chapters))
+            current_page += estimated_pages
+    
+    toc_html += '</div>\n</div>'
+    return toc_html
 @api_router.get("/")
 async def root():
     return {"message": "AI Book Writer API"}
