@@ -1085,7 +1085,7 @@ async def export_book_pdf(project_id: str):
 
 @api_router.get("/export-book-docx/{project_id}")
 async def export_book_docx(project_id: str):
-    """Export book as DOCX with proper formatting"""
+    """Export book as DOCX with table of contents only"""
     try:
         project = await db.book_projects.find_one({"id": project_id})
         if not project:
@@ -1100,28 +1100,47 @@ async def export_book_docx(project_id: str):
         title = doc.add_heading(project_obj.title, level=1)
         title.alignment = 1  # Center alignment
         
-        doc.add_paragraph(f"Description: {project_obj.description}")
-        doc.add_paragraph(f"Language: {project_obj.language}")
-        doc.add_paragraph(f"Writing Style: {project_obj.writing_style.title()}")
-        doc.add_paragraph(f"Chapters: {project_obj.chapters}")
-        doc.add_paragraph(f"Target Pages: {project_obj.pages}")
         doc.add_paragraph(f"Generated On: {datetime.now().strftime('%B %d, %Y')}")
-        
-        # Page break
         doc.add_page_break()
         
-        # Outline
-        if project_obj.outline:
-            doc.add_heading("📖 Book Outline", level=2)
-            # Convert HTML to plain text for DOCX
-            outline_text = re.sub(r'<[^>]+>', '', project_obj.outline)
-            outline_text = unescape(outline_text)
-            doc.add_paragraph(outline_text)
-            doc.add_page_break()
+        # Table of Contents
+        toc_heading = doc.add_heading("📚 Table of Contents", level=1)
+        toc_heading.alignment = 1  # Center alignment
+        
+        # Extract chapter titles and create TOC
+        chapter_titles = extract_chapter_titles(project_obj.outline or "")
+        current_page = 3  # Start after title and TOC pages
+        words_per_page = 275
+        
+        for i in range(1, project_obj.chapters + 1):
+            chapter_title = chapter_titles.get(i, f"Chapter {i}")
+            
+            # Create TOC entry
+            toc_paragraph = doc.add_paragraph()
+            toc_paragraph.add_run(f"Chapter {i}: {chapter_title}")
+            
+            # Add dots
+            dots_run = toc_paragraph.add_run("." * (80 - len(f"Chapter {i}: {chapter_title}") - len(str(current_page))))
+            dots_run.font.color.rgb = RGBColor(189, 195, 199)  # Light gray
+            
+            # Add page number
+            page_run = toc_paragraph.add_run(str(current_page))
+            page_run.bold = True
+            page_run.font.color.rgb = RGBColor(52, 152, 219)  # Blue
+            
+            # Calculate next chapter's page
+            if project_obj.chapters_content and str(i) in project_obj.chapters_content:
+                chapter_content = project_obj.chapters_content[str(i)]
+                word_count = len(re.sub(r'<[^>]+>', '', chapter_content).split())
+                pages_in_chapter = max(1, word_count // words_per_page)
+                current_page += pages_in_chapter
+            else:
+                estimated_pages = max(1, (project_obj.pages // project_obj.chapters))
+                current_page += estimated_pages
+        
+        doc.add_page_break()
         
         # Chapters
-        doc.add_heading("📚 Chapters", level=2)
-        
         if project_obj.chapters_content:
             for i in range(1, project_obj.chapters + 1):
                 chapter_content = project_obj.chapters_content.get(str(i), "")
@@ -1129,11 +1148,21 @@ async def export_book_docx(project_id: str):
                     # Convert HTML to plain text for DOCX
                     chapter_text = re.sub(r'<[^>]+>', '', chapter_content)
                     chapter_text = unescape(chapter_text)
-                    doc.add_paragraph(chapter_text)
+                    
+                    # Split into paragraphs
+                    paragraphs = chapter_text.split('\n\n')
+                    for paragraph in paragraphs:
+                        if paragraph.strip():
+                            if paragraph.strip().startswith('Chapter'):
+                                doc.add_heading(paragraph.strip(), level=2)
+                            else:
+                                doc.add_paragraph(paragraph.strip())
                 else:
-                    doc.add_heading(f"Chapter {i}", level=3)
+                    doc.add_heading(f"Chapter {i}", level=2)
                     doc.add_paragraph("This chapter has not been generated yet.")
-                doc.add_page_break()
+                
+                if i < project_obj.chapters:  # Don't add page break after last chapter
+                    doc.add_page_break()
         
         # Save to buffer
         buffer = io.BytesIO()
@@ -1147,7 +1176,7 @@ async def export_book_docx(project_id: str):
             safe_filename = f"book_{project_obj.id}"
         
         return StreamingResponse(
-            io.BytesIO(buffer.getvalue()),
+            buffer,
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             headers={"Content-Disposition": f"attachment; filename={safe_filename}.docx"}
         )
