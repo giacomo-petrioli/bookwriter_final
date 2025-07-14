@@ -596,7 +596,7 @@ async def generate_chapter(request: ChapterRequest):
             api_key=os.environ.get('GEMINI_API_KEY'),
             session_id=f"chapter_{project_obj.id}_{request.chapter_number}",
             system_message="You are an expert book writer. You write engaging, well-structured chapters based on outlines. Use HTML formatting for headings, bold text, and structure. Always start each chapter with its proper title."
-        ).with_model("gemini", "gemini-2.0-flash-lite")
+        ).with_model("gemini", "gemini-2.5-flash-lite-preview-06-17")
         
         # Calculate estimated words per chapter (275 words per page)
         estimated_words_per_chapter = (project_obj.pages * 275) // project_obj.chapters
