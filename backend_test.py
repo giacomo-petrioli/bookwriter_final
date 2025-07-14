@@ -2165,42 +2165,51 @@ As we stand at this technological crossroads, understanding the implications of 
             ("DOCX Export", self.test_docx_export)
         ]
         
+        passed = 0
+        total = len(tests)
+        
         for test_name, test_func in tests:
-            self.log(f"\n--- Running {test_name} ---")
+            self.log(f"\n{'='*60}")
+            self.log(f"RUNNING: {test_name}")
+            self.log(f"{'='*60}")
+            
             try:
                 result = test_func()
                 test_results[test_name] = result
                 if result:
-                    self.log(f"✅ {test_name} PASSED")
+                    passed += 1
+                    self.log(f"✅ {test_name}: PASSED")
                 else:
-                    self.log(f"❌ {test_name} FAILED")
+                    self.log(f"❌ {test_name}: FAILED")
             except Exception as e:
-                self.log(f"❌ {test_name} FAILED with exception: {str(e)}", "ERROR")
+                self.log(f"❌ {test_name}: FAILED with exception: {str(e)}", "ERROR")
                 test_results[test_name] = False
             
             # Small delay between tests
             time.sleep(1)
         
-        # Summary
-        self.log("\n" + "=" * 60)
-        self.log("TEST SUMMARY")
-        self.log("=" * 60)
-        
-        passed = sum(1 for result in test_results.values() if result)
-        total = len(test_results)
+        # Final summary
+        self.log(f"\n{'='*80}")
+        self.log("FINAL TEST RESULTS SUMMARY")
+        self.log(f"{'='*80}")
         
         for test_name, result in test_results.items():
-            status = "✅ PASS" if result else "❌ FAIL"
+            status = "✅ PASSED" if result else "❌ FAILED"
             self.log(f"{test_name}: {status}")
         
-        self.log(f"\nOverall: {passed}/{total} tests passed")
+        self.log(f"\n{'='*80}")
+        self.log(f"OVERALL RESULTS: {passed}/{total} tests passed ({(passed/total)*100:.1f}%)")
         
         if passed == total:
-            self.log("🎉 All tests passed! Backend API is working correctly.")
-            return True
+            self.log("🎉 ALL TESTS PASSED! Backend is working perfectly.")
+        elif passed >= total * 0.8:
+            self.log("⚠️ Most tests passed. Minor issues detected.")
         else:
-            self.log(f"⚠️ {total - passed} test(s) failed. Backend needs attention.")
-            return False
+            self.log("❌ Multiple test failures detected. Backend needs attention.")
+        
+        self.log(f"{'='*80}")
+        
+        return passed, total, test_results
 
 def main():
     tester = BookWriterAPITester()
