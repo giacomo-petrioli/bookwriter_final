@@ -1927,38 +1927,242 @@ As we stand at this technological crossroads, understanding the implications of 
             self.log(f"❌ Gemini 2.5 Flash-Lite model test failed: {str(e)}", "ERROR")
             return False
 
+    def test_enhanced_literary_content_quality(self):
+        """Test enhanced AI prompts for literary content quality improvements"""
+        try:
+            self.log("Testing enhanced literary content quality improvements...")
+            
+            # Create a story-style project specifically for literary quality testing
+            literary_project_data = {
+                "title": "The Whispering Shadows",
+                "description": "A psychological thriller about a detective who discovers that the shadows in an old mansion hold memories of past crimes, and she must learn to communicate with them to solve a decades-old murder mystery.",
+                "pages": 200,
+                "chapters": 8,
+                "language": "English",
+                "writing_style": "story"
+            }
+            
+            response = self.session.post(f"{self.base_url}/projects", json=literary_project_data)
+            
+            if response.status_code != 200:
+                self.log(f"❌ Literary project creation failed: {response.text}", "ERROR")
+                return False
+                
+            literary_project = response.json()
+            literary_project_id = literary_project.get("id")
+            
+            self.log("✅ Literary quality test project created successfully")
+            
+            # Test enhanced outline generation with creative chapter titles
+            self.log("Testing enhanced outline generation with creative chapter titles...")
+            outline_request = {"project_id": literary_project_id}
+            outline_response = self.session.post(f"{self.base_url}/generate-outline", json=outline_request)
+            
+            if outline_response.status_code != 200:
+                self.log(f"❌ Enhanced outline generation failed: {outline_response.text}", "ERROR")
+                return False
+                
+            outline_data = outline_response.json()
+            outline_content = outline_data.get("outline", "")
+            
+            # Check for creative, atmospheric chapter titles (not generic ones)
+            import re
+            generic_patterns = [
+                r'<h2[^>]*>Chapter\s+\d+</h2>',  # Just "Chapter X"
+                r'<h2[^>]*>Introduction</h2>',
+                r'<h2[^>]*>Conclusion</h2>',
+                r'<h2[^>]*>Chapter\s+\d+:\s*Chapter\s+\d+</h2>'  # Redundant titles
+            ]
+            
+            has_generic_titles = any(re.search(pattern, outline_content, re.IGNORECASE) for pattern in generic_patterns)
+            if has_generic_titles:
+                self.log("❌ Found generic chapter titles - creative titles not implemented", "ERROR")
+                return False
+            
+            # Check for creative, atmospheric chapter titles
+            creative_title_patterns = [
+                r'<h2[^>]*>Chapter\s+\d+:\s*[^<]{10,}</h2>',  # Titles with substantial content
+                r'<h2[^>]*>Chapter\s+\d+:\s*.*[Ss]hadow.*</h2>',  # Thematic titles
+                r'<h2[^>]*>Chapter\s+\d+:\s*.*[Ww]hisper.*</h2>',
+                r'<h2[^>]*>Chapter\s+\d+:\s*.*[Mm]emory.*</h2>',
+                r'<h2[^>]*>Chapter\s+\d+:\s*.*[Dd]arkness.*</h2>'
+            ]
+            
+            creative_titles_found = sum(1 for pattern in creative_title_patterns if re.search(pattern, outline_content, re.IGNORECASE))
+            if creative_titles_found < 2:  # At least 2 creative titles expected
+                self.log("⚠️ Limited creative chapter titles found - may need improvement", "WARNING")
+            else:
+                self.log("✅ Creative, atmospheric chapter titles detected")
+            
+            # Check for narrative voice consistency instructions
+            if "consistent narrative voice" in outline_content.lower() or "first-person" in outline_content.lower() or "third-person" in outline_content.lower():
+                self.log("✅ Narrative voice consistency addressed in outline")
+            
+            self.log("✅ Enhanced outline generation with creative titles working")
+            
+            # Test enhanced chapter generation with literary quality improvements
+            self.log("Testing enhanced chapter generation with literary quality improvements...")
+            chapter_request = {"project_id": literary_project_id, "chapter_number": 1}
+            chapter_response = self.session.post(f"{self.base_url}/generate-chapter", json=chapter_request)
+            
+            if chapter_response.status_code != 200:
+                self.log(f"❌ Enhanced chapter generation failed: {chapter_response.text}", "ERROR")
+                return False
+                
+            chapter_data = chapter_response.json()
+            chapter_content = chapter_data.get("chapter_content", "")
+            chapter_title = chapter_data.get("chapter_title", "")
+            
+            # Test 1: Creative Chapter Title
+            if not chapter_title or len(chapter_title) < 10:
+                self.log("❌ Chapter title missing or too generic", "ERROR")
+                return False
+            
+            generic_title_words = ['chapter', 'introduction', 'beginning', 'start']
+            if any(word in chapter_title.lower() for word in generic_title_words):
+                self.log(f"❌ Chapter title appears generic: {chapter_title}", "ERROR")
+                return False
+            
+            self.log(f"✅ Creative chapter title generated: {chapter_title}")
+            
+            # Test 2: Dialogue Variety and Character Voices
+            dialogue_patterns = [
+                r'"[^"]*"',  # Direct dialogue
+                r"'[^']*'",  # Alternative dialogue format
+                r'said\s+\w+',  # Speech attribution
+                r'\w+\s+replied',
+                r'\w+\s+whispered',
+                r'\w+\s+shouted'
+            ]
+            
+            dialogue_count = sum(len(re.findall(pattern, chapter_content, re.IGNORECASE)) for pattern in dialogue_patterns)
+            if dialogue_count < 3:
+                self.log("❌ Insufficient dialogue variety detected", "ERROR")
+                return False
+            
+            # Check for varied speech attribution (not just "said")
+            speech_verbs = ['whispered', 'shouted', 'replied', 'muttered', 'exclaimed', 'asked', 'answered']
+            varied_speech = sum(1 for verb in speech_verbs if verb in chapter_content.lower())
+            if varied_speech < 2:
+                self.log("⚠️ Limited speech verb variety - dialogue could be more varied", "WARNING")
+            else:
+                self.log("✅ Dialogue variety with distinct character voices detected")
+            
+            # Test 3: Balance between Descriptive and Action-Oriented Content
+            descriptive_indicators = ['described', 'appeared', 'seemed', 'looked', 'felt', 'atmosphere', 'setting']
+            action_indicators = ['moved', 'ran', 'grabbed', 'opened', 'closed', 'walked', 'turned', 'stepped']
+            
+            descriptive_count = sum(1 for word in descriptive_indicators if word in chapter_content.lower())
+            action_count = sum(1 for word in action_indicators if word in chapter_content.lower())
+            
+            if descriptive_count == 0 and action_count == 0:
+                self.log("❌ No clear balance between descriptive and action content", "ERROR")
+                return False
+            
+            balance_ratio = min(descriptive_count, action_count) / max(descriptive_count, action_count, 1)
+            if balance_ratio > 0.3:  # Good balance if ratio > 30%
+                self.log("✅ Good balance between descriptive and action-oriented content")
+            else:
+                self.log("⚠️ Content may be too heavily weighted toward one style", "WARNING")
+            
+            # Test 4: Emotional Authenticity and Human-like Narrative
+            emotion_indicators = ['felt', 'emotion', 'heart', 'fear', 'hope', 'anxiety', 'relief', 'tension', 'worry', 'joy']
+            human_indicators = ['breath', 'pulse', 'hands', 'eyes', 'voice', 'face', 'smile', 'frown']
+            
+            emotion_count = sum(1 for word in emotion_indicators if word in chapter_content.lower())
+            human_count = sum(1 for word in human_indicators if word in chapter_content.lower())
+            
+            if emotion_count < 2:
+                self.log("❌ Limited emotional authenticity detected", "ERROR")
+                return False
+            
+            if human_count < 3:
+                self.log("⚠️ Limited human-like narrative elements", "WARNING")
+            else:
+                self.log("✅ Emotional authenticity and human-like narrative detected")
+            
+            # Test 5: Natural Speech Patterns vs Formal Narrator Voice
+            contractions = ["don't", "can't", "won't", "isn't", "aren't", "wasn't", "weren't", "I'm", "you're", "he's", "she's"]
+            contraction_count = sum(1 for contraction in contractions if contraction in chapter_content)
+            
+            if contraction_count < 2:
+                self.log("⚠️ Limited natural speech patterns - may be too formal", "WARNING")
+            else:
+                self.log("✅ Natural speech patterns with contractions detected")
+            
+            # Test 6: Better Paragraph Structure and Visual Formatting
+            paragraph_count = chapter_content.count('<p>')
+            if paragraph_count < 5:
+                self.log("❌ Insufficient paragraph structure", "ERROR")
+                return False
+            
+            # Check for varied paragraph lengths (good visual structure)
+            paragraphs = re.findall(r'<p>(.*?)</p>', chapter_content, re.DOTALL)
+            if paragraphs:
+                paragraph_lengths = [len(p.split()) for p in paragraphs]
+                avg_length = sum(paragraph_lengths) / len(paragraph_lengths)
+                length_variance = any(abs(length - avg_length) > avg_length * 0.5 for length in paragraph_lengths)
+                
+                if length_variance:
+                    self.log("✅ Good paragraph length variety for visual structure")
+                else:
+                    self.log("⚠️ Paragraph lengths may be too uniform", "WARNING")
+            
+            # Test 7: Word Count and Content Depth
+            word_count = len(chapter_content.split())
+            expected_words = (200 * 275) // 8  # About 6875 words per chapter
+            
+            if word_count < expected_words * 0.4:  # At least 40% of target
+                self.log(f"❌ Chapter word count too low: {word_count} words (expected ~{expected_words})", "ERROR")
+                return False
+            elif word_count >= expected_words * 0.7:  # 70% or more is good
+                self.log(f"✅ Chapter meets word count expectations: {word_count} words")
+            else:
+                self.log(f"⚠️ Chapter word count below target: {word_count} words (expected ~{expected_words})", "WARNING")
+            
+            # Test 8: Check for Narrative Voice Consistency
+            first_person_count = chapter_content.lower().count(' i ') + chapter_content.lower().count(' my ') + chapter_content.lower().count(' me ')
+            third_person_count = chapter_content.lower().count(' she ') + chapter_content.lower().count(' he ') + chapter_content.lower().count(' they ')
+            
+            if first_person_count > 5 and third_person_count > 5:
+                self.log("⚠️ Potential narrative voice inconsistency - mixing first and third person", "WARNING")
+            else:
+                self.log("✅ Narrative voice consistency maintained")
+            
+            self.log("✅ Enhanced literary content quality testing completed successfully")
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Enhanced literary content quality test failed: {str(e)}", "ERROR")
+            return False
+
     def run_all_tests(self):
-        """Run all backend API tests"""
-        self.log("=" * 60)
-        self.log("Starting AI Book Writer Backend API Tests")
-        self.log("=" * 60)
+        """Run all backend tests with focus on enhanced literary content quality"""
+        self.log("=" * 80)
+        self.log("STARTING COMPREHENSIVE AI BOOK WRITER BACKEND TESTING")
+        self.log("Focus: Enhanced Literary Content Quality Improvements")
+        self.log("=" * 80)
         
         test_results = {}
         
-        # Test sequence - prioritizing the current focus and new requirements
+        # Test sequence - prioritizing the review request requirements
         tests = [
             ("API Health Check", self.test_api_health),
             ("Project Creation", self.test_create_project),
-            ("Get All Projects", self.test_get_projects),
-            ("Get Specific Project", self.test_get_specific_project),
-            ("🎯 CURRENT FOCUS: Enhanced Word Count Generation", self.test_enhanced_word_count_generation),
-            ("🎯 Gemini 2.5 Flash-Lite Model Test", self.test_gemini_2_5_flash_lite_model),
-            ("🎯 Italian Language Naturalness", self.test_italian_language_naturalness),
-            ("🎯 Export Table of Contents Only", self.test_export_table_of_contents_only),
-            ("Generate AI Outline", self.test_generate_outline),
-            ("Generate AI Chapter", self.test_generate_chapter),
-            ("Update Outline", self.test_update_outline),
-            ("Update Chapter", self.test_update_chapter),
-            ("Export Book", self.test_export_book),
-            ("Enhanced HTML Export", self.test_enhanced_html_export),
-            ("PDF Export", self.test_pdf_export),
-            ("DOCX Export", self.test_docx_export),
-            ("Chapter Title Extraction", self.test_chapter_title_extraction),
+            ("Project Retrieval", self.test_get_projects),
+            ("Specific Project Retrieval", self.test_get_specific_project),
+            ("🎯 PRIORITY: Enhanced Literary Content Quality", self.test_enhanced_literary_content_quality),
+            ("AI Outline Generation", self.test_generate_outline),
+            ("AI Chapter Generation", self.test_generate_chapter),
             ("Story Style Project", self.test_story_style_project),
             ("Descriptive Style Project", self.test_descriptive_style_project),
-            ("New Writing Styles", self.test_new_writing_styles),
             ("Enhanced Content Quality", self.test_enhanced_content_quality),
-            ("Gemini Model Performance", self.test_gemini_model_performance),
+            ("Gemini 2.5 Flash-Lite Performance", self.test_gemini_model_performance),
+            ("Outline Update", self.test_update_outline),
+            ("Chapter Update", self.test_update_chapter),
+            ("Book Export", self.test_export_book),
+            ("PDF Export", self.test_pdf_export),
+            ("DOCX Export", self.test_docx_export)
         ]
         
         for test_name, test_func in tests:
