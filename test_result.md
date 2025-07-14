@@ -267,9 +267,9 @@ backend:
         agent: "main"
         comment: "Fixed Chapter 1 editor bug where content appeared empty initially. Updated loadProject and generateAllChapters functions to ensure Chapter 1 content is loaded immediately when reaching Step 4. No longer need to switch to another chapter and back to view Chapter 1 content."
 
-  - task: "Enhanced AI prompts for literary content quality"
+  - task: "Enhanced AI response cleanup and formatting"
     implemented: true
-    working: "needs_improvement"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
@@ -277,7 +277,19 @@ backend:
     status_history:
       - working: true
         agent: "main"
-        comment: "Significantly enhanced AI prompts for outline and chapter generation to address literary quality issues. Improved dialogue variety with character-specific voices, better balance between descriptive and action-oriented content, enhanced emotional authenticity, better paragraph structure and visual formatting, and creative chapter titles. Updated story and descriptive writing style instructions with specific guidelines for natural dialogue, character development, and narrative flow. Generated test content shows substantial improvement in literary quality."
+        comment: "Completely enhanced AI response cleanup function to remove unwanted preamble text in multiple languages (Italian, English, French, Spanish, German). Added pattern matching for common AI response patterns like 'Ecco', 'Here is', 'Certainly', etc. Fixed chapter title formatting bugs and duplicate title issues. Enhanced AI prompts with explicit instructions to not include preamble text. Tested successfully with Italian content - no preamble text appears in generated outlines or chapters."
+
+  - task: "Professional PDF and DOCX export formatting"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Completely redesigned PDF and DOCX export functions to look professional and book-like. PDF improvements: Enhanced typography with Helvetica for headings and Times-Roman for body text, better spacing and margins, professional title page layout, improved table of contents formatting, separate styles for dialogue and body text, proper chapter formatting with centered titles. DOCX improvements: Added professional book styles with Garamond and Times New Roman fonts, better paragraph formatting, justified text with proper indentation, enhanced visual hierarchy, improved dialogue formatting. Both exports now look like real published books rather than simple documents."
       - working: "needs_improvement"
         agent: "testing"
         comment: "COMPREHENSIVE TESTING COMPLETED: Enhanced literary content quality partially working but needs refinement. ✅ EXCELLENT: Creative chapter titles working ('The Manor's Breath' generated instead of generic titles). ✅ EXCELLENT: Dialogue variety with distinct character voices detected. ✅ EXCELLENT: Good balance between descriptive and action-oriented content. ✅ EXCELLENT: Emotional authenticity and human-like narrative detected. ✅ EXCELLENT: Narrative voice consistency maintained. ⚠️ MINOR: Limited natural speech patterns - may be too formal (needs more contractions). ❌ CRITICAL: Insufficient paragraph structure (less than 5 <p> tags detected). Need to enhance prompts to generate more paragraph breaks for better visual formatting."
