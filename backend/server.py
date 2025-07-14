@@ -463,7 +463,7 @@ async def generate_outline(request: OutlineRequest):
             api_key=os.environ.get('GEMINI_API_KEY'),
             session_id=f"outline_{project_obj.id}",
             system_message="You are an expert book writing assistant. You create detailed, well-structured book outlines that serve as comprehensive guides for content generation."
-        ).with_model("gemini", "gemini-2.0-flash-lite")
+        ).with_model("gemini", "gemini-2.5-flash-lite-preview-06-17")
         
         # Enhanced style-specific instructions based on writing style
         if project_obj.writing_style == "story":
