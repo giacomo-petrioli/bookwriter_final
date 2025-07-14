@@ -1530,6 +1530,403 @@ As we stand at this technological crossroads, understanding the implications of 
             self.log(f"❌ Focused outline generation test failed: {str(e)}", "ERROR")
             return False
 
+    def test_italian_language_naturalness(self):
+        """Test Italian language content generation for naturalness"""
+        try:
+            self.log("Testing Italian language content generation for naturalness...")
+            
+            # Create Italian project
+            italian_project_data = {
+                "title": "L'Arte della Cucina Italiana",
+                "description": "Una guida completa alla cucina italiana tradizionale, dalle ricette regionali alle tecniche culinarie moderne.",
+                "pages": 200,
+                "chapters": 8,
+                "language": "Italian",
+                "writing_style": "descriptive"
+            }
+            
+            response = self.session.post(f"{self.base_url}/projects", json=italian_project_data)
+            
+            if response.status_code != 200:
+                self.log(f"❌ Italian project creation failed: {response.text}", "ERROR")
+                return False
+                
+            italian_project = response.json()
+            italian_project_id = italian_project.get("id")
+            
+            self.log("✅ Italian project created successfully")
+            
+            # Generate Italian outline
+            outline_request = {"project_id": italian_project_id}
+            outline_response = self.session.post(f"{self.base_url}/generate-outline", json=outline_request)
+            
+            if outline_response.status_code != 200:
+                self.log(f"❌ Italian outline generation failed: {outline_response.text}", "ERROR")
+                return False
+                
+            outline_data = outline_response.json()
+            italian_outline = outline_data.get("outline", "")
+            
+            # Check for Italian language characteristics
+            italian_keywords = ['capitolo', 'cucina', 'ricetta', 'tradizionale', 'italiana', 'ingredienti']
+            found_italian = any(keyword in italian_outline.lower() for keyword in italian_keywords)
+            
+            if not found_italian:
+                self.log("❌ Italian outline doesn't contain expected Italian keywords", "ERROR")
+                return False
+            else:
+                self.log("✅ Italian outline contains appropriate Italian vocabulary")
+            
+            # Check for natural Italian phrasing (avoid literal translations)
+            unnatural_phrases = ['è importante che', 'al fine di', 'in modo da']  # Common literal translation patterns
+            natural_phrases = ['bisogna', 'per', 'così']  # More natural Italian
+            
+            unnatural_count = sum(1 for phrase in unnatural_phrases if phrase in italian_outline.lower())
+            natural_count = sum(1 for phrase in natural_phrases if phrase in italian_outline.lower())
+            
+            if unnatural_count > natural_count:
+                self.log("⚠️ Italian outline may contain unnatural phrasing", "WARNING")
+            else:
+                self.log("✅ Italian outline uses natural phrasing")
+            
+            # Generate Italian chapter
+            chapter_request = {"project_id": italian_project_id, "chapter_number": 1}
+            chapter_response = self.session.post(f"{self.base_url}/generate-chapter", json=chapter_request)
+            
+            if chapter_response.status_code != 200:
+                self.log(f"❌ Italian chapter generation failed: {chapter_response.text}", "ERROR")
+                return False
+                
+            chapter_data = chapter_response.json()
+            italian_chapter = chapter_data.get("chapter_content", "")
+            
+            # Check chapter word count
+            word_count = len(italian_chapter.split())
+            expected_words = (200 * 275) // 8  # Expected words per chapter
+            
+            if word_count < expected_words * 0.5:  # Allow more variance for language testing
+                self.log(f"❌ Italian chapter word count too low: {word_count} words (expected ~{expected_words})", "ERROR")
+                return False
+            else:
+                self.log(f"✅ Italian chapter has adequate word count: {word_count} words")
+            
+            # Check for natural Italian expressions and cultural context
+            italian_expressions = ['infatti', 'inoltre', 'tuttavia', 'dunque', 'quindi']
+            cultural_terms = ['tradizione', 'famiglia', 'regione', 'territorio', 'cultura']
+            
+            expressions_found = sum(1 for expr in italian_expressions if expr in italian_chapter.lower())
+            cultural_found = sum(1 for term in cultural_terms if term in italian_chapter.lower())
+            
+            if expressions_found < 2:
+                self.log("⚠️ Italian chapter may lack natural Italian expressions", "WARNING")
+            else:
+                self.log("✅ Italian chapter contains natural Italian expressions")
+                
+            if cultural_found < 1:
+                self.log("⚠️ Italian chapter may lack cultural context", "WARNING")
+            else:
+                self.log("✅ Italian chapter includes appropriate cultural context")
+            
+            # Check for consistent narrative voice in Italian
+            first_person_indicators = ['io', 'mi', 'mio', 'mia']
+            third_person_indicators = ['lui', 'lei', 'loro', 'si']
+            
+            first_person_count = sum(1 for indicator in first_person_indicators if indicator in italian_chapter.lower())
+            third_person_count = sum(1 for indicator in third_person_indicators if indicator in italian_chapter.lower())
+            
+            if first_person_count > 0 and third_person_count > first_person_count:
+                self.log("⚠️ Italian chapter may have inconsistent narrative voice", "WARNING")
+            else:
+                self.log("✅ Italian chapter maintains consistent narrative voice")
+            
+            self.log("✅ Italian language naturalness test completed successfully")
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Italian language naturalness test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_enhanced_word_count_generation(self):
+        """Test enhanced content generation with improved word count - CURRENT FOCUS"""
+        try:
+            self.log("Testing enhanced content generation with improved word count (CURRENT FOCUS)...")
+            
+            # Create a test project specifically for word count testing
+            wordcount_project_data = {
+                "title": "Advanced Machine Learning Techniques",
+                "description": "A comprehensive guide to advanced machine learning algorithms, neural networks, and practical applications in modern AI systems.",
+                "pages": 275,  # 275 pages = 275 * 275 = 75,625 total words
+                "chapters": 11,  # 11 chapters = ~6,875 words per chapter
+                "language": "English",
+                "writing_style": "descriptive"
+            }
+            
+            response = self.session.post(f"{self.base_url}/projects", json=wordcount_project_data)
+            
+            if response.status_code != 200:
+                self.log(f"❌ Word count test project creation failed: {response.text}", "ERROR")
+                return False
+                
+            wordcount_project = response.json()
+            wordcount_project_id = wordcount_project.get("id")
+            
+            self.log("✅ Word count test project created successfully")
+            
+            # Generate outline
+            outline_request = {"project_id": wordcount_project_id}
+            outline_response = self.session.post(f"{self.base_url}/generate-outline", json=outline_request)
+            
+            if outline_response.status_code != 200:
+                self.log(f"❌ Word count test outline generation failed: {outline_response.text}", "ERROR")
+                return False
+                
+            outline_data = outline_response.json()
+            outline_content = outline_data.get("outline", "")
+            
+            self.log(f"✅ Outline generated ({len(outline_content)} characters)")
+            
+            # Test multiple chapters for word count consistency
+            chapter_results = {}
+            target_words_per_chapter = (275 * 275) // 11  # ~6,875 words per chapter
+            
+            for chapter_num in [1, 2, 3]:  # Test first 3 chapters
+                self.log(f"Testing chapter {chapter_num} word count...")
+                
+                chapter_request = {"project_id": wordcount_project_id, "chapter_number": chapter_num}
+                chapter_response = self.session.post(f"{self.base_url}/generate-chapter", json=chapter_request)
+                
+                if chapter_response.status_code != 200:
+                    self.log(f"❌ Chapter {chapter_num} generation failed: {chapter_response.text}", "ERROR")
+                    chapter_results[chapter_num] = {"success": False, "words": 0}
+                    continue
+                    
+                chapter_data = chapter_response.json()
+                chapter_content = chapter_data.get("chapter_content", "")
+                
+                # Count words (remove HTML tags for accurate count)
+                import re
+                clean_text = re.sub(r'<[^>]+>', '', chapter_content)
+                word_count = len(clean_text.split())
+                
+                chapter_results[chapter_num] = {
+                    "success": True,
+                    "words": word_count,
+                    "target": target_words_per_chapter,
+                    "percentage": (word_count / target_words_per_chapter) * 100
+                }
+                
+                self.log(f"Chapter {chapter_num}: {word_count} words (target: {target_words_per_chapter}, {chapter_results[chapter_num]['percentage']:.1f}%)")
+                
+                # Small delay between chapters
+                time.sleep(3)
+            
+            # Analyze results
+            successful_chapters = [r for r in chapter_results.values() if r["success"]]
+            
+            if not successful_chapters:
+                self.log("❌ No chapters generated successfully for word count test", "ERROR")
+                return False
+            
+            avg_word_count = sum(r["words"] for r in successful_chapters) / len(successful_chapters)
+            avg_percentage = sum(r["percentage"] for r in successful_chapters) / len(successful_chapters)
+            
+            self.log(f"Average word count: {avg_word_count:.0f} words ({avg_percentage:.1f}% of target)")
+            
+            # Check if word count meets requirements (at least 70% of target)
+            if avg_percentage < 70:
+                self.log(f"❌ CRITICAL ISSUE: Generated chapters don't meet word count requirements", "ERROR")
+                self.log(f"❌ Average: {avg_word_count:.0f} words ({avg_percentage:.1f}% of target {target_words_per_chapter})", "ERROR")
+                self.log("❌ Need to enhance AI prompts to generate more substantial content per chapter", "ERROR")
+                return False
+            elif avg_percentage >= 70 and avg_percentage < 90:
+                self.log(f"⚠️ Word count partially meets requirements: {avg_percentage:.1f}% of target", "WARNING")
+                self.log("⚠️ Could benefit from further prompt optimization", "WARNING")
+                return True
+            else:
+                self.log(f"✅ Word count meets requirements: {avg_percentage:.1f}% of target", "SUCCESS")
+                return True
+            
+        except Exception as e:
+            self.log(f"❌ Enhanced word count generation test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_export_table_of_contents_only(self):
+        """Test export system with table of contents only (no outline section)"""
+        if not self.test_project_id:
+            self.log("❌ No test project ID available for TOC export test", "ERROR")
+            return False
+            
+        try:
+            self.log("Testing export system with table of contents only...")
+            
+            # Test HTML export
+            html_response = self.session.get(f"{self.base_url}/export-book/{self.test_project_id}")
+            
+            if html_response.status_code != 200:
+                self.log(f"❌ HTML export failed: {html_response.text}", "ERROR")
+                return False
+                
+            html_data = html_response.json()
+            html_content = html_data.get("html", "")
+            
+            # Check that outline section is NOT present
+            if 'class="outline"' in html_content:
+                self.log("❌ HTML export still contains outline section (should be removed)", "ERROR")
+                return False
+            else:
+                self.log("✅ HTML export correctly excludes outline section")
+            
+            # Check that table of contents IS present
+            if 'table-of-contents' not in html_content:
+                self.log("❌ HTML export missing table of contents", "ERROR")
+                return False
+            else:
+                self.log("✅ HTML export includes table of contents")
+            
+            # Check for proper TOC format with chapter titles and page numbers
+            if 'Chapter' not in html_content or 'toc-page' not in html_content:
+                self.log("❌ HTML export TOC missing proper chapter/page format", "ERROR")
+                return False
+            else:
+                self.log("✅ HTML export TOC has proper chapter titles and page numbers")
+            
+            # Test PDF export
+            pdf_response = self.session.get(f"{self.base_url}/export-book-pdf/{self.test_project_id}")
+            
+            if pdf_response.status_code != 200:
+                self.log(f"❌ PDF export failed: {pdf_response.text}", "ERROR")
+                return False
+            
+            # Check PDF content type and size
+            if 'application/pdf' not in pdf_response.headers.get('content-type', ''):
+                self.log("❌ PDF export wrong content type", "ERROR")
+                return False
+            
+            if len(pdf_response.content) < 5000:  # PDF should be substantial
+                self.log(f"❌ PDF export too small: {len(pdf_response.content)} bytes", "ERROR")
+                return False
+            
+            self.log("✅ PDF export successful with proper format")
+            
+            # Test DOCX export
+            docx_response = self.session.get(f"{self.base_url}/export-book-docx/{self.test_project_id}")
+            
+            if docx_response.status_code != 200:
+                self.log(f"❌ DOCX export failed: {docx_response.text}", "ERROR")
+                return False
+            
+            # Check DOCX content type and size
+            expected_docx_type = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            if expected_docx_type not in docx_response.headers.get('content-type', ''):
+                self.log("❌ DOCX export wrong content type", "ERROR")
+                return False
+            
+            if len(docx_response.content) < 5000:  # DOCX should be substantial
+                self.log(f"❌ DOCX export too small: {len(docx_response.content)} bytes", "ERROR")
+                return False
+            
+            self.log("✅ DOCX export successful with proper format")
+            
+            self.log("✅ All export formats working with table of contents only")
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Export table of contents test failed: {str(e)}", "ERROR")
+            return False
+
+    def test_gemini_2_5_flash_lite_model(self):
+        """Test updated Gemini 2.5 Flash-Lite model performance"""
+        try:
+            self.log("Testing Gemini 2.5 Flash-Lite model (gemini-2.5-flash-lite-preview-06-17)...")
+            
+            # Create a test project for model testing
+            model_test_data = {
+                "title": "Gemini 2.5 Flash-Lite Model Test",
+                "description": "Testing the updated Gemini 2.5 Flash-Lite model for performance and quality improvements.",
+                "pages": 100,
+                "chapters": 5,
+                "language": "English",
+                "writing_style": "descriptive"
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{self.base_url}/projects", json=model_test_data)
+            
+            if response.status_code != 200:
+                self.log(f"❌ Model test project creation failed", "ERROR")
+                return False
+                
+            model_project = response.json()
+            model_project_id = model_project.get("id")
+            
+            # Test outline generation with timing
+            outline_start = time.time()
+            outline_request = {"project_id": model_project_id}
+            outline_response = self.session.post(f"{self.base_url}/generate-outline", json=outline_request)
+            outline_time = time.time() - outline_start
+            
+            if outline_response.status_code != 200:
+                self.log(f"❌ Model outline generation failed", "ERROR")
+                return False
+                
+            outline_data = outline_response.json()
+            outline_content = outline_data.get("outline", "")
+            
+            # Check outline quality and timing
+            if outline_time > 25:  # Should be faster with Flash-Lite
+                self.log(f"⚠️ Outline generation took {outline_time:.2f}s (may be slow for Flash-Lite)", "WARNING")
+            else:
+                self.log(f"✅ Outline generation completed in {outline_time:.2f}s (good for Flash-Lite)")
+            
+            if len(outline_content) < 1000:
+                self.log(f"❌ Generated outline quality insufficient: {len(outline_content)} chars", "ERROR")
+                return False
+            else:
+                self.log(f"✅ Generated outline quality good: {len(outline_content)} chars")
+            
+            # Test chapter generation with timing
+            chapter_start = time.time()
+            chapter_request = {"project_id": model_project_id, "chapter_number": 1}
+            chapter_response = self.session.post(f"{self.base_url}/generate-chapter", json=chapter_request)
+            chapter_time = time.time() - chapter_start
+            
+            if chapter_response.status_code != 200:
+                self.log(f"❌ Model chapter generation failed", "ERROR")
+                return False
+                
+            chapter_data = chapter_response.json()
+            chapter_content = chapter_data.get("chapter_content", "")
+            
+            # Check chapter quality and timing
+            if chapter_time > 35:  # Should be faster with Flash-Lite
+                self.log(f"⚠️ Chapter generation took {chapter_time:.2f}s (may be slow for Flash-Lite)", "WARNING")
+            else:
+                self.log(f"✅ Chapter generation completed in {chapter_time:.2f}s (good for Flash-Lite)")
+            
+            word_count = len(chapter_content.split())
+            if word_count < 1000:
+                self.log(f"❌ Generated chapter quality insufficient: {word_count} words", "ERROR")
+                return False
+            else:
+                self.log(f"✅ Generated chapter quality good: {word_count} words")
+            
+            # Check for consistent narrative voice
+            first_person_count = chapter_content.lower().count(' i ') + chapter_content.lower().count(' my ')
+            third_person_count = chapter_content.lower().count(' he ') + chapter_content.lower().count(' she ') + chapter_content.lower().count(' they ')
+            
+            if first_person_count > 5 and third_person_count > 5:
+                self.log("⚠️ Chapter may have inconsistent narrative voice (mixing first and third person)", "WARNING")
+            else:
+                self.log("✅ Chapter maintains consistent narrative voice")
+            
+            total_time = time.time() - start_time
+            self.log(f"✅ Gemini 2.5 Flash-Lite model test completed in {total_time:.2f}s total")
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Gemini 2.5 Flash-Lite model test failed: {str(e)}", "ERROR")
+            return False
+
     def run_all_tests(self):
         """Run all backend API tests"""
         self.log("=" * 60)
