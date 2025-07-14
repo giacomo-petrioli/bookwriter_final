@@ -952,7 +952,7 @@ async def export_book(project_id: str):
 
 @api_router.get("/export-book-pdf/{project_id}")
 async def export_book_pdf(project_id: str):
-    """Export book as PDF with proper formatting"""
+    """Export book as PDF with table of contents only"""
     try:
         project = await db.book_projects.find_one({"id": project_id})
         if not project:
@@ -972,6 +972,24 @@ async def export_book_pdf(project_id: str):
             fontSize=24,
             spaceAfter=30,
             alignment=1  # Center alignment
+        )
+        
+        toc_title_style = ParagraphStyle(
+            'TOCTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            spaceAfter=20,
+            textColor=HexColor('#2c3e50'),
+            alignment=1  # Center alignment
+        )
+        
+        toc_entry_style = ParagraphStyle(
+            'TOCEntry',
+            parent=styles['Normal'],
+            fontSize=12,
+            spaceAfter=6,
+            leftIndent=20,
+            rightIndent=20
         )
         
         heading_style = ParagraphStyle(
@@ -997,28 +1015,40 @@ async def export_book_pdf(project_id: str):
         # Title page
         content.append(Paragraph(project_obj.title, title_style))
         content.append(Spacer(1, 12))
-        content.append(Paragraph(f"<b>Description:</b> {project_obj.description}", body_style))
-        content.append(Paragraph(f"<b>Language:</b> {project_obj.language}", body_style))
-        content.append(Paragraph(f"<b>Writing Style:</b> {project_obj.writing_style.title()}", body_style))
-        content.append(Paragraph(f"<b>Chapters:</b> {project_obj.chapters}", body_style))
-        content.append(Paragraph(f"<b>Target Pages:</b> {project_obj.pages}", body_style))
-        content.append(Paragraph(f"<b>Generated On:</b> {datetime.now().strftime('%B %d, %Y')}", body_style))
+        content.append(Paragraph(f"Generated On: {datetime.now().strftime('%B %d, %Y')}", body_style))
         content.append(PageBreak())
         
-        # Outline
-        if project_obj.outline:
-            content.append(Paragraph("📖 Book Outline", heading_style))
-            content.append(Spacer(1, 12))
-            # Convert HTML to plain text for PDF
-            outline_text = re.sub(r'<[^>]+>', '', project_obj.outline)
-            outline_text = unescape(outline_text)
-            content.append(Paragraph(outline_text, body_style))
-            content.append(PageBreak())
+        # Table of Contents
+        content.append(Paragraph("📚 Table of Contents", toc_title_style))
+        content.append(Spacer(1, 20))
+        
+        # Extract chapter titles and create TOC
+        chapter_titles = extract_chapter_titles(project_obj.outline or "")
+        current_page = 3  # Start after title and TOC pages
+        words_per_page = 275
+        
+        for i in range(1, project_obj.chapters + 1):
+            chapter_title = chapter_titles.get(i, f"Chapter {i}")
+            
+            # Create TOC entry with dots
+            toc_text = f"Chapter {i}: {chapter_title}"
+            dots = "." * (80 - len(toc_text))
+            toc_entry = f"{toc_text} {dots} {current_page}"
+            content.append(Paragraph(toc_entry, toc_entry_style))
+            
+            # Calculate next chapter's page
+            if project_obj.chapters_content and str(i) in project_obj.chapters_content:
+                chapter_content = project_obj.chapters_content[str(i)]
+                word_count = len(re.sub(r'<[^>]+>', '', chapter_content).split())
+                pages_in_chapter = max(1, word_count // words_per_page)
+                current_page += pages_in_chapter
+            else:
+                estimated_pages = max(1, (project_obj.pages // project_obj.chapters))
+                current_page += estimated_pages
+        
+        content.append(PageBreak())
         
         # Chapters
-        content.append(Paragraph("📚 Chapters", heading_style))
-        content.append(Spacer(1, 12))
-        
         if project_obj.chapters_content:
             for i in range(1, project_obj.chapters + 1):
                 chapter_content = project_obj.chapters_content.get(str(i), "")
@@ -1030,7 +1060,9 @@ async def export_book_pdf(project_id: str):
                 else:
                     content.append(Paragraph(f"Chapter {i}", heading_style))
                     content.append(Paragraph("This chapter has not been generated yet.", body_style))
-                content.append(PageBreak())
+                
+                if i < project_obj.chapters:  # Don't add page break after last chapter
+                    content.append(PageBreak())
         
         # Build PDF
         doc.build(content)
