@@ -565,7 +565,19 @@ async def generate_chapter(request: ChapterRequest):
         style_instructions = get_style_instructions(project_obj.writing_style, "chapter")
         formatting_instructions = get_style_instructions(project_obj.writing_style, "formatting")
         
-        # Optimized prompt for faster generation
+        # Enhanced language-specific instructions for natural content generation
+        language_instructions = ""
+        if project_obj.language.lower() != "english":
+            language_instructions = f"""
+**Language Requirements for {project_obj.language}:**
+- Write in natural, fluent {project_obj.language} that feels authentic to native speakers
+- Use idiomatic expressions and natural phrasing typical of {project_obj.language} literature
+- Avoid literal translations or awkward constructions
+- Employ appropriate cultural references and context for {project_obj.language} readers
+- Use natural sentence structures and vocabulary that native speakers would use
+- Maintain consistent tone and style throughout the chapter"""
+
+        # Optimized prompt for faster generation with voice consistency
         prompt = f"""Write Chapter {request.chapter_number} for "{project_obj.title}":
 
 **Chapter Title:** {chapter_title}
@@ -579,13 +591,29 @@ async def generate_chapter(request: ChapterRequest):
 4. Use HTML formatting (headings, paragraphs, lists)
 5. Write in {project_obj.language}
 
+**Narrative Voice Consistency:**
+- Maintain consistent narrative voice throughout this chapter
+- If using first-person ("I"), keep it consistent - never switch to third-person
+- If using third-person ("he/she/they"), maintain it throughout
+- Choose the voice that best fits the content and maintain it completely
+- Ensure smooth transitions between sentences and paragraphs
+
+**Content Quality Guidelines:**
+- Use natural, flowing language that feels authentic and engaging
+- Avoid repetitive phrases or awkward constructions
+- Create smooth transitions between ideas and paragraphs
+- Use varied sentence structures for natural rhythm
+- Include specific details and examples to make content vivid and relatable
+
+{language_instructions}
+
 **Book Outline:**
 {project_obj.outline}
 
 **Style Instructions:**
 {style_instructions}
 
-Write a complete chapter that follows the outline and meets the word count requirement."""
+Write a complete chapter that follows the outline and meets the word count requirement. Focus on creating natural, engaging content that maintains consistent narrative voice throughout."""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
