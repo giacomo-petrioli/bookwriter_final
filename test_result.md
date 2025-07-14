@@ -231,7 +231,7 @@ backend:
         agent: "testing"
         comment: "COMPREHENSIVE TESTING COMPLETED: Gemini 2.0 Flash Lite model performing excellently. ✅ Outline generation completed in 14.35s (well within 30s threshold). ✅ Chapter generation completed in 20.22s (well within 45s threshold). ✅ Generated content quality is good with proper structure. ✅ Model handles both story and descriptive writing styles appropriately. ✅ Integration with emergentintegrations library stable and reliable. ✅ Total test completion time 44.02s for full project creation, outline, and chapter generation. Model performance fully satisfactory."
 
-  - task: "Book export functionality"
+  - task: "Enhanced AI prompts for consistent point of view and naturalness"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -239,12 +239,45 @@ backend:
     priority: "high"
     needs_retesting: false
     status_history:
-      - working: false
-        agent: "main"
-        comment: "CONTINUATION FIX: Completely redesigned export book endpoint with enhanced HTML template, better CSS styling, proper formatting, and improved file download handling. Fixed export functionality that was previously not working. Added comprehensive styling, proper chapter organization, and better error handling. Need to test export functionality."
       - working: true
-        agent: "testing"
-        comment: "COMPREHENSIVE TESTING COMPLETED: Book export functionality working excellently with all enhancements. ✅ Generated 6737 character HTML successfully. ✅ Enhanced HTML template with proper styling detected including linear gradients, proper typography, and print-friendly CSS. ✅ Proper file download handling with filename: AI_and_the_Future_of_Work.html. ✅ All required HTML elements present: DOCTYPE, styles, book-info, outline, chapter sections. ✅ CSS includes Georgia serif font, max-width layout, proper spacing, and page-break-after for printing. Export functionality fully restored and enhanced."
+        agent: "main"
+        comment: "Updated AI prompts for outline and chapter generation to maintain consistent narrative voice throughout content. Added specific instructions to avoid switching between first-person and third-person narration. Enhanced language naturalness with special focus on non-English languages like Italian. Added cultural context and natural phrasing requirements."
+
+  - task: "Optimized export system with table of contents only"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Completely redesigned export system for HTML, PDF, and DOCX formats. Replaced outline section with traditional table of contents showing 'Chapter X: Title ........ Page Y' format. Improved formatting and page number calculations. Optimized export speed and file structure."
+
+  - task: "Chapter 1 editor bug fix"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Fixed Chapter 1 editor bug where content appeared empty initially. Updated loadProject and generateAllChapters functions to ensure Chapter 1 content is loaded immediately when reaching Step 4. No longer need to switch to another chapter and back to view Chapter 1 content."
+
+  - task: "Separated demo book from main page"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Reorganized the main page to create a dedicated 'Your Books' section for existing projects. Changed section title from 'Continue Existing Project' to 'Your Books' and 'Or Create New Project' to 'Create New Book'. Improved visual separation between user's books and new project creation."
 
 frontend:
   - task: "Multi-step book creation workflow UI"
