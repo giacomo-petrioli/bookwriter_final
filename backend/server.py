@@ -630,7 +630,7 @@ async def generate_chapter(request: ChapterRequest):
 - Use natural sentence structures and vocabulary that native speakers would use
 - Maintain consistent tone and style throughout the chapter"""
 
-        # Optimized prompt for faster generation with voice consistency
+        # Optimized prompt for faster generation with voice consistency and literary quality
         prompt = f"""Write Chapter {request.chapter_number} for "{project_obj.title}":
 
 **Chapter Title:** {chapter_title}
@@ -651,12 +651,44 @@ async def generate_chapter(request: ChapterRequest):
 - Choose the voice that best fits the content and maintain it completely
 - Ensure smooth transitions between sentences and paragraphs
 
+**Dialogue & Character Development:**
+- Give each character a distinct voice and speech pattern
+- Use natural, conversational dialogue that sounds like real people talking
+- Avoid having characters speak in the same formal register as the narrator
+- Include interruptions, hesitations, and natural speech patterns
+- Show character personality through their word choices and speaking style
+- Use contractions and colloquialisms where appropriate
+- Break up long speeches with action beats and internal thoughts
+
+**Content Balance & Structure:**
+- Alternate between descriptive passages and action/dialogue scenes
+- Use varied sentence lengths and structures for natural rhythm
+- Include both concrete, grounded scenes and poetic, atmospheric moments
+- Break up large blocks of text with dialogue and shorter paragraphs
+- Show character emotions through actions and dialogue, not just description
+
+**Emotional Authenticity:**
+- Write with genuine emotional depth and human imperfection
+- Include subtle internal conflicts and character contradictions
+- Allow for moments of vulnerability, uncertainty, and authentic emotion
+- Use specific, sensory details rather than abstract concepts
+- Show characters' emotions through their actions and reactions
+- Include subtle imperfections in thought patterns and speech
+
+**Visual Structure & Formatting:**
+- Use frequent paragraph breaks for better readability
+- Separate different speakers with clear line breaks
+- Use shorter paragraphs for dialogue and action sequences
+- Include proper scene transitions and time shifts
+- Format dialogue clearly with proper punctuation and spacing
+
 **Content Quality Guidelines:**
 - Use natural, flowing language that feels authentic and engaging
 - Avoid repetitive phrases or awkward constructions
 - Create smooth transitions between ideas and paragraphs
 - Use varied sentence structures for natural rhythm
 - Include specific details and examples to make content vivid and relatable
+- Balance showing vs. telling - demonstrate through action and dialogue
 
 {language_instructions}
 
@@ -666,7 +698,7 @@ async def generate_chapter(request: ChapterRequest):
 **Style Instructions:**
 {style_instructions}
 
-Write a complete chapter that follows the outline and meets the word count requirement. Focus on creating natural, engaging content that maintains consistent narrative voice throughout."""
+Write a complete chapter that follows the outline and meets the word count requirement. Focus on creating natural, engaging content with authentic dialogue, distinct character voices, and emotional depth. Make the narrative feel human and relatable, with proper visual structure and formatting."""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
