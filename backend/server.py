@@ -122,22 +122,28 @@ def get_style_instructions(writing_style: str, content_type: str = "outline"):
 - Balances depth and accessibility of content
 - Uses consistent terminology and definitions
 - Provides clear learning objectives per section
-- Includes practical applications and insights""",
-            "chapter": """Write in a descriptive, informational style that:
-- Provides detailed explanations and analysis
-- Uses clear structure and organization
-- Includes examples and case studies when relevant
-- Maintains an informative and engaging tone
-- Breaks down complex topics into digestible sections
-- Uses logical progression from basic to advanced concepts""",
-            "formatting": """Use structured HTML formatting:
-- <h2> for chapter titles with chapter names
-- <h3> for main section headings within chapters
-- <h4> for subsection headings
-- <p> for paragraphs
-- <ul> and <li> for bullet points and lists
-- <strong> for key terms and concepts
-- <em> for emphasis"""
+- Includes practical applications and insights
+- Maintains engaging narrative elements where appropriate
+- Balances informative content with readability""",
+            "chapter": """Write in a descriptive style that:
+- Uses clear, informative language with engaging examples
+- Balances detailed explanations with accessible prose
+- Includes relevant case studies and real-world applications
+- Maintains reader engagement through varied content structure
+- Uses natural transitions between concepts and ideas
+- Incorporates storytelling elements to illustrate points
+- Avoids overly technical jargon without sacrificing accuracy
+- Includes dialogue or character examples where relevant
+- Structures content for optimal comprehension and retention""",
+            "formatting": """Use descriptive HTML formatting:
+- <h2> for chapter titles with descriptive, engaging names
+- <h3> for major topics or concepts
+- <h4> for sub-topics and detailed explanations
+- <p> for explanatory paragraphs with varied lengths
+- <ul> and <li> for organized lists and key points
+- <strong> for important terms and concepts
+- <em> for emphasis and examples
+- Use clear section breaks and logical content flow"""
         },
         "academic": {
             "outline": """Create an academic/research outline that:
