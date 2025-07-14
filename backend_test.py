@@ -1935,13 +1935,16 @@ As we stand at this technological crossroads, understanding the implications of 
         
         test_results = {}
         
-        # Test sequence - prioritizing the focused outline generation test
+        # Test sequence - prioritizing the current focus and new requirements
         tests = [
             ("API Health Check", self.test_api_health),
             ("Project Creation", self.test_create_project),
             ("Get All Projects", self.test_get_projects),
             ("Get Specific Project", self.test_get_specific_project),
-            ("🎯 FOCUSED: AI Outline Generation Model Fix", self.test_outline_generation_model_fix),
+            ("🎯 CURRENT FOCUS: Enhanced Word Count Generation", self.test_enhanced_word_count_generation),
+            ("🎯 Gemini 2.5 Flash-Lite Model Test", self.test_gemini_2_5_flash_lite_model),
+            ("🎯 Italian Language Naturalness", self.test_italian_language_naturalness),
+            ("🎯 Export Table of Contents Only", self.test_export_table_of_contents_only),
             ("Generate AI Outline", self.test_generate_outline),
             ("Generate AI Chapter", self.test_generate_chapter),
             ("Update Outline", self.test_update_outline),
@@ -1951,7 +1954,6 @@ As we stand at this technological crossroads, understanding the implications of 
             ("PDF Export", self.test_pdf_export),
             ("DOCX Export", self.test_docx_export),
             ("Chapter Title Extraction", self.test_chapter_title_extraction),
-            ("Generate All Chapters", self.test_generate_all_chapters),
             ("Story Style Project", self.test_story_style_project),
             ("Descriptive Style Project", self.test_descriptive_style_project),
             ("New Writing Styles", self.test_new_writing_styles),
