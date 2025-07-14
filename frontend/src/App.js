@@ -457,10 +457,10 @@ const BookWriter = () => {
             <div className="bg-white rounded-2xl shadow-xl p-8">
               <h2 className="text-3xl font-bold text-gray-800 mb-6">Start Your Book Journey</h2>
               
-              {/* Existing Projects */}
+              {/* Existing Projects - Create separate section */}
               {projects.length > 0 && (
                 <div className="mb-8">
-                  <h3 className="text-xl font-semibold text-gray-700 mb-4">Continue Existing Project</h3>
+                  <h3 className="text-xl font-semibold text-gray-700 mb-4">📚 Your Books</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {projects.map((project) => (
                       <div 
@@ -477,7 +477,7 @@ const BookWriter = () => {
                     ))}
                   </div>
                   <div className="border-t pt-6 mt-6">
-                    <h3 className="text-xl font-semibold text-gray-700 mb-4">Or Create New Project</h3>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-4">✨ Create New Book</h3>
                   </div>
                 </div>
               )}
