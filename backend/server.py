@@ -504,11 +504,18 @@ async def generate_outline(request: OutlineRequest):
 - Language: {project_obj.language}
 
 **Requirements:**
-1. Create exactly {project_obj.chapters} chapter titles
+1. Create exactly {project_obj.chapters} expressive, thematic chapter titles that capture the essence of each chapter
 2. Each chapter: 3-5 sentences summary + 3-5 key points
 3. Target {(project_obj.pages * 275) // project_obj.chapters} words per chapter
-4. HTML format: <h2>Chapter [Number]: [Title]</h2> for titles
+4. HTML format: <h2>Chapter [Number]: [Creative Title]</h2> for titles
 5. Use <p> for summaries, <ul><li> for key points
+
+**Creative Chapter Titles:**
+- Make each chapter title evocative and atmospheric
+- Reflect the emotional tone or key theme of the chapter
+- Avoid generic titles like "Chapter 1" or "Introduction"
+- Use metaphors, imagery, or compelling phrases that draw readers in
+- Examples: "The Weight of Silence", "Dancing with Shadows", "Where Rivers Meet the Sea"
 
 **Style Guide:**
 {style_instructions}
@@ -518,12 +525,18 @@ async def generate_outline(request: OutlineRequest):
 - Ensure the chosen voice fits the writing style and subject matter
 - Never switch between narrative voices within the same context
 
+**Content Balance & Structure:**
+- Plan chapters with varied pacing and emotional rhythm
+- Balance descriptive passages with action and dialogue scenes
+- Include character development and interaction opportunities
+- Ensure each chapter has a clear narrative arc and purpose
+
 {language_instructions}
 
 **Book Description:**
 {project_obj.description}
 
-Create a comprehensive outline that flows logically from chapter 1 to {project_obj.chapters}. Use natural, engaging language that feels authentic and avoids overly formal or artificial phrasing."""
+Create a comprehensive outline that flows logically from chapter 1 to {project_obj.chapters}. Use natural, engaging language that feels authentic and avoids overly formal or artificial phrasing. Focus on creating compelling, creative chapter titles that will draw readers in."""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
