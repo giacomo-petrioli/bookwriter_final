@@ -21,7 +21,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.colors import HexColor
 from docx import Document
-from docx.shared import Inches
+from docx.shared import Inches, RGBColor
 from docx.enum.style import WD_STYLE_TYPE
 from docx.oxml.shared import OxmlElement, qn
 import re
