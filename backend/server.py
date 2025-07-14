@@ -1258,7 +1258,7 @@ def process_html_for_pdf(html_content, body_style, dialogue_style):
 
 @api_router.get("/export-book-docx/{project_id}")
 async def export_book_docx(project_id: str):
-    """Export book as DOCX with table of contents only"""
+    """Export book as DOCX with professional book formatting"""
     try:
         project = await db.book_projects.find_one({"id": project_id})
         if not project:
@@ -1269,15 +1269,76 @@ async def export_book_docx(project_id: str):
         # Create DOCX document
         doc = Document()
         
-        # Title page
-        title = doc.add_heading(project_obj.title, level=1)
-        title.alignment = 1  # Center alignment
+        # Configure professional book styles
+        styles = doc.styles
         
-        doc.add_paragraph(f"Generated On: {datetime.now().strftime('%B %d, %Y')}")
+        # Title page styling
+        title_style = styles.add_style('BookTitle', WD_STYLE_TYPE.PARAGRAPH)
+        title_style.font.name = 'Garamond'
+        title_style.font.size = Inches(0.3)
+        title_style.font.bold = True
+        title_style.paragraph_format.alignment = 1  # Center
+        title_style.paragraph_format.space_after = Inches(0.5)
+        
+        # Author style
+        author_style = styles.add_style('AuthorStyle', WD_STYLE_TYPE.PARAGRAPH)
+        author_style.font.name = 'Garamond'
+        author_style.font.size = Inches(0.2)
+        author_style.font.color.rgb = RGBColor(102, 102, 102)
+        author_style.paragraph_format.alignment = 1  # Center
+        author_style.paragraph_format.space_after = Inches(0.3)
+        
+        # Chapter title style
+        chapter_title_style = styles.add_style('ChapterTitle', WD_STYLE_TYPE.PARAGRAPH)
+        chapter_title_style.font.name = 'Garamond'
+        chapter_title_style.font.size = Inches(0.25)
+        chapter_title_style.font.bold = True
+        chapter_title_style.font.color.rgb = RGBColor(44, 62, 80)
+        chapter_title_style.paragraph_format.alignment = 1  # Center
+        chapter_title_style.paragraph_format.space_before = Inches(0.5)
+        chapter_title_style.paragraph_format.space_after = Inches(0.4)
+        
+        # Body text style
+        body_style = styles.add_style('BookBody', WD_STYLE_TYPE.PARAGRAPH)
+        body_style.font.name = 'Times New Roman'
+        body_style.font.size = Inches(0.15)
+        body_style.paragraph_format.alignment = 4  # Justified
+        body_style.paragraph_format.first_line_indent = Inches(0.3)
+        body_style.paragraph_format.space_after = Inches(0.15)
+        body_style.paragraph_format.line_spacing = 1.2
+        
+        # Dialogue style
+        dialogue_style = styles.add_style('DialogueStyle', WD_STYLE_TYPE.PARAGRAPH)
+        dialogue_style.font.name = 'Times New Roman'
+        dialogue_style.font.size = Inches(0.15)
+        dialogue_style.paragraph_format.alignment = 4  # Justified
+        dialogue_style.paragraph_format.left_indent = Inches(0.4)
+        dialogue_style.paragraph_format.space_after = Inches(0.12)
+        dialogue_style.paragraph_format.line_spacing = 1.2
+        
+        # Title page
+        title_paragraph = doc.add_paragraph()
+        title_paragraph.style = title_style
+        title_run = title_paragraph.add_run(project_obj.title)
+        
+        # Add some space
+        doc.add_paragraph()
+        doc.add_paragraph()
+        
+        # Author information
+        author_paragraph = doc.add_paragraph()
+        author_paragraph.style = author_style
+        author_run = author_paragraph.add_run("Generated with AI Book Writer")
+        
+        # Date
+        date_paragraph = doc.add_paragraph()
+        date_paragraph.style = author_style
+        date_run = date_paragraph.add_run(f"Generated on {datetime.now().strftime('%B %d, %Y')}")
+        
         doc.add_page_break()
         
         # Table of Contents
-        toc_heading = doc.add_heading("📚 Table of Contents", level=1)
+        toc_heading = doc.add_heading("Table of Contents", level=1)
         toc_heading.alignment = 1  # Center alignment
         
         # Extract chapter titles and create TOC
@@ -1288,12 +1349,18 @@ async def export_book_docx(project_id: str):
         for i in range(1, project_obj.chapters + 1):
             chapter_title = chapter_titles.get(i, f"Chapter {i}")
             
-            # Create TOC entry
+            # Create professional TOC entry
             toc_paragraph = doc.add_paragraph()
-            toc_paragraph.add_run(f"Chapter {i}: {chapter_title}")
+            toc_paragraph.paragraph_format.space_after = Inches(0.1)
+            
+            # Chapter info
+            chapter_run = toc_paragraph.add_run(f"Chapter {i}: {chapter_title}")
+            chapter_run.font.name = 'Times New Roman'
+            chapter_run.font.size = Inches(0.14)
             
             # Add dots
-            dots_run = toc_paragraph.add_run("." * (80 - len(f"Chapter {i}: {chapter_title}") - len(str(current_page))))
+            dots_text = "." * max(5, 60 - len(f"Chapter {i}: {chapter_title}") - len(str(current_page)))
+            dots_run = toc_paragraph.add_run(dots_text)
             dots_run.font.color.rgb = RGBColor(189, 195, 199)  # Light gray
             
             # Add page number
@@ -1313,26 +1380,27 @@ async def export_book_docx(project_id: str):
         
         doc.add_page_break()
         
-        # Chapters
+        # Chapters with professional formatting
         if project_obj.chapters_content:
             for i in range(1, project_obj.chapters + 1):
                 chapter_content = project_obj.chapters_content.get(str(i), "")
                 if chapter_content:
-                    # Convert HTML to plain text for DOCX
-                    chapter_text = re.sub(r'<[^>]+>', '', chapter_content)
-                    chapter_text = unescape(chapter_text)
+                    # Add chapter title
+                    chapter_title = chapter_titles.get(i, f"Chapter {i}")
+                    chapter_heading = doc.add_paragraph()
+                    chapter_heading.style = chapter_title_style
+                    chapter_heading.add_run(chapter_title)
                     
-                    # Split into paragraphs
-                    paragraphs = chapter_text.split('\n\n')
-                    for paragraph in paragraphs:
-                        if paragraph.strip():
-                            if paragraph.strip().startswith('Chapter'):
-                                doc.add_heading(paragraph.strip(), level=2)
-                            else:
-                                doc.add_paragraph(paragraph.strip())
+                    # Process and add chapter content
+                    process_html_for_docx(chapter_content, doc, body_style, dialogue_style)
                 else:
-                    doc.add_heading(f"Chapter {i}", level=2)
-                    doc.add_paragraph("This chapter has not been generated yet.")
+                    chapter_heading = doc.add_paragraph()
+                    chapter_heading.style = chapter_title_style
+                    chapter_heading.add_run(f"Chapter {i}")
+                    
+                    empty_paragraph = doc.add_paragraph()
+                    empty_paragraph.style = body_style
+                    empty_paragraph.add_run("This chapter has not been generated yet.")
                 
                 if i < project_obj.chapters:  # Don't add page break after last chapter
                     doc.add_page_break()
@@ -1356,6 +1424,31 @@ async def export_book_docx(project_id: str):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error exporting book as DOCX: {str(e)}")
+
+def process_html_for_docx(html_content, doc, body_style, dialogue_style):
+    """Process HTML content for better DOCX formatting"""
+    # Clean and split content
+    cleaned_content = re.sub(r'<h2[^>]*>.*?</h2>', '', html_content)  # Remove h2 tags (already handled)
+    paragraphs = re.split(r'<p>|</p>', cleaned_content)
+    
+    for paragraph in paragraphs:
+        if paragraph.strip():
+            # Remove HTML tags
+            clean_text = re.sub(r'<[^>]+>', '', paragraph).strip()
+            clean_text = unescape(clean_text)
+            
+            if clean_text:
+                # Create paragraph
+                doc_paragraph = doc.add_paragraph()
+                
+                # Check if it's dialogue (contains quotation marks)
+                if '"' in clean_text or '"' in clean_text or '"' in clean_text:
+                    doc_paragraph.style = dialogue_style
+                else:
+                    doc_paragraph.style = body_style
+                
+                # Add text
+                doc_paragraph.add_run(clean_text)
 
 @api_router.put("/update-outline")
 async def update_outline(request: dict):
