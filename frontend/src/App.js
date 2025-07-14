@@ -392,9 +392,15 @@ const BookWriter = () => {
       if (project.chapters_content && Object.keys(project.chapters_content).length > 0) {
         setCurrentStep(4);
         setAllChapters(project.chapters_content);
-        const firstChapter = Object.keys(project.chapters_content)[0];
-        setCurrentChapter(parseInt(firstChapter));
-        setChapterContent(project.chapters_content[firstChapter]);
+        
+        // Fix Chapter 1 editor bug - ensure Chapter 1 content is loaded immediately
+        const firstChapter = 1;
+        setCurrentChapter(firstChapter);
+        if (project.chapters_content[firstChapter]) {
+          setChapterContent(project.chapters_content[firstChapter]);
+        } else {
+          setChapterContent("");
+        }
       } else {
         setCurrentStep(3);
       }
