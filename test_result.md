@@ -267,17 +267,17 @@ backend:
         agent: "main"
         comment: "Fixed Chapter 1 editor bug where content appeared empty initially. Updated loadProject and generateAllChapters functions to ensure Chapter 1 content is loaded immediately when reaching Step 4. No longer need to switch to another chapter and back to view Chapter 1 content."
 
-  - task: "Separated demo book from main page"
+  - task: "Enhanced AI prompts for literary content quality"
     implemented: true
     working: true
-    file: "/app/frontend/src/App.js"
+    file: "/app/backend/server.py"
     stuck_count: 0
-    priority: "medium"
+    priority: "high"
     needs_retesting: false
     status_history:
       - working: true
         agent: "main"
-        comment: "Reorganized the main page to create a dedicated 'Your Books' section for existing projects. Changed section title from 'Continue Existing Project' to 'Your Books' and 'Or Create New Project' to 'Create New Book'. Improved visual separation between user's books and new project creation."
+        comment: "Significantly enhanced AI prompts for outline and chapter generation to address literary quality issues. Improved dialogue variety with character-specific voices, better balance between descriptive and action-oriented content, enhanced emotional authenticity, better paragraph structure and visual formatting, and creative chapter titles. Updated story and descriptive writing style instructions with specific guidelines for natural dialogue, character development, and narrative flow. Generated test content shows substantial improvement in literary quality."
 
 frontend:
   - task: "Multi-step book creation workflow UI"
