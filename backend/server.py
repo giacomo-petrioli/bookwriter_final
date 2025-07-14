@@ -1055,7 +1055,7 @@ async def export_book(project_id: str):
 
 @api_router.get("/export-book-pdf/{project_id}")
 async def export_book_pdf(project_id: str):
-    """Export book as PDF with table of contents only"""
+    """Export book as PDF with professional book formatting"""
     try:
         project = await db.book_projects.find_one({"id": project_id})
         if not project:
@@ -1065,65 +1065,105 @@ async def export_book_pdf(project_id: str):
         
         # Create PDF buffer
         buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+        doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
         
-        # Get styles
+        # Professional book styles
         styles = getSampleStyleSheet()
+        
+        # Title page styles
         title_style = ParagraphStyle(
-            'CustomTitle',
+            'BookTitle',
             parent=styles['Title'],
-            fontSize=24,
-            spaceAfter=30,
-            alignment=1  # Center alignment
+            fontSize=28,
+            spaceAfter=40,
+            alignment=1,  # Center alignment
+            textColor=HexColor('#1a1a1a'),
+            fontName='Helvetica-Bold'
         )
         
+        author_style = ParagraphStyle(
+            'Author',
+            parent=styles['Normal'],
+            fontSize=16,
+            spaceAfter=20,
+            alignment=1,  # Center alignment
+            textColor=HexColor('#666666'),
+            fontName='Helvetica'
+        )
+        
+        # Table of Contents styles
         toc_title_style = ParagraphStyle(
             'TOCTitle',
             parent=styles['Heading1'],
-            fontSize=18,
-            spaceAfter=20,
+            fontSize=22,
+            spaceAfter=30,
             textColor=HexColor('#2c3e50'),
-            alignment=1  # Center alignment
+            alignment=1,  # Center alignment
+            fontName='Helvetica-Bold'
         )
         
         toc_entry_style = ParagraphStyle(
             'TOCEntry',
             parent=styles['Normal'],
             fontSize=12,
-            spaceAfter=6,
-            leftIndent=20,
-            rightIndent=20
+            spaceAfter=8,
+            leftIndent=0,
+            rightIndent=0,
+            fontName='Helvetica'
         )
         
-        heading_style = ParagraphStyle(
-            'CustomHeading',
+        # Chapter styles
+        chapter_title_style = ParagraphStyle(
+            'ChapterTitle',
             parent=styles['Heading1'],
-            fontSize=16,
-            spaceAfter=12,
-            textColor=HexColor('#2c3e50')
+            fontSize=18,
+            spaceAfter=24,
+            spaceBefore=36,
+            textColor=HexColor('#2c3e50'),
+            alignment=1,  # Center alignment
+            fontName='Helvetica-Bold'
         )
         
-        body_style = ParagraphStyle(
-            'CustomBody',
+        chapter_body_style = ParagraphStyle(
+            'ChapterBody',
             parent=styles['Normal'],
-            fontSize=12,
+            fontSize=11,
             spaceAfter=12,
             alignment=4,  # Justified
-            firstLineIndent=20
+            firstLineIndent=20,
+            fontName='Times-Roman',
+            leading=16
+        )
+        
+        dialogue_style = ParagraphStyle(
+            'Dialogue',
+            parent=styles['Normal'],
+            fontSize=11,
+            spaceAfter=8,
+            spaceBefore=8,
+            alignment=4,  # Justified
+            leftIndent=30,
+            rightIndent=10,
+            fontName='Times-Roman',
+            leading=16
         )
         
         # Build content
         content = []
         
         # Title page
+        content.append(Spacer(1, 100))  # Top margin
         content.append(Paragraph(project_obj.title, title_style))
-        content.append(Spacer(1, 12))
-        content.append(Paragraph(f"Generated On: {datetime.now().strftime('%B %d, %Y')}", body_style))
+        content.append(Spacer(1, 40))
+        content.append(Paragraph("Generated with AI Book Writer", author_style))
+        content.append(Spacer(1, 20))
+        content.append(Paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y')}", author_style))
         content.append(PageBreak())
         
         # Table of Contents
-        content.append(Paragraph("📚 Table of Contents", toc_title_style))
-        content.append(Spacer(1, 20))
+        content.append(Spacer(1, 50))
+        content.append(Paragraph("Table of Contents", toc_title_style))
+        content.append(Spacer(1, 30))
         
         # Extract chapter titles and create TOC
         chapter_titles = extract_chapter_titles(project_obj.outline or "")
@@ -1133,9 +1173,9 @@ async def export_book_pdf(project_id: str):
         for i in range(1, project_obj.chapters + 1):
             chapter_title = chapter_titles.get(i, f"Chapter {i}")
             
-            # Create TOC entry with dots
+            # Create professional TOC entry
             toc_text = f"Chapter {i}: {chapter_title}"
-            dots = "." * (80 - len(toc_text))
+            dots = "." * max(5, 70 - len(toc_text))
             toc_entry = f"{toc_text} {dots} {current_page}"
             content.append(Paragraph(toc_entry, toc_entry_style))
             
@@ -1151,18 +1191,23 @@ async def export_book_pdf(project_id: str):
         
         content.append(PageBreak())
         
-        # Chapters
+        # Chapters with improved formatting
         if project_obj.chapters_content:
             for i in range(1, project_obj.chapters + 1):
                 chapter_content = project_obj.chapters_content.get(str(i), "")
                 if chapter_content:
-                    # Convert HTML to plain text for PDF
-                    chapter_text = re.sub(r'<[^>]+>', '', chapter_content)
-                    chapter_text = unescape(chapter_text)
-                    content.append(Paragraph(chapter_text, body_style))
+                    # Get chapter title
+                    chapter_title = chapter_titles.get(i, f"Chapter {i}")
+                    content.append(Paragraph(chapter_title, chapter_title_style))
+                    content.append(Spacer(1, 20))
+                    
+                    # Process HTML content for better formatting
+                    processed_content = process_html_for_pdf(chapter_content, chapter_body_style, dialogue_style)
+                    content.extend(processed_content)
                 else:
-                    content.append(Paragraph(f"Chapter {i}", heading_style))
-                    content.append(Paragraph("This chapter has not been generated yet.", body_style))
+                    content.append(Paragraph(f"Chapter {i}", chapter_title_style))
+                    content.append(Spacer(1, 20))
+                    content.append(Paragraph("This chapter has not been generated yet.", chapter_body_style))
                 
                 if i < project_obj.chapters:  # Don't add page break after last chapter
                     content.append(PageBreak())
@@ -1185,6 +1230,31 @@ async def export_book_pdf(project_id: str):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error exporting book as PDF: {str(e)}")
+
+def process_html_for_pdf(html_content, body_style, dialogue_style):
+    """Process HTML content for better PDF formatting"""
+    content = []
+    
+    # Clean and split content
+    cleaned_content = re.sub(r'<h2[^>]*>.*?</h2>', '', html_content)  # Remove h2 tags (already handled)
+    paragraphs = re.split(r'<p>|</p>', cleaned_content)
+    
+    for paragraph in paragraphs:
+        if paragraph.strip():
+            # Remove HTML tags
+            clean_text = re.sub(r'<[^>]+>', '', paragraph).strip()
+            clean_text = unescape(clean_text)
+            
+            if clean_text:
+                # Check if it's dialogue (contains quotation marks)
+                if '"' in clean_text or '"' in clean_text or '"' in clean_text:
+                    content.append(Paragraph(clean_text, dialogue_style))
+                else:
+                    content.append(Paragraph(clean_text, body_style))
+                
+                content.append(Spacer(1, 6))
+    
+    return content
 
 @api_router.get("/export-book-docx/{project_id}")
 async def export_book_docx(project_id: str):
