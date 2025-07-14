@@ -718,13 +718,16 @@ async def update_chapter(request: ChapterUpdate):
 
 @api_router.get("/export-book/{project_id}")
 async def export_book(project_id: str):
-    """Export book as HTML with proper formatting"""
+    """Export book as HTML with table of contents only"""
     try:
         project = await db.book_projects.find_one({"id": project_id})
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
         
         project_obj = BookProject(**project)
+        
+        # Generate table of contents
+        toc_html = generate_table_of_contents(project_obj)
         
         # Create well-formatted HTML content
         html_content = f"""<!DOCTYPE html>
@@ -750,6 +753,7 @@ async def export_book(project_id: str):
             padding-bottom: 15px;
             margin-bottom: 30px;
             font-size: 2.5em;
+            text-align: center;
         }}
         
         h2 {{
@@ -778,6 +782,7 @@ async def export_book(project_id: str):
             border-radius: 10px;
             margin-bottom: 40px;
             border-left: 5px solid #3498db;
+            text-align: center;
         }}
         
         .book-info h1 {{
@@ -791,12 +796,49 @@ async def export_book(project_id: str):
             text-indent: 0;
         }}
         
-        .outline {{
+        .table-of-contents {{
             background: #f8f9fa;
             padding: 25px;
             border-radius: 8px;
             margin-bottom: 40px;
             border-left: 5px solid #28a745;
+        }}
+        
+        .table-of-contents h2 {{
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }}
+        
+        .toc-entries {{
+            max-width: 100%;
+        }}
+        
+        .toc-entry {{
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }}
+        
+        .toc-chapter {{
+            font-weight: 500;
+            color: #2c3e50;
+            white-space: nowrap;
+        }}
+        
+        .toc-dots {{
+            flex: 1;
+            color: #bdc3c7;
+            font-size: 12px;
+            overflow: hidden;
+            margin: 0 8px;
+        }}
+        
+        .toc-page {{
+            font-weight: 500;
+            color: #3498db;
+            white-space: nowrap;
         }}
         
         .chapter {{
@@ -834,6 +876,15 @@ async def export_book(project_id: str):
             color: #7f8c8d;
         }}
         
+        .footer {{
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            color: #7f8c8d;
+        }}
+        
         @media print {{
             body {{
                 padding: 20px;
@@ -841,27 +892,21 @@ async def export_book(project_id: str):
             .chapter {{
                 page-break-after: always;
             }}
+            .toc-entry {{
+                page-break-inside: avoid;
+            }}
         }}
     </style>
 </head>
 <body>
     <div class="book-info">
         <h1>{project_obj.title}</h1>
-        <p><strong>Description:</strong> {project_obj.description}</p>
-        <p><strong>Language:</strong> {project_obj.language}</p>
-        <p><strong>Writing Style:</strong> {project_obj.writing_style.title()}</p>
-        <p><strong>Chapters:</strong> {project_obj.chapters}</p>
-        <p><strong>Target Pages:</strong> {project_obj.pages}</p>
         <p><strong>Generated On:</strong> {datetime.now().strftime("%B %d, %Y")}</p>
     </div>
     
-    <div class="outline">
-        <h2>📖 Book Outline</h2>
-        <div>{project_obj.outline or "No outline available"}</div>
-    </div>
+    {toc_html}
     
-    <div class="chapters">
-        <h2>📚 Chapters</h2>"""
+    <div class="chapters">"""
         
         # Add chapters with proper formatting
         if project_obj.chapters_content:
@@ -884,7 +929,7 @@ async def export_book(project_id: str):
         html_content += """
     </div>
     
-    <div style="text-align: center; margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+    <div class="footer">
         <p><em>Generated with AI Book Writer</em></p>
     </div>
 </body>
