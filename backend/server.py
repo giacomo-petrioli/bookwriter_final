@@ -546,6 +546,14 @@ async def generate_outline(request: OutlineRequest):
 - Style: {project_obj.writing_style}
 - Language: {project_obj.language}
 
+**CRITICAL: Response Format Requirements:**
+- Start IMMEDIATELY with the first chapter title in HTML format
+- Do NOT include any preamble, explanations, or introductory text
+- Do NOT include phrases like "Here is", "Ecco", "Voici", etc.
+- Do NOT include "Book Description" or "Outline" headers
+- Do NOT include any text before the first <h2> tag
+- Response must begin directly with: <h2>Chapter 1: [Creative Title]</h2>
+
 **Requirements:**
 1. Create exactly {project_obj.chapters} expressive, thematic chapter titles that capture the essence of each chapter
 2. Each chapter: 3-5 sentences summary + 3-5 key points
@@ -579,7 +587,7 @@ async def generate_outline(request: OutlineRequest):
 **Book Description:**
 {project_obj.description}
 
-Create a comprehensive outline that flows logically from chapter 1 to {project_obj.chapters}. Use natural, engaging language that feels authentic and avoids overly formal or artificial phrasing. Focus on creating compelling, creative chapter titles that will draw readers in."""
+Begin your response immediately with the first chapter title. Do not include any explanatory text, preambles, or introductions."""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
