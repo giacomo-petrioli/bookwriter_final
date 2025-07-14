@@ -445,7 +445,17 @@ async def generate_outline(request: OutlineRequest):
 - Provides clear learning objectives per section
 - Includes practical applications and insights"""
         
-        # Optimized outline generation prompt
+        # Enhanced outline generation prompt for consistency and naturalness
+        language_instructions = ""
+        if project_obj.language.lower() != "english":
+            language_instructions = f"""
+**Language Requirements for {project_obj.language}:**
+- Use natural, fluent {project_obj.language} that feels authentic to native speakers
+- Employ idiomatic expressions and natural phrasing typical of {project_obj.language} literature
+- Avoid literal translations or awkward constructions
+- Use appropriate cultural references and context for {project_obj.language} readers
+- Maintain consistent tone and style throughout all content"""
+
         prompt = f"""Create a detailed book outline for "{project_obj.title}":
 
 **Book Details:**
@@ -463,10 +473,17 @@ async def generate_outline(request: OutlineRequest):
 **Style Guide:**
 {style_instructions}
 
+**Narrative Voice Consistency:**
+- Choose a consistent narrative voice (first-person "I" or third-person "he/she/they") and maintain it throughout
+- Ensure the chosen voice fits the writing style and subject matter
+- Never switch between narrative voices within the same context
+
+{language_instructions}
+
 **Book Description:**
 {project_obj.description}
 
-Create a comprehensive outline that flows logically from chapter 1 to {project_obj.chapters}."""
+Create a comprehensive outline that flows logically from chapter 1 to {project_obj.chapters}. Use natural, engaging language that feels authentic and avoids overly formal or artificial phrasing."""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
