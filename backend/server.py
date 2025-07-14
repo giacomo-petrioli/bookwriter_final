@@ -81,29 +81,38 @@ def get_style_instructions(writing_style: str, content_type: str = "outline"):
     
     styles = {
         "story": {
-            "outline": """Create a story-focused outline that:
-- Develops compelling character arcs and relationships
-- Crafts engaging plot points and narrative hooks
-- Maintains consistent pacing and tension
-- Builds immersive story worlds and settings
+            "outline": """Create a story outline that:
+- Develops compelling characters with distinct personalities and voices
+- Crafts engaging plot points with emotional depth and conflict
+- Maintains consistent pacing with varied scene types (dialogue, action, reflection)
+- Builds immersive story worlds with vivid settings and atmosphere
 - Weaves subplots seamlessly into the main narrative
-- Creates emotional resonance and character growth
-- Uses natural scene and chapter transitions""",
-            "chapter": """Write in a fluid, narrative style that:
-- Focuses on storytelling and character development
-- Uses natural dialogue and descriptive prose
-- Maintains narrative flow without excessive sub-headings
-- Creates immersive scenes and situations
-- Keeps the reader engaged with story progression
-- Uses minimal structural breaks within chapters
-- Develops character emotions and relationships""",
-            "formatting": """Use minimal HTML formatting for story flow:
-- <h2> for chapter titles with chapter names
-- <p> for paragraphs (the main content)
-- <em> for emphasis, thoughts, or internal dialogue
-- <strong> for important dialogue or key moments
-- Avoid excessive <h3> tags within chapters
-- Focus on smooth paragraph transitions"""
+- Creates emotional resonance through character relationships and growth
+- Uses natural scene transitions and chapter hooks
+- Balances showing vs. telling throughout the narrative
+- Includes opportunities for authentic dialogue and character interaction""",
+            "chapter": """Write in a story style that:
+- Creates compelling characters with unique voices and speech patterns
+- Uses natural, authentic dialogue that reveals character personality
+- Balances narrative description with action and conversation
+- Shows character emotions through actions and dialogue, not just description
+- Includes varied sentence structures and paragraph lengths for natural flow
+- Uses specific, sensory details to create vivid scenes
+- Alternates between intimate character moments and broader plot advancement
+- Incorporates subtext and emotional depth in character interactions
+- Uses dialogue to advance plot and reveal character development
+- Avoids having characters speak in the same formal register as the narrator
+- Includes natural speech patterns, contractions, and conversational rhythms
+- Breaks up exposition with engaging dialogue and action sequences""",
+            "formatting": """Use story HTML formatting:
+- <h2> for chapter titles with evocative, atmospheric names
+- <h3> for scene breaks or major story sections
+- <p> for narrative paragraphs with varied lengths
+- Use frequent paragraph breaks for dialogue and action
+- Format dialogue clearly with proper speaker attribution
+- <strong> for emphasis and important moments
+- <em> for internal thoughts and emphasis
+- Structure content with natural scene transitions and pacing"""
         },
         "descriptive": {
             "outline": """Create a structured informational outline that:
