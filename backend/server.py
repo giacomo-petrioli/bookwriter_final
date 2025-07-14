@@ -349,6 +349,31 @@ def clean_ai_response(response: str) -> str:
     cleaned_response = cleaned_response.replace('```html', '').replace('```', '')
     cleaned_response = cleaned_response.strip()
     
+    # Remove common AI preamble patterns in multiple languages
+    preamble_patterns = [
+        r'^.*?(Here is|Ecco|Voici|Aquí está|Hier ist).*?(?=<h2>|Chapter|Capitolo|Chapitre|Capítulo|Kapitel)',
+        r'^.*?(detailed outline|bozza dettagliata|plan détaillé|esquema detallado).*?(?=<h2>|Chapter|Capitolo|Chapitre|Capítulo|Kapitel)',
+        r'^.*?(following your specifications|secondo le tue specifiche|selon vos spécifications|siguiendo sus especificaciones).*?(?=<h2>|Chapter|Capitolo|Chapitre|Capítulo|Kapitel)',
+        r'^.*?(\*\*\*|---|\*\*.*?\*\*).*?(?=<h2>|Chapter|Capitolo|Chapitre|Capítulo|Kapitel)',
+        r'^.*?(Book Description|Descrizione del libro|Description du livre|Descripción del libro).*?(?=<h2>|Chapter|Capitolo|Chapitre|Capítulo|Kapitel)',
+        r'^.*?(Outline|Schema|Plan|Esquema|Gliederung).*?(?=<h2>|Chapter|Capitolo|Chapitre|Capítulo|Kapitel)',
+        r'^.*?(?:Certainly|Certamente|Certainement|Ciertamente|Sicherlich).*?(?=<h2>|Chapter|Capitolo|Chapitre|Capítulo|Kapitel)',
+        r'^[^<]*(?=<h2>)',  # Remove any text before first h2 tag
+        r'^.*?(?=<h2>Chapter|<h2>Capitolo|<h2>Chapitre|<h2>Capítulo|<h2>Kapitel)',  # Remove text before chapter headers
+    ]
+    
+    for pattern in preamble_patterns:
+        cleaned_response = re.sub(pattern, '', cleaned_response, flags=re.DOTALL | re.IGNORECASE)
+    
+    cleaned_response = cleaned_response.strip()
+    
+    # Clean up chapter title formatting issues
+    # Fix duplicated chapter titles
+    cleaned_response = re.sub(r'<h2>([^<]+)</h2>\s*#+\s*\1', r'<h2>\1</h2>', cleaned_response, flags=re.IGNORECASE)
+    
+    # Remove standalone markdown headers that might duplicate HTML headers
+    cleaned_response = re.sub(r'\n#+\s*([^\n]+)\n(?=\s*<h2>)', '', cleaned_response)
+    
     # Enhance HTML formatting with proper spacing
     cleaned_response = cleaned_response.replace('<h1>', '\n\n<h1>').replace('</h1>', '</h1>\n\n')
     cleaned_response = cleaned_response.replace('<h2>', '\n\n<h2>').replace('</h2>', '</h2>\n\n')
@@ -361,6 +386,9 @@ def clean_ai_response(response: str) -> str:
     # Clean up excessive spacing
     cleaned_response = re.sub(r'\n{3,}', '\n\n', cleaned_response)
     cleaned_response = cleaned_response.strip()
+    
+    # Final cleanup of any remaining unwanted text patterns
+    cleaned_response = re.sub(r'^[^<]*?(?=<h2>)', '', cleaned_response, flags=re.DOTALL)
     
     return cleaned_response
 
