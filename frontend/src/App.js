@@ -208,55 +208,37 @@ const BookWriter = () => {
 
     setGeneratingAllChapters(true);
     setChapterProgress(0);
-    setCurrentStep(4); // Move to writing step
-    
+    const generatedChapters = {};
+
     try {
-      const totalChapters = currentProject.chapters;
-      const generatedChapters = {};
-      
-      // Generate chapters one by one to avoid timeouts
-      for (let chapterNum = 1; chapterNum <= totalChapters; chapterNum++) {
-        try {
-          // Update progress and current chapter being generated
-          setChapterProgress(Math.round(((chapterNum - 1) / totalChapters) * 100));
-          setGeneratingChapterNum(chapterNum);
-          
-          const response = await axios.post(`${API}/generate-chapter`, {
-            project_id: currentProject.id,
-            chapter_number: chapterNum
-          });
-          
-          if (response.data && response.data.chapter_content) {
-            generatedChapters[chapterNum.toString()] = response.data.chapter_content;
-          }
-          
-          // Small delay to avoid overwhelming the API
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-        } catch (error) {
-          console.error(`Error generating chapter ${chapterNum}:`, error);
-          // Add error placeholder for failed chapters
-          generatedChapters[chapterNum.toString()] = `<h2>Chapter ${chapterNum}</h2><p><em>Error generating this chapter. Please try regenerating individually.</em></p>`;
-        }
+      for (let i = 1; i <= currentProject.chapters; i++) {
+        setGeneratingChapterNum(i);
+        const response = await axios.post(`${API}/generate-chapter`, {
+          project_id: currentProject.id,
+          chapter_number: i
+        });
+        
+        generatedChapters[i] = response.data.chapter_content;
+        setChapterProgress(Math.round((i / currentProject.chapters) * 100));
       }
       
-      // Update progress to 100%
-      setChapterProgress(100);
-      
-      // Set all chapters
       setAllChapters(generatedChapters);
+      setCurrentStep(4);
       
-      // Update current project with generated chapters
-      setCurrentProject(prev => ({
-        ...prev,
-        chapters_content: generatedChapters
-      }));
+      // Fix Chapter 1 editor bug - ensure Chapter 1 content is loaded immediately
+      setCurrentChapter(1);
+      if (generatedChapters[1]) {
+        setChapterContent(generatedChapters[1]);
+      } else {
+        setChapterContent("");
+      }
       
     } catch (error) {
       console.error("Error generating chapters:", error);
-      alert("Error generating chapters. Please try again.");
+      alert("Error generating chapters");
     } finally {
       setGeneratingAllChapters(false);
+      setGeneratingChapterNum(0);
     }
   };
 
