@@ -610,10 +610,11 @@ async def root():
     return {"message": "AI Book Writer API"}
 
 @api_router.post("/projects", response_model=BookProject)
-async def create_project(project_data: BookProjectCreate):
+async def create_project(project_data: BookProjectCreate, current_user: User = Depends(get_current_user)):
     """Create a new book project"""
     try:
         project_dict = project_data.dict()
+        project_dict["user_id"] = current_user.id  # Associate with current user
         project_obj = BookProject(**project_dict)
         await db.book_projects.insert_one(project_obj.dict())
         return project_obj
@@ -621,19 +622,19 @@ async def create_project(project_data: BookProjectCreate):
         raise HTTPException(status_code=500, detail=f"Error creating project: {str(e)}")
 
 @api_router.get("/projects", response_model=List[BookProject])
-async def get_projects():
-    """Get all book projects"""
+async def get_projects(current_user: User = Depends(get_current_user)):
+    """Get all book projects for the current user"""
     try:
-        projects = await db.book_projects.find().to_list(1000)
+        projects = await db.book_projects.find({"user_id": current_user.id}).to_list(1000)
         return [BookProject(**project) for project in projects]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching projects: {str(e)}")
 
 @api_router.get("/projects/{project_id}", response_model=BookProject)
-async def get_project(project_id: str):
+async def get_project(project_id: str, current_user: User = Depends(get_current_user)):
     """Get a specific book project"""
     try:
-        project = await db.book_projects.find_one({"id": project_id})
+        project = await db.book_projects.find_one({"id": project_id, "user_id": current_user.id})
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
         return BookProject(**project)
