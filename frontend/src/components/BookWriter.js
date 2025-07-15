@@ -214,6 +214,25 @@ const BookWriter = () => {
     }
   };
 
+  const saveOutline = async () => {
+    try {
+      setSavingOutline(true);
+      await axios.put(`${API}/update-outline`, {
+        project_id: currentProject.id,
+        outline: editableOutline
+      });
+      setOutline(editableOutline);
+      setIsEditingOutline(false);
+    } catch (error) {
+      console.error('Error saving outline:', error);
+      if (error.response?.status === 401) {
+        await logout();
+      }
+    } finally {
+      setSavingOutline(false);
+    }
+  };
+
   const saveChapter = async () => {
     try {
       setSavingChapter(true);
