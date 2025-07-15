@@ -1222,39 +1222,39 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
         
-        # Professional book styles
+        # Professional book styles - standardized to match DOCX
         styles = getSampleStyleSheet()
         
         # Title page styles
         title_style = ParagraphStyle(
             'BookTitle',
             parent=styles['Title'],
-            fontSize=28,
-            spaceAfter=40,
+            fontSize=24,  # Standardized size
+            spaceAfter=30,
             alignment=1,  # Center alignment
             textColor=HexColor('#1a1a1a'),
-            fontName='Helvetica-Bold'
+            fontName='Times-Bold'  # Standardized to Times family
         )
         
         author_style = ParagraphStyle(
             'Author',
             parent=styles['Normal'],
-            fontSize=16,
+            fontSize=14,  # Standardized size
             spaceAfter=20,
             alignment=1,  # Center alignment
             textColor=HexColor('#666666'),
-            fontName='Helvetica'
+            fontName='Times-Roman'  # Standardized to Times family
         )
         
         # Table of Contents styles
         toc_title_style = ParagraphStyle(
             'TOCTitle',
             parent=styles['Heading1'],
-            fontSize=22,
+            fontSize=20,  # Standardized size
             spaceAfter=30,
             textColor=HexColor('#2c3e50'),
             alignment=1,  # Center alignment
-            fontName='Helvetica-Bold'
+            fontName='Times-Bold'  # Standardized to Times family
         )
         
         toc_entry_style = ParagraphStyle(
@@ -1264,19 +1264,19 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
             spaceAfter=8,
             leftIndent=0,
             rightIndent=0,
-            fontName='Helvetica'
+            fontName='Times-Roman'  # Standardized to Times family
         )
         
         # Chapter styles
         chapter_title_style = ParagraphStyle(
             'ChapterTitle',
             parent=styles['Heading1'],
-            fontSize=18,
+            fontSize=16,  # Standardized size
             spaceAfter=24,
             spaceBefore=36,
             textColor=HexColor('#2c3e50'),
             alignment=1,  # Center alignment
-            fontName='Helvetica-Bold'
+            fontName='Times-Bold'  # Standardized to Times family
         )
         
         chapter_body_style = ParagraphStyle(
@@ -1285,7 +1285,7 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
             fontSize=11,
             spaceAfter=12,
             alignment=4,  # Justified
-            firstLineIndent=20,
+            firstLineIndent=18,  # Standardized to ~0.25 inches
             fontName='Times-Roman',
             leading=16
         )
@@ -1297,7 +1297,7 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
             spaceAfter=8,
             spaceBefore=8,
             alignment=4,  # Justified
-            leftIndent=30,
+            leftIndent=28,  # Standardized to ~0.4 inches
             rightIndent=10,
             fontName='Times-Roman',
             leading=16
@@ -1310,7 +1310,7 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
         content.append(Spacer(1, 100))  # Top margin
         content.append(Paragraph(project_obj.title, title_style))
         content.append(Spacer(1, 40))
-        content.append(Paragraph("Generated with AI Book Writer", author_style))
+        content.append(Paragraph("Generated with BookCraft AI", author_style))
         content.append(Spacer(1, 20))
         content.append(Paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y')}", author_style))
         content.append(PageBreak())
@@ -1328,9 +1328,9 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
         for i in range(1, project_obj.chapters + 1):
             chapter_title = chapter_titles.get(i, f"Chapter {i}")
             
-            # Create professional TOC entry
+            # Create professional TOC entry with standardized formatting
             toc_text = f"Chapter {i}: {chapter_title}"
-            dots = "." * max(5, 70 - len(toc_text))
+            dots = "." * max(5, 65 - len(toc_text) - len(str(current_page)))  # Standardized spacing
             toc_entry = f"{toc_text} {dots} {current_page}"
             content.append(Paragraph(toc_entry, toc_entry_style))
             
@@ -1353,7 +1353,7 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
                 if chapter_content:
                     # Get chapter title
                     chapter_title = chapter_titles.get(i, f"Chapter {i}")
-                    content.append(Paragraph(chapter_title, chapter_title_style))
+                    content.append(Paragraph(f"Chapter {i}: {chapter_title}", chapter_title_style))  # Standardized format
                     content.append(Spacer(1, 20))
                     
                     # Process HTML content for better formatting
