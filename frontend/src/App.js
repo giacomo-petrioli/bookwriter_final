@@ -637,9 +637,7 @@ const BookWriter = () => {
             >
               ← Back
             </button>
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">✍️</span>
-            </div>
+            <BookCraftLogo className="w-10 h-10" />
             <div>
               <h1 className="text-xl font-bold text-white">{currentProject?.title}</h1>
               <p className="text-gray-400 text-sm">{getWritingStyleDisplay(currentProject?.writing_style)}</p>
