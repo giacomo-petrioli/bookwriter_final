@@ -15,7 +15,7 @@ const UserHeader = ({ children }) => {
     <nav className="bg-black/20 backdrop-blur-sm border-b border-white/10 p-6">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-3">
-          <BookCraftLogo className="w-10 h-10" />
+          <BookCraftLogo className="w-12 h-12" />
           <h1 className="text-2xl font-bold text-white">BookCraft AI</h1>
         </div>
         
