@@ -106,6 +106,20 @@ const BookWriter = () => {
     }));
   };
 
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (formData.title && formData.description && !loading) {
+      createProject();
+    }
+  };
+
+  const handleInputKeyDown = (e) => {
+    // Prevent form submission on Enter key for input fields
+    if (e.key === 'Enter' && e.target.type !== 'textarea') {
+      e.preventDefault();
+    }
+  };
+
   const loadProject = async (projectId) => {
     try {
       setLoading(true);
