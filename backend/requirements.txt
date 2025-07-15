@@ -32,3 +32,4 @@ aiohttp
 httpx
 multidict
 attrs
+yarl
