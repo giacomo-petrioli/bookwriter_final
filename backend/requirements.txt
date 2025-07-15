@@ -40,3 +40,4 @@ httpcore
 tiktoken
 Pillow
 lxml
+propcache
