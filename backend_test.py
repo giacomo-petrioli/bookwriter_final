@@ -22,6 +22,8 @@ class BookWriterAPITester:
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         })
+        self.auth_token = None
+        self.test_user_data = None
         
     def log(self, message, level="INFO"):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
