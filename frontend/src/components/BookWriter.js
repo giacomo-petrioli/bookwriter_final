@@ -445,15 +445,15 @@ const BookWriter = () => {
                     onKeyDown={handleInputKeyDown}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                   >
-                    <option value="story">📚 Story - Fluid narrative, character-driven</option>
-                    <option value="descriptive">📖 Descriptive - Structured, informational</option>
-                    <option value="academic">🎓 Academic - Scholarly, research-based</option>
-                    <option value="technical">⚙️ Technical - Step-by-step, instructional</option>
-                    <option value="biography">👤 Biography - Life story, chronological</option>
-                    <option value="self_help">💪 Self-Help - Motivational, actionable</option>
-                    <option value="children">🧸 Children's - Age-appropriate, engaging</option>
-                    <option value="poetry">🎭 Poetry - Creative, artistic expression</option>
-                    <option value="business">💼 Business - Professional, strategic</option>
+                    <option value="story" className="bg-gray-800 text-white">📚 Story - Fluid narrative, character-driven</option>
+                    <option value="descriptive" className="bg-gray-800 text-white">📖 Descriptive - Structured, informational</option>
+                    <option value="academic" className="bg-gray-800 text-white">🎓 Academic - Scholarly, research-based</option>
+                    <option value="technical" className="bg-gray-800 text-white">⚙️ Technical - Step-by-step, instructional</option>
+                    <option value="biography" className="bg-gray-800 text-white">👤 Biography - Life story, chronological</option>
+                    <option value="self_help" className="bg-gray-800 text-white">💪 Self-Help - Motivational, actionable</option>
+                    <option value="children" className="bg-gray-800 text-white">🧸 Children's - Age-appropriate, engaging</option>
+                    <option value="poetry" className="bg-gray-800 text-white">🎭 Poetry - Creative, artistic expression</option>
+                    <option value="business" className="bg-gray-800 text-white">💼 Business - Professional, strategic</option>
                   </select>
                 </div>
               </div>
