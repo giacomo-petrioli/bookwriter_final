@@ -31,3 +31,4 @@ openai
 aiohttp
 httpx
 multidict
+attrs
