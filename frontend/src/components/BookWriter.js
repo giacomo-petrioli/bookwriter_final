@@ -825,7 +825,7 @@ const BookWriter = () => {
                         )}
                       </button>
                       {showExportDropdown && (
-                        <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-48 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 shadow-xl">
+                        <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 w-48 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 shadow-xl z-50">
                           <button
                             onClick={() => exportBook('pdf')}
                             className="w-full px-4 py-2 text-left text-white hover:bg-white/20 transition-colors rounded-t-lg"
