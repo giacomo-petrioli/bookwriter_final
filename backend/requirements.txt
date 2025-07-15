@@ -39,3 +39,4 @@ distro
 httpcore
 tiktoken
 Pillow
+lxml
