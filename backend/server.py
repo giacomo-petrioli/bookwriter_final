@@ -791,11 +791,11 @@ Begin your response immediately with the first chapter title. Do not include any
 
 
 @api_router.post("/generate-chapter")
-async def generate_chapter(request: ChapterRequest):
+async def generate_chapter(request: ChapterRequest, current_user: User = Depends(get_current_user)):
     """Generate a specific chapter using Gemini 2.5 Flash-Lite AI"""
     try:
-        # Get project details
-        project = await db.book_projects.find_one({"id": request.project_id})
+        # Get project details and verify ownership
+        project = await db.book_projects.find_one({"id": request.project_id, "user_id": current_user.id})
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
         
