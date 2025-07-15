@@ -2492,21 +2492,21 @@ As we stand at this technological crossroads, understanding the implications of 
             return False
 
     def run_all_tests(self):
-        """Run all backend tests with focus on enhanced literary content quality"""
+        """Run all backend tests with focus on authentication system testing"""
         self.log("=" * 80)
         self.log("STARTING COMPREHENSIVE AI BOOK WRITER BACKEND TESTING")
-        self.log("Focus: Enhanced Literary Content Quality Improvements")
+        self.log("Focus: Authentication System Testing (BookCraft AI)")
         self.log("=" * 80)
         
         test_results = {}
         
-        # Test sequence - prioritizing the review request requirements
+        # Test sequence - prioritizing authentication system as requested
         tests = [
+            ("🔐 PRIORITY: Authentication System Comprehensive", self.test_authentication_system_comprehensive),
             ("API Health Check", self.test_api_health),
             ("Project Creation", self.test_create_project),
             ("Project Retrieval", self.test_get_projects),
             ("Specific Project Retrieval", self.test_get_specific_project),
-            ("🎯 PRIORITY: Enhanced Literary Content Quality", self.test_enhanced_literary_content_quality),
             ("AI Outline Generation", self.test_generate_outline),
             ("AI Chapter Generation", self.test_generate_chapter),
             ("Story Style Project", self.test_story_style_project),
