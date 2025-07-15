@@ -1412,10 +1412,11 @@ def process_html_for_pdf(html_content, body_style, dialogue_style):
     return content
 
 @api_router.get("/export-book-docx/{project_id}")
-async def export_book_docx(project_id: str):
+async def export_book_docx(project_id: str, current_user: User = Depends(get_current_user)):
     """Export book as DOCX with professional book formatting"""
     try:
-        project = await db.book_projects.find_one({"id": project_id})
+        # Get project and verify ownership
+        project = await db.book_projects.find_one({"id": project_id, "user_id": current_user.id})
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
         
