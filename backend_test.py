@@ -2503,7 +2503,7 @@ As we stand at this technological crossroads, understanding the implications of 
         # Test sequence - prioritizing authentication system as requested
         tests = [
             ("🔐 PRIORITY: Authentication System Comprehensive", self.test_authentication_system_comprehensive),
-            ("API Health Check", self.test_api_health),
+            ("API Health Check", self.test_auth_health_check),
             ("Project Creation", self.test_create_project),
             ("Project Retrieval", self.test_get_projects),
             ("Specific Project Retrieval", self.test_get_specific_project),
