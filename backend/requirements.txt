@@ -36,3 +36,4 @@ yarl
 aiohappyeyeballs
 aiosignal
 distro
+httpcore
