@@ -33,3 +33,4 @@ httpx
 multidict
 attrs
 yarl
+aiohappyeyeballs
