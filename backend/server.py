@@ -419,6 +419,131 @@ def clean_ai_response(response: str) -> str:
     
     return cleaned_response
 
+# Authentication helper functions
+async def get_current_user(authorization: str = Header(None)):
+    """Get current user from session token"""
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authorization header required")
+    
+    try:
+        # Extract token from Bearer header
+        if authorization.startswith("Bearer "):
+            token = authorization.split(" ")[1]
+        else:
+            token = authorization
+        
+        # Find session in database
+        session = await db.user_sessions.find_one({"session_token": token})
+        if not session:
+            raise HTTPException(status_code=401, detail="Invalid session token")
+        
+        # Check if session is expired
+        if datetime.utcnow() > session["expires_at"]:
+            await db.user_sessions.delete_one({"session_token": token})
+            raise HTTPException(status_code=401, detail="Session expired")
+        
+        # Get user data
+        user = await db.users.find_one({"id": session["user_id"]})
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        
+        return User(**user)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid session token")
+
+async def create_user_session(user_id: str, session_token: str) -> UserSession:
+    """Create a new user session"""
+    expires_at = datetime.utcnow() + timedelta(days=7)
+    session = UserSession(
+        user_id=user_id,
+        session_token=session_token,
+        expires_at=expires_at
+    )
+    await db.user_sessions.insert_one(session.dict())
+    return session
+
+# Authentication endpoints
+@api_router.post("/auth/session")
+async def authenticate_session(request: AuthSessionRequest):
+    """Authenticate user session with Emergent auth"""
+    try:
+        # Call Emergent auth API
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": request.session_id}
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=401, detail="Invalid session ID")
+            
+            auth_data = response.json()
+            
+            # Check if user exists
+            existing_user = await db.users.find_one({"email": auth_data["email"]})
+            
+            if existing_user:
+                user = User(**existing_user)
+            else:
+                # Create new user
+                user = User(
+                    email=auth_data["email"],
+                    name=auth_data["name"],
+                    picture=auth_data.get("picture")
+                )
+                await db.users.insert_one(user.dict())
+            
+            # Create user session
+            session = await create_user_session(user.id, auth_data["session_token"])
+            
+            return {
+                "user": UserProfile(
+                    id=user.id,
+                    email=user.email,
+                    name=user.name,
+                    picture=user.picture
+                ),
+                "session_token": auth_data["session_token"],
+                "expires_at": session.expires_at.isoformat()
+            }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Authentication failed: {str(e)}")
+
+@api_router.get("/auth/profile")
+async def get_user_profile(current_user: User = Depends(get_current_user)):
+    """Get current user profile"""
+    return UserProfile(
+        id=current_user.id,
+        email=current_user.email,
+        name=current_user.name,
+        picture=current_user.picture
+    )
+
+@api_router.post("/auth/logout")
+async def logout(authorization: str = Header(None)):
+    """Logout user by invalidating session"""
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authorization header required")
+    
+    try:
+        # Extract token from Bearer header
+        if authorization.startswith("Bearer "):
+            token = authorization.split(" ")[1]
+        else:
+            token = authorization
+        
+        # Delete session from database
+        await db.user_sessions.delete_one({"session_token": token})
+        
+        return {"message": "Logged out successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Logout failed: {str(e)}")
+
 # Helper function to extract chapter titles from outline
 def extract_chapter_titles(outline: str) -> dict:
     """Extract chapter titles from the outline HTML"""
