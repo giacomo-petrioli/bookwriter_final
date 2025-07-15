@@ -550,7 +550,7 @@ const BookWriter = () => {
               Export Book
             </button>
             {showExportDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 shadow-xl">
+              <div className="absolute right-0 mt-2 w-48 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 shadow-xl z-50">
                 <button
                   onClick={() => exportBook('pdf')}
                   className="w-full px-4 py-2 text-left text-white hover:bg-white/20 transition-colors"
@@ -575,8 +575,8 @@ const BookWriter = () => {
         )}
       </UserHeader>
       
-      <div className="container mx-auto px-6 py-8">
-        <div className="max-w-6xl mx-auto">
+      <div className="container mx-auto px-6 py-8 min-h-screen">
+        <div className="max-w-6xl mx-auto min-h-full">
           {/* Project Info */}
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">{currentProject?.title}</h2>
