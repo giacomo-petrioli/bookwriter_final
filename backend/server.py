@@ -81,6 +81,15 @@ class BookProjectCreate(BaseModel):
     language: str
     writing_style: str = "story"  # "story", "descriptive", "academic", "technical", "biography", "self_help", "children", "poetry", "business"
 
+class AuthSessionRequest(BaseModel):
+    session_id: str
+
+class UserProfile(BaseModel):
+    id: str
+    email: str
+    name: str
+    picture: Optional[str] = None
+
 class OutlineRequest(BaseModel):
     project_id: str
 
