@@ -644,11 +644,11 @@ async def get_project(project_id: str, current_user: User = Depends(get_current_
         raise HTTPException(status_code=500, detail=f"Error fetching project: {str(e)}")
 
 @api_router.post("/generate-outline")
-async def generate_outline(request: OutlineRequest):
+async def generate_outline(request: OutlineRequest, current_user: User = Depends(get_current_user)):
     """Generate book outline using Gemini 2.5 Flash-Lite AI"""
     try:
-        # Get project details
-        project = await db.book_projects.find_one({"id": request.project_id})
+        # Get project details and verify ownership
+        project = await db.book_projects.find_one({"id": request.project_id, "user_id": current_user.id})
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
         
