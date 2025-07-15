@@ -973,7 +973,7 @@ async def update_chapter(request: ChapterUpdate, current_user: User = Depends(ge
         raise HTTPException(status_code=500, detail=f"Error updating chapter: {str(e)}")
 
 @api_router.get("/export-book/{project_id}")
-async def export_book(project_id: str):
+async def export_book(project_id: str, current_user: User = Depends(get_current_user)):
     """Export book as HTML with table of contents only"""
     try:
         project = await db.book_projects.find_one({"id": project_id})
