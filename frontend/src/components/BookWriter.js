@@ -425,12 +425,12 @@ const BookWriter = () => {
                     onKeyDown={handleInputKeyDown}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                   >
-                    <option value="English">English</option>
-                    <option value="Spanish">Spanish</option>
-                    <option value="French">French</option>
-                    <option value="German">German</option>
-                    <option value="Italian">Italian</option>
-                    <option value="Portuguese">Portuguese</option>
+                    <option value="English" className="bg-gray-800 text-white">English</option>
+                    <option value="Spanish" className="bg-gray-800 text-white">Spanish</option>
+                    <option value="French" className="bg-gray-800 text-white">French</option>
+                    <option value="German" className="bg-gray-800 text-white">German</option>
+                    <option value="Italian" className="bg-gray-800 text-white">Italian</option>
+                    <option value="Portuguese" className="bg-gray-800 text-white">Portuguese</option>
                   </select>
                 </div>
                 
