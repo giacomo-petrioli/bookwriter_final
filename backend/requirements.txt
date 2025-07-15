@@ -37,3 +37,4 @@ aiohappyeyeballs
 aiosignal
 distro
 httpcore
+tiktoken
