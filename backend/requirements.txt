@@ -34,3 +34,4 @@ multidict
 attrs
 yarl
 aiohappyeyeballs
+aiosignal
