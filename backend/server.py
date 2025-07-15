@@ -976,7 +976,8 @@ async def update_chapter(request: ChapterUpdate, current_user: User = Depends(ge
 async def export_book(project_id: str, current_user: User = Depends(get_current_user)):
     """Export book as HTML with table of contents only"""
     try:
-        project = await db.book_projects.find_one({"id": project_id})
+        # Get project and verify ownership
+        project = await db.book_projects.find_one({"id": project_id, "user_id": current_user.id})
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
         
