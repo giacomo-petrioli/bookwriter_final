@@ -348,7 +348,7 @@ const BookWriter = () => {
               Create New Book
             </h3>
             
-            <div className="space-y-6">
+            <form onSubmit={handleFormSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-3">
                   Book Title *
@@ -358,6 +358,7 @@ const BookWriter = () => {
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
+                  onKeyDown={handleInputKeyDown}
                   placeholder="Enter your book title..."
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                 />
@@ -371,6 +372,7 @@ const BookWriter = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
+                  onKeyDown={handleInputKeyDown}
                   rows="4"
                   placeholder="Describe what your book is about..."
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
@@ -387,6 +389,7 @@ const BookWriter = () => {
                     name="pages"
                     value={formData.pages}
                     onChange={handleInputChange}
+                    onKeyDown={handleInputKeyDown}
                     min="10"
                     max="1000"
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
@@ -402,6 +405,7 @@ const BookWriter = () => {
                     name="chapters"
                     value={formData.chapters}
                     onChange={handleInputChange}
+                    onKeyDown={handleInputKeyDown}
                     min="1"
                     max="50"
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
@@ -418,6 +422,7 @@ const BookWriter = () => {
                     name="language"
                     value={formData.language}
                     onChange={handleInputChange}
+                    onKeyDown={handleInputKeyDown}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                   >
                     <option value="English">English</option>
@@ -437,6 +442,7 @@ const BookWriter = () => {
                     name="writing_style"
                     value={formData.writing_style}
                     onChange={handleInputChange}
+                    onKeyDown={handleInputKeyDown}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                   >
                     <option value="story">📚 Story - Fluid narrative, character-driven</option>
@@ -453,7 +459,7 @@ const BookWriter = () => {
               </div>
               
               <button
-                onClick={createProject}
+                type="submit"
                 disabled={!formData.title || !formData.description || loading}
                 className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-semibold text-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -469,7 +475,7 @@ const BookWriter = () => {
                   "Create Book"
                 )}
               </button>
-            </div>
+            </form>
           </div>
           
           {/* Existing Books */}
