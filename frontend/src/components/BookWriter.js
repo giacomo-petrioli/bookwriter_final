@@ -37,6 +37,9 @@ const BookWriter = () => {
   const [savingChapter, setSavingChapter] = useState(false);
   const [exportingBook, setExportingBook] = useState(false);
   const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const [isEditingOutline, setIsEditingOutline] = useState(false);
+  const [editableOutline, setEditableOutline] = useState("");
+  const [savingOutline, setSavingOutline] = useState(false);
 
   // Rich text editor configuration for better HTML formatting
   const quillModules = {
