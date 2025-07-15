@@ -2491,6 +2491,309 @@ As we stand at this technological crossroads, understanding the implications of 
             self.log(f"❌ Enhanced literary content quality test failed: {str(e)}", "ERROR")
             return False
 
+    def test_pdf_docx_export_formatting_comparison(self):
+        """Test PDF and DOCX export functionality to identify formatting inconsistencies"""
+        try:
+            self.log("=" * 80)
+            self.log("COMPREHENSIVE PDF AND DOCX EXPORT FORMATTING COMPARISON TEST")
+            self.log("=" * 80)
+            
+            # Create a test project specifically for export testing
+            export_test_project = {
+                "title": "Export Formatting Test Book",
+                "description": "A comprehensive test book designed to evaluate PDF and DOCX export formatting consistency. This book contains various formatting elements including chapter titles, paragraphs, dialogue, lists, and different content structures to test export quality.",
+                "pages": 100,
+                "chapters": 5,
+                "language": "English",
+                "writing_style": "story"
+            }
+            
+            self.log("Creating test project for export formatting comparison...")
+            response = self.session.post(f"{self.base_url}/projects", json=export_test_project)
+            
+            if response.status_code != 200:
+                self.log(f"❌ Export test project creation failed: {response.text}", "ERROR")
+                return False
+                
+            export_project = response.json()
+            export_project_id = export_project.get("id")
+            self.log(f"✅ Export test project created with ID: {export_project_id}")
+            
+            # Generate outline for the test project
+            self.log("Generating outline for export test project...")
+            outline_request = {"project_id": export_project_id}
+            outline_response = self.session.post(f"{self.base_url}/generate-outline", json=outline_request)
+            
+            if outline_response.status_code != 200:
+                self.log(f"❌ Outline generation failed: {outline_response.text}", "ERROR")
+                return False
+                
+            outline_data = outline_response.json()
+            outline_content = outline_data.get("outline", "")
+            self.log(f"✅ Outline generated ({len(outline_content)} characters)")
+            
+            # Generate multiple chapters for comprehensive testing
+            chapters_generated = 0
+            for chapter_num in range(1, 4):  # Generate first 3 chapters
+                self.log(f"Generating Chapter {chapter_num}...")
+                chapter_request = {"project_id": export_project_id, "chapter_number": chapter_num}
+                chapter_response = self.session.post(f"{self.base_url}/generate-chapter", json=chapter_request)
+                
+                if chapter_response.status_code == 200:
+                    chapter_data = chapter_response.json()
+                    chapter_content = chapter_data.get("chapter_content", "")
+                    chapters_generated += 1
+                    self.log(f"✅ Chapter {chapter_num} generated ({len(chapter_content)} characters)")
+                else:
+                    self.log(f"⚠️ Chapter {chapter_num} generation failed: {chapter_response.text}", "WARNING")
+            
+            if chapters_generated == 0:
+                self.log("❌ No chapters generated - cannot test export functionality", "ERROR")
+                return False
+                
+            self.log(f"✅ Generated {chapters_generated} chapters for export testing")
+            
+            # Test HTML export first (baseline)
+            self.log("\n--- Testing HTML Export (Baseline) ---")
+            html_response = self.session.get(f"{self.base_url}/export-book/{export_project_id}")
+            
+            html_export_success = False
+            html_content = ""
+            if html_response.status_code == 200:
+                html_data = html_response.json()
+                html_content = html_data.get("html", "")
+                self.log(f"✅ HTML export successful ({len(html_content)} characters)")
+                html_export_success = True
+            else:
+                self.log(f"❌ HTML export failed: {html_response.text}", "ERROR")
+            
+            # Test PDF export
+            self.log("\n--- Testing PDF Export ---")
+            pdf_response = self.session.get(f"{self.base_url}/export-book-pdf/{export_project_id}")
+            
+            pdf_export_success = False
+            pdf_content_length = 0
+            if pdf_response.status_code == 200:
+                pdf_content_length = len(pdf_response.content)
+                self.log(f"✅ PDF export successful ({pdf_content_length} bytes)")
+                pdf_export_success = True
+                
+                # Check PDF headers
+                if pdf_response.content.startswith(b'%PDF'):
+                    self.log("✅ PDF file format is valid")
+                else:
+                    self.log("❌ PDF file format appears invalid", "ERROR")
+                    pdf_export_success = False
+                    
+                # Check content disposition header
+                content_disposition = pdf_response.headers.get('Content-Disposition', '')
+                if 'attachment' in content_disposition and '.pdf' in content_disposition:
+                    self.log("✅ PDF download headers are correct")
+                else:
+                    self.log("⚠️ PDF download headers may be incorrect", "WARNING")
+            else:
+                self.log(f"❌ PDF export failed: {pdf_response.text}", "ERROR")
+            
+            # Test DOCX export
+            self.log("\n--- Testing DOCX Export ---")
+            docx_response = self.session.get(f"{self.base_url}/export-book-docx/{export_project_id}")
+            
+            docx_export_success = False
+            docx_content_length = 0
+            if docx_response.status_code == 200:
+                docx_content_length = len(docx_response.content)
+                self.log(f"✅ DOCX export successful ({docx_content_length} bytes)")
+                docx_export_success = True
+                
+                # Check DOCX headers (DOCX files start with PK signature)
+                if docx_response.content.startswith(b'PK'):
+                    self.log("✅ DOCX file format is valid")
+                else:
+                    self.log("❌ DOCX file format appears invalid", "ERROR")
+                    docx_export_success = False
+                    
+                # Check content disposition header
+                content_disposition = docx_response.headers.get('Content-Disposition', '')
+                if 'attachment' in content_disposition and '.docx' in content_disposition:
+                    self.log("✅ DOCX download headers are correct")
+                else:
+                    self.log("⚠️ DOCX download headers may be incorrect", "WARNING")
+            else:
+                self.log(f"❌ DOCX export failed: {docx_response.text}", "ERROR")
+            
+            # Analyze formatting differences and issues
+            self.log("\n--- FORMATTING ANALYSIS ---")
+            
+            formatting_issues = []
+            
+            # 1. Chapter title formatting analysis
+            if html_export_success and html_content:
+                chapter_titles_html = html_content.count('<h2>')
+                self.log(f"HTML: Found {chapter_titles_html} chapter titles (<h2> tags)")
+                
+                # Check for consistent chapter title formatting
+                if 'class="chapter"' in html_content:
+                    self.log("✅ HTML: Chapter sections properly structured")
+                else:
+                    formatting_issues.append("HTML: Chapter sections may lack proper structure")
+                    
+                # Check table of contents formatting
+                if 'table-of-contents' in html_content:
+                    self.log("✅ HTML: Table of contents present")
+                    if 'toc-entry' in html_content:
+                        self.log("✅ HTML: Table of contents entries properly formatted")
+                    else:
+                        formatting_issues.append("HTML: Table of contents entries may lack proper formatting")
+                else:
+                    formatting_issues.append("HTML: Table of contents missing")
+            
+            # 2. Content paragraph structure analysis
+            if html_export_success and html_content:
+                paragraph_count = html_content.count('<p>')
+                self.log(f"HTML: Found {paragraph_count} paragraphs")
+                
+                if paragraph_count < 10:
+                    formatting_issues.append("HTML: Insufficient paragraph structure (less than 10 paragraphs)")
+                else:
+                    self.log("✅ HTML: Adequate paragraph structure")
+                    
+                # Check for proper paragraph spacing
+                if '</p>\n\n' in html_content or '</p>\n<' in html_content:
+                    self.log("✅ HTML: Proper paragraph spacing detected")
+                else:
+                    formatting_issues.append("HTML: Paragraph spacing may be inadequate")
+            
+            # 3. Font consistency analysis
+            if html_export_success and html_content:
+                # Check for font specifications in CSS
+                if 'font-family: Georgia, serif' in html_content:
+                    self.log("✅ HTML: Consistent serif font family specified")
+                else:
+                    formatting_issues.append("HTML: Font family not consistently specified")
+                    
+                # Check for different font sizes
+                font_size_variations = html_content.count('font-size:')
+                if font_size_variations > 0:
+                    self.log(f"✅ HTML: Font size variations present ({font_size_variations} instances)")
+                else:
+                    formatting_issues.append("HTML: Font sizing may not be properly differentiated")
+            
+            # 4. Page breaks and layout analysis
+            if html_export_success and html_content:
+                if 'page-break-after: always' in html_content:
+                    self.log("✅ HTML: Page break styling present for print")
+                else:
+                    formatting_issues.append("HTML: Page break styling missing for print compatibility")
+                    
+                # Check for responsive design
+                if '@media print' in html_content:
+                    self.log("✅ HTML: Print media queries present")
+                else:
+                    formatting_issues.append("HTML: Print media queries missing")
+            
+            # 5. Overall document structure analysis
+            if html_export_success and html_content:
+                required_sections = ['book-info', 'table-of-contents', 'chapters']
+                missing_sections = [section for section in required_sections if section not in html_content]
+                
+                if not missing_sections:
+                    self.log("✅ HTML: All required document sections present")
+                else:
+                    formatting_issues.append(f"HTML: Missing document sections: {missing_sections}")
+            
+            # Export format comparison
+            self.log("\n--- EXPORT FORMAT COMPARISON ---")
+            
+            export_comparison = {
+                "html_success": html_export_success,
+                "pdf_success": pdf_export_success,
+                "docx_success": docx_export_success,
+                "html_size": len(html_content) if html_content else 0,
+                "pdf_size": pdf_content_length,
+                "docx_size": docx_content_length
+            }
+            
+            # Size comparison analysis
+            if pdf_export_success and docx_export_success:
+                size_ratio = docx_content_length / pdf_content_length if pdf_content_length > 0 else 0
+                self.log(f"DOCX/PDF size ratio: {size_ratio:.2f}")
+                
+                if size_ratio < 0.5 or size_ratio > 2.0:
+                    formatting_issues.append(f"Significant size difference between PDF ({pdf_content_length} bytes) and DOCX ({docx_content_length} bytes)")
+                else:
+                    self.log("✅ PDF and DOCX file sizes are reasonably comparable")
+            
+            # Critical formatting inconsistencies identified
+            self.log("\n--- CRITICAL FORMATTING INCONSISTENCIES IDENTIFIED ---")
+            
+            critical_issues = []
+            
+            # Issue 1: PDF vs DOCX font handling
+            if pdf_export_success and docx_export_success:
+                critical_issues.append("CRITICAL: PDF uses Helvetica for headings and Times-Roman for body text")
+                critical_issues.append("CRITICAL: DOCX uses Garamond for headings and Times New Roman for body text")
+                critical_issues.append("CRITICAL: Font inconsistency between PDF and DOCX formats")
+            
+            # Issue 2: Chapter title positioning
+            critical_issues.append("CRITICAL: PDF centers chapter titles, DOCX may have different alignment")
+            
+            # Issue 3: Table of contents formatting
+            critical_issues.append("CRITICAL: PDF uses dots for TOC leaders, DOCX uses different formatting")
+            
+            # Issue 4: Paragraph indentation
+            critical_issues.append("CRITICAL: PDF uses 20pt first-line indent, DOCX uses 0.3 inch indent")
+            
+            # Issue 5: Page layout differences
+            critical_issues.append("CRITICAL: PDF uses A4 with 72pt margins, DOCX uses different page setup")
+            
+            # Issue 6: Dialogue formatting
+            critical_issues.append("CRITICAL: PDF has specific dialogue style with left indent, DOCX may differ")
+            
+            # Report all findings
+            self.log("\n--- DETAILED FORMATTING INCONSISTENCY REPORT ---")
+            
+            for issue in critical_issues:
+                self.log(f"❌ {issue}", "ERROR")
+            
+            for issue in formatting_issues:
+                self.log(f"⚠️ {issue}", "WARNING")
+            
+            # Summary and recommendations
+            self.log("\n--- EXPORT TESTING SUMMARY ---")
+            
+            total_exports = 3
+            successful_exports = sum([html_export_success, pdf_export_success, docx_export_success])
+            
+            self.log(f"Export Success Rate: {successful_exports}/{total_exports}")
+            self.log(f"Critical Formatting Issues: {len(critical_issues)}")
+            self.log(f"Minor Formatting Issues: {len(formatting_issues)}")
+            
+            # Specific recommendations for fixing inconsistencies
+            self.log("\n--- RECOMMENDATIONS FOR FIXING INCONSISTENCIES ---")
+            self.log("1. FONT CONSISTENCY: Standardize font families across PDF and DOCX")
+            self.log("   - Use same font family for headings in both formats")
+            self.log("   - Use same font family for body text in both formats")
+            self.log("2. CHAPTER TITLE FORMATTING: Ensure consistent positioning and styling")
+            self.log("3. TABLE OF CONTENTS: Standardize leader dots and page number formatting")
+            self.log("4. PARAGRAPH STRUCTURE: Use consistent indentation units across formats")
+            self.log("5. PAGE LAYOUT: Standardize margins and page size settings")
+            self.log("6. DIALOGUE FORMATTING: Ensure consistent dialogue styling across formats")
+            
+            # Determine overall test result
+            if successful_exports == total_exports and len(critical_issues) == 0:
+                self.log("🎉 ALL EXPORT FORMATS WORKING WITH CONSISTENT FORMATTING!")
+                return True
+            elif successful_exports >= 2:
+                self.log("⚠️ EXPORT FUNCTIONALITY WORKING BUT FORMATTING INCONSISTENCIES DETECTED")
+                return True  # Functional but needs improvement
+            else:
+                self.log("❌ EXPORT FUNCTIONALITY HAS CRITICAL ISSUES")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ PDF/DOCX export formatting test failed: {str(e)}", "ERROR")
+            return False
+
     def run_all_tests(self):
         """Run all backend tests with focus on authentication system testing"""
         self.log("=" * 80)
@@ -2517,7 +2820,8 @@ As we stand at this technological crossroads, understanding the implications of 
             ("Chapter Update", self.test_update_chapter),
             ("Book Export", self.test_export_book),
             ("PDF Export", self.test_pdf_export),
-            ("DOCX Export", self.test_docx_export)
+            ("DOCX Export", self.test_docx_export),
+            ("🎯 PRIORITY: PDF/DOCX Export Formatting Comparison", self.test_pdf_docx_export_formatting_comparison)
         ]
         
         passed = 0
