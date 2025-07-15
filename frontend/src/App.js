@@ -422,10 +422,8 @@ const BookWriter = () => {
       <nav className="bg-black/20 backdrop-blur-sm border-b border-white/10 p-6">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">✍️</span>
-            </div>
-            <h1 className="text-2xl font-bold text-white">AI BookWriter</h1>
+            <BookCraftLogo className="w-10 h-10" />
+            <h1 className="text-2xl font-bold text-white">BookCraft AI</h1>
           </div>
           <button
             onClick={() => setCurrentView('landing')}
