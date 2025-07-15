@@ -947,10 +947,10 @@ Begin your response immediately with the chapter title. Do not include any expla
 
 
 @api_router.put("/update-chapter")
-async def update_chapter(request: ChapterUpdate):
+async def update_chapter(request: ChapterUpdate, current_user: User = Depends(get_current_user)):
     """Update chapter content"""
     try:
-        project = await db.book_projects.find_one({"id": request.project_id})
+        project = await db.book_projects.find_one({"id": request.project_id, "user_id": current_user.id})
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
         
