@@ -38,3 +38,4 @@ aiosignal
 distro
 httpcore
 tiktoken
+Pillow
