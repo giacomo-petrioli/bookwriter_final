@@ -1425,51 +1425,51 @@ async def export_book_docx(project_id: str, current_user: User = Depends(get_cur
         # Create DOCX document
         doc = Document()
         
-        # Configure professional book styles
+        # Configure professional book styles - standardized to match PDF
         styles = doc.styles
         
         # Title page styling
         title_style = styles.add_style('BookTitle', WD_STYLE_TYPE.PARAGRAPH)
-        title_style.font.name = 'Garamond'
-        title_style.font.size = Inches(0.3)
+        title_style.font.name = 'Times New Roman'  # Standardized to Times family
+        title_style.font.size = Inches(0.33)  # Standardized size (24pt)
         title_style.font.bold = True
         title_style.paragraph_format.alignment = 1  # Center
-        title_style.paragraph_format.space_after = Inches(0.5)
+        title_style.paragraph_format.space_after = Inches(0.42)  # Standardized spacing
         
         # Author style
         author_style = styles.add_style('AuthorStyle', WD_STYLE_TYPE.PARAGRAPH)
-        author_style.font.name = 'Garamond'
-        author_style.font.size = Inches(0.2)
+        author_style.font.name = 'Times New Roman'  # Standardized to Times family
+        author_style.font.size = Inches(0.19)  # Standardized size (14pt)
         author_style.font.color.rgb = RGBColor(102, 102, 102)
         author_style.paragraph_format.alignment = 1  # Center
-        author_style.paragraph_format.space_after = Inches(0.3)
+        author_style.paragraph_format.space_after = Inches(0.28)  # Standardized spacing
         
         # Chapter title style
         chapter_title_style = styles.add_style('ChapterTitle', WD_STYLE_TYPE.PARAGRAPH)
-        chapter_title_style.font.name = 'Garamond'
-        chapter_title_style.font.size = Inches(0.25)
+        chapter_title_style.font.name = 'Times New Roman'  # Standardized to Times family
+        chapter_title_style.font.size = Inches(0.22)  # Standardized size (16pt)
         chapter_title_style.font.bold = True
         chapter_title_style.font.color.rgb = RGBColor(44, 62, 80)
         chapter_title_style.paragraph_format.alignment = 1  # Center
         chapter_title_style.paragraph_format.space_before = Inches(0.5)
-        chapter_title_style.paragraph_format.space_after = Inches(0.4)
+        chapter_title_style.paragraph_format.space_after = Inches(0.33)  # Standardized spacing
         
         # Body text style
         body_style = styles.add_style('BookBody', WD_STYLE_TYPE.PARAGRAPH)
-        body_style.font.name = 'Times New Roman'
-        body_style.font.size = Inches(0.15)
+        body_style.font.name = 'Times New Roman'  # Standardized to Times family
+        body_style.font.size = Inches(0.15)  # Standardized size (11pt)
         body_style.paragraph_format.alignment = 4  # Justified
-        body_style.paragraph_format.first_line_indent = Inches(0.3)
-        body_style.paragraph_format.space_after = Inches(0.15)
+        body_style.paragraph_format.first_line_indent = Inches(0.25)  # Standardized to match PDF
+        body_style.paragraph_format.space_after = Inches(0.17)  # Standardized spacing
         body_style.paragraph_format.line_spacing = 1.2
         
         # Dialogue style
         dialogue_style = styles.add_style('DialogueStyle', WD_STYLE_TYPE.PARAGRAPH)
-        dialogue_style.font.name = 'Times New Roman'
-        dialogue_style.font.size = Inches(0.15)
+        dialogue_style.font.name = 'Times New Roman'  # Standardized to Times family
+        dialogue_style.font.size = Inches(0.15)  # Standardized size (11pt)
         dialogue_style.paragraph_format.alignment = 4  # Justified
-        dialogue_style.paragraph_format.left_indent = Inches(0.4)
-        dialogue_style.paragraph_format.space_after = Inches(0.12)
+        dialogue_style.paragraph_format.left_indent = Inches(0.39)  # Standardized to match PDF
+        dialogue_style.paragraph_format.space_after = Inches(0.11)  # Standardized spacing
         dialogue_style.paragraph_format.line_spacing = 1.2
         
         # Title page
@@ -1484,7 +1484,7 @@ async def export_book_docx(project_id: str, current_user: User = Depends(get_cur
         # Author information
         author_paragraph = doc.add_paragraph()
         author_paragraph.style = author_style
-        author_run = author_paragraph.add_run("Generated with AI Book Writer")
+        author_run = author_paragraph.add_run("Generated with BookCraft AI")  # Standardized branding
         
         # Date
         date_paragraph = doc.add_paragraph()
@@ -1496,6 +1496,9 @@ async def export_book_docx(project_id: str, current_user: User = Depends(get_cur
         # Table of Contents
         toc_heading = doc.add_heading("Table of Contents", level=1)
         toc_heading.alignment = 1  # Center alignment
+        toc_heading.runs[0].font.name = 'Times New Roman'  # Standardized font
+        toc_heading.runs[0].font.size = Inches(0.28)  # Standardized size (20pt)
+        toc_heading.runs[0].font.bold = True
         
         # Extract chapter titles and create TOC
         chapter_titles = extract_chapter_titles(project_obj.outline or "")
@@ -1505,24 +1508,26 @@ async def export_book_docx(project_id: str, current_user: User = Depends(get_cur
         for i in range(1, project_obj.chapters + 1):
             chapter_title = chapter_titles.get(i, f"Chapter {i}")
             
-            # Create professional TOC entry
+            # Create professional TOC entry with standardized formatting
             toc_paragraph = doc.add_paragraph()
-            toc_paragraph.paragraph_format.space_after = Inches(0.1)
+            toc_paragraph.paragraph_format.space_after = Inches(0.11)  # Standardized spacing
             
             # Chapter info
             chapter_run = toc_paragraph.add_run(f"Chapter {i}: {chapter_title}")
-            chapter_run.font.name = 'Times New Roman'
-            chapter_run.font.size = Inches(0.14)
+            chapter_run.font.name = 'Times New Roman'  # Standardized font
+            chapter_run.font.size = Inches(0.17)  # Standardized size (12pt)
             
-            # Add dots
-            dots_text = "." * max(5, 60 - len(f"Chapter {i}: {chapter_title}") - len(str(current_page)))
+            # Add dots with standardized spacing
+            dots_text = "." * max(5, 65 - len(f"Chapter {i}: {chapter_title}") - len(str(current_page)))
             dots_run = toc_paragraph.add_run(dots_text)
             dots_run.font.color.rgb = RGBColor(189, 195, 199)  # Light gray
+            dots_run.font.name = 'Times New Roman'  # Standardized font
             
             # Add page number
             page_run = toc_paragraph.add_run(str(current_page))
             page_run.bold = True
             page_run.font.color.rgb = RGBColor(52, 152, 219)  # Blue
+            page_run.font.name = 'Times New Roman'  # Standardized font
             
             # Calculate next chapter's page
             if project_obj.chapters_content and str(i) in project_obj.chapters_content:
@@ -1541,11 +1546,11 @@ async def export_book_docx(project_id: str, current_user: User = Depends(get_cur
             for i in range(1, project_obj.chapters + 1):
                 chapter_content = project_obj.chapters_content.get(str(i), "")
                 if chapter_content:
-                    # Add chapter title
+                    # Add chapter title with standardized format
                     chapter_title = chapter_titles.get(i, f"Chapter {i}")
                     chapter_heading = doc.add_paragraph()
                     chapter_heading.style = chapter_title_style
-                    chapter_heading.add_run(chapter_title)
+                    chapter_heading.add_run(f"Chapter {i}: {chapter_title}")  # Standardized format
                     
                     # Process and add chapter content
                     process_html_for_docx(chapter_content, doc, body_style, dialogue_style)
