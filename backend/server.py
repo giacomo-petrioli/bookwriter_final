@@ -1208,10 +1208,11 @@ async def export_book(project_id: str, current_user: User = Depends(get_current_
         raise HTTPException(status_code=500, detail=f"Error exporting book: {str(e)}")
 
 @api_router.get("/export-book-pdf/{project_id}")
-async def export_book_pdf(project_id: str):
+async def export_book_pdf(project_id: str, current_user: User = Depends(get_current_user)):
     """Export book as PDF with professional book formatting"""
     try:
-        project = await db.book_projects.find_one({"id": project_id})
+        # Get project and verify ownership
+        project = await db.book_projects.find_one({"id": project_id, "user_id": current_user.id})
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
         
