@@ -409,7 +409,7 @@ const BookWriter = () => {
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/10 py-8">
         <div className="container mx-auto px-6 text-center text-gray-400">
-          <p>&copy; 2024 AI BookWriter. Powered by advanced AI technology.</p>
+          <p>&copy; 2024 BookCraft AI. Powered by advanced AI technology.</p>
         </div>
       </footer>
     </div>
