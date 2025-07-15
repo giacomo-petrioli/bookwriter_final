@@ -114,8 +114,8 @@ const BookWriter = () => {
   };
 
   const handleInputKeyDown = (e) => {
-    // Prevent form submission on Enter key for input fields
-    if (e.key === 'Enter' && e.target.type !== 'textarea') {
+    // Only prevent form submission on Enter key for non-textarea inputs
+    if (e.key === 'Enter' && e.target.type !== 'textarea' && e.target.tagName !== 'TEXTAREA') {
       e.preventDefault();
     }
   };
