@@ -249,6 +249,7 @@ const WritingInterface = React.memo(({
   updateChapterContent, 
   updateEditableOutline, 
   setIsEditingOutline, 
+  editBook,
   loading, 
   outline, 
   chapterContent, 
