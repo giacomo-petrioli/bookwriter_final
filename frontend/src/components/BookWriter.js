@@ -884,39 +884,7 @@ const BookWriter = () => {
     setEditableOutline(content);
   };
 
-// Writing Interface Component - extracted outside to prevent re-renders  
-const WritingInterface = React.memo(({ 
-  currentProject, 
-  currentStep, 
-  setCurrentView, 
-  setShowExportDropdown, 
-  showExportDropdown, 
-  exportBook, 
-  generateOutline, 
-  generateAllChapters, 
-  generateChapter, 
-  saveChapter, 
-  saveOutline, 
-  switchChapter, 
-  updateChapterContent, 
-  updateEditableOutline, 
-  setIsEditingOutline, 
-  loading, 
-  outline, 
-  chapterContent, 
-  currentChapter, 
-  allChapters, 
-  generatingAllChapters, 
-  generatingChapterNum, 
-  chapterProgress, 
-  savingChapter, 
-  exportingBook, 
-  isEditingOutline, 
-  editableOutline, 
-  savingOutline, 
-  getWritingStyleDisplay, 
-  quillModules 
-}) => (
+  // Main render
   <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
     <UserHeader>
       <button
