@@ -437,7 +437,6 @@ const BookWriter = () => {
                     name="writing_style"
                     value={formData.writing_style}
                     onChange={handleInputChange}
-                    onKeyDown={handleInputKeyDown}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                   >
                     <option value="story" className="bg-gray-800 text-white">📚 Story - Fluid narrative, character-driven</option>
