@@ -383,7 +383,7 @@ const WritingInterface = React.memo(({
                 onClick={() => {
                   if (!isEditingOutline) {
                     // Initialize editableOutline with current outline content when starting to edit
-                    setEditableOutline(outline);
+                    updateEditableOutline(outline);
                   }
                   setIsEditingOutline(!isEditingOutline);
                 }}
