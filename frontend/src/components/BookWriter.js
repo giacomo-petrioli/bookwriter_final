@@ -583,7 +583,7 @@ const BookWriter = () => {
         )}
       </UserHeader>
       
-      <div className="container mx-auto px-6 py-8 min-h-screen">
+      <div className="container mx-auto px-6 py-8 pb-32 min-h-screen">
         <div className="max-w-6xl mx-auto min-h-full">
           {/* Project Info */}
           <div className="mb-8">
