@@ -232,6 +232,335 @@ const Dashboard = React.memo(({
   </div>
 ));
 
+// Writing Interface Component - extracted outside to prevent re-renders  
+const WritingInterface = React.memo(({ 
+  currentProject, 
+  currentStep, 
+  setCurrentView, 
+  setShowExportDropdown, 
+  showExportDropdown, 
+  exportBook, 
+  generateOutline, 
+  generateAllChapters, 
+  generateChapter, 
+  saveChapter, 
+  saveOutline, 
+  switchChapter, 
+  updateChapterContent, 
+  updateEditableOutline, 
+  setIsEditingOutline, 
+  loading, 
+  outline, 
+  chapterContent, 
+  currentChapter, 
+  allChapters, 
+  generatingAllChapters, 
+  generatingChapterNum, 
+  chapterProgress, 
+  savingChapter, 
+  exportingBook, 
+  isEditingOutline, 
+  editableOutline, 
+  savingOutline, 
+  getWritingStyleDisplay, 
+  quillModules 
+}) => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <UserHeader>
+      <button
+        onClick={() => setCurrentView('dashboard')}
+        className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+      >
+        ← Back to Dashboard
+      </button>
+      {currentStep >= 4 && (
+        <div className="relative">
+          <button
+            onClick={() => setShowExportDropdown(!showExportDropdown)}
+            className="px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105"
+          >
+            Export Book
+          </button>
+          {showExportDropdown && (
+            <div className="absolute right-0 mt-2 w-48 bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-600/50 shadow-xl z-50">
+              <button
+                onClick={() => exportBook('pdf')}
+                className="w-full px-4 py-2 text-left text-white hover:bg-gray-700/80 transition-colors rounded-t-lg"
+              >
+                📄 Export as PDF
+              </button>
+              <button
+                onClick={() => exportBook('docx')}
+                className="w-full px-4 py-2 text-left text-white hover:bg-gray-700/80 transition-colors"
+              >
+                📝 Export as DOCX
+              </button>
+              <button
+                onClick={() => exportBook('html')}
+                className="w-full px-4 py-2 text-left text-white hover:bg-gray-700/80 transition-colors rounded-b-lg"
+              >
+                🌐 Export as HTML
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </UserHeader>
+    
+    <div className="container mx-auto px-6 py-8 pb-32 min-h-screen">
+      <div className="max-w-6xl mx-auto min-h-full">
+        {/* Project Info */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-white mb-2">{currentProject?.title}</h2>
+          <p className="text-gray-400">{getWritingStyleDisplay(currentProject?.writing_style)} • {currentProject?.language}</p>
+        </div>
+        
+        {/* Progress Steps */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            {[
+              { num: 1, label: "Project Setup", active: currentStep >= 1 },
+              { num: 2, label: "Generate Outline", active: currentStep >= 2 },
+              { num: 3, label: "Review Outline", active: currentStep >= 3 },
+              { num: 4, label: "Write Chapters", active: currentStep >= 4 }
+            ].map((step, index) => (
+              <div key={index} className="flex items-center">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                  step.active 
+                    ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white' 
+                    : 'bg-white/10 text-gray-400'
+                }`}>
+                  {step.num}
+                </div>
+                <span className={`ml-2 font-medium ${
+                  step.active ? 'text-white' : 'text-gray-400'
+                }`}>
+                  {step.label}
+                </span>
+                {index < 3 && (
+                  <div className={`w-16 h-0.5 mx-4 ${
+                    step.active ? 'bg-gradient-to-r from-purple-500 to-blue-500' : 'bg-white/10'
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Step Content */}
+        {currentStep === 2 && (
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
+            <h3 className="text-2xl font-bold text-white mb-6">Generate Book Outline</h3>
+            <p className="text-gray-300 mb-6">
+              Create a detailed outline for "{currentProject?.title}" with {currentProject?.chapters} chapters.
+            </p>
+            <button
+              onClick={generateOutline}
+              disabled={loading}
+              className="px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-semibold text-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+            >
+              {loading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Generating Outline...
+                </span>
+              ) : (
+                "Generate Outline"
+              )}
+            </button>
+          </div>
+        )}
+        
+        {/* Step 3: Review Outline */}
+        {currentStep === 3 && (
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-white">Review Your Outline</h3>
+              <button
+                onClick={() => setIsEditingOutline(!isEditingOutline)}
+                className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105"
+              >
+                {isEditingOutline ? 'Cancel Edit' : 'Edit Outline'}
+              </button>
+            </div>
+            
+            {isEditingOutline ? (
+              <div className="space-y-4">
+                <div className="relative">
+                  <ReactQuill
+                    value={editableOutline}
+                    onChange={updateEditableOutline}
+                    modules={quillModules}
+                    theme="snow"
+                    placeholder="Edit your outline..."
+                    className="bg-white/10 rounded-xl"
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      borderRadius: '0.75rem',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      minHeight: '400px'
+                    }}
+                  />
+                </div>
+                
+                <div className="flex gap-4">
+                  <button
+                    onClick={saveOutline}
+                    disabled={savingOutline}
+                    className="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-xl font-semibold hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+                  >
+                    {savingOutline ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Saving...
+                      </span>
+                    ) : (
+                      "Save Outline"
+                    )}
+                  </button>
+                  
+                  <button
+                    onClick={() => setIsEditingOutline(false)}
+                    className="px-6 py-3 bg-gray-600 text-white rounded-xl font-semibold hover:bg-gray-700 transition-all duration-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+                  <div 
+                    className="text-gray-300 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: outline }}
+                    style={{ minHeight: '300px' }}
+                  />
+                </div>
+                
+                <div className="flex gap-4">
+                  <button
+                    onClick={generateAllChapters}
+                    disabled={generatingAllChapters}
+                    className="px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-semibold text-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+                  >
+                    {generatingAllChapters ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating Chapter {generatingChapterNum} of {currentProject?.chapters}...
+                      </span>
+                    ) : (
+                      "Generate All Chapters"
+                    )}
+                  </button>
+                  
+                  <button
+                    onClick={generateOutline}
+                    disabled={loading}
+                    className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl font-semibold hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+                  >
+                    {loading ? "Regenerating..." : "Regenerate Outline"}
+                  </button>
+                </div>
+                
+                {generatingAllChapters && (
+                  <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-white font-semibold">Generating Chapters...</span>
+                      <span className="text-gray-300">{Math.round(chapterProgress)}% complete</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${chapterProgress}%` }}
+                      />
+                    </div>
+                    <p className="text-gray-400 mt-2">
+                      Chapter {generatingChapterNum} of {currentProject?.chapters} - This may take a few minutes...
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* Step 4: Write Chapters */}
+        {currentStep === 4 && (
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-white">Write Your Chapters</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => generateChapter(currentChapter)}
+                  disabled={loading}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+                >
+                  {loading ? "Generating..." : "Generate Chapter"}
+                </button>
+                <button
+                  onClick={saveChapter}
+                  disabled={savingChapter}
+                  className="px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+                >
+                  {savingChapter ? "Saving..." : "Save Chapter"}
+                </button>
+              </div>
+            </div>
+            
+            {/* Chapter Navigation */}
+            <div className="mb-6">
+              <div className="flex flex-wrap gap-2">
+                {Array.from({ length: currentProject?.chapters || 0 }, (_, i) => i + 1).map((chapterNum) => (
+                  <button
+                    key={chapterNum}
+                    onClick={() => switchChapter(chapterNum)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                      currentChapter === chapterNum
+                        ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                        : allChapters[chapterNum]
+                        ? 'bg-green-500/20 text-green-300 border border-green-500/50'
+                        : 'bg-white/10 text-gray-400 border border-white/20'
+                    }`}
+                  >
+                    Chapter {chapterNum}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Chapter Content Editor */}
+            <div className="relative">
+              <ReactQuill
+                value={chapterContent}
+                onChange={updateChapterContent}
+                modules={quillModules}
+                theme="snow"
+                placeholder={`Write Chapter ${currentChapter} content here...`}
+                className="bg-white/10 rounded-xl"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: '0.75rem',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  minHeight: '500px'
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+));
+
 const BookWriter = () => {
   const { user, logout } = useAuth();
   const [currentView, setCurrentView] = useState('dashboard'); // Start with dashboard for authenticated users
