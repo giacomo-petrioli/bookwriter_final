@@ -99,7 +99,6 @@ const BookWriter = () => {
   };
 
   const handleInputChange = (e) => {
-    e.preventDefault();
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
