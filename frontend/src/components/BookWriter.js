@@ -380,7 +380,13 @@ const WritingInterface = React.memo(({
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-white">Review Your Outline</h3>
               <button
-                onClick={() => setIsEditingOutline(!isEditingOutline)}
+                onClick={() => {
+                  if (!isEditingOutline) {
+                    // Initialize editableOutline with current outline content when starting to edit
+                    setEditableOutline(outline);
+                  }
+                  setIsEditingOutline(!isEditingOutline);
+                }}
                 className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105"
               >
                 {isEditingOutline ? 'Cancel Edit' : 'Edit Outline'}
