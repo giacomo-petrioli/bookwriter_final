@@ -387,7 +387,6 @@ const BookWriter = () => {
                     name="pages"
                     value={formData.pages}
                     onChange={handleInputChange}
-                    onKeyDown={handleInputKeyDown}
                     min="10"
                     max="1000"
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
