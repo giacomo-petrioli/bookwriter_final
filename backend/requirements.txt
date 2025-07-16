@@ -41,3 +41,4 @@ tiktoken
 Pillow
 lxml
 propcache
+frozenlist
