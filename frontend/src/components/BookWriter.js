@@ -371,7 +371,6 @@ const BookWriter = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  onKeyDown={handleInputKeyDown}
                   rows="4"
                   placeholder="Describe what your book is about..."
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
