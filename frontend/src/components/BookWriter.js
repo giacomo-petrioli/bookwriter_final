@@ -884,8 +884,6 @@ const BookWriter = () => {
     setEditableOutline(content);
   };
 
-));
-
 // Writing Interface Component - extracted outside to prevent re-renders  
 const WritingInterface = React.memo(({ 
   currentProject, 
