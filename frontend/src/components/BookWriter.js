@@ -880,6 +880,11 @@ const BookWriter = () => {
     setEditableOutline(content);
   };
 
+  const editBook = () => {
+    // Go back to step 1 to edit the current project
+    setCurrentStep(1);
+  };
+
   // Main render
   return (
     <div className="App min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
