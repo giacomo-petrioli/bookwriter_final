@@ -414,6 +414,8 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Edit Outline button populates with current content"
+    - "Button replacement in outline review step"
     - "Enhanced content generation with improved word count"
   stuck_tasks:
     - "Enhanced content generation with improved word count"
