@@ -917,6 +917,7 @@ const BookWriter = () => {
           updateChapterContent={updateChapterContent}
           updateEditableOutline={updateEditableOutline}
           setIsEditingOutline={setIsEditingOutline}
+          editBook={editBook}
           loading={loading}
           outline={outline}
           chapterContent={chapterContent}
