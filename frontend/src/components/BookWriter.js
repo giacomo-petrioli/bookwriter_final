@@ -555,49 +555,81 @@ const BookWriter = () => {
     setEditableOutline(content);
   };
 
-  // Writing Interface Component
-  const WritingInterface = () => (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <UserHeader>
-        <button
-          onClick={() => setCurrentView('dashboard')}
-          className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
-        >
-          ← Back to Dashboard
-        </button>
-        {currentStep >= 4 && (
-          <div className="relative">
-            <button
-              onClick={() => setShowExportDropdown(!showExportDropdown)}
-              className="px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105"
-            >
-              Export Book
-            </button>
-            {showExportDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-600/50 shadow-xl z-50">
-                <button
-                  onClick={() => exportBook('pdf')}
-                  className="w-full px-4 py-2 text-left text-white hover:bg-gray-700/80 transition-colors rounded-t-lg"
-                >
-                  📄 Export as PDF
-                </button>
-                <button
-                  onClick={() => exportBook('docx')}
-                  className="w-full px-4 py-2 text-left text-white hover:bg-gray-700/80 transition-colors"
-                >
-                  📝 Export as DOCX
-                </button>
-                <button
-                  onClick={() => exportBook('html')}
-                  className="w-full px-4 py-2 text-left text-white hover:bg-gray-700/80 transition-colors rounded-b-lg"
-                >
-                  🌐 Export as HTML
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </UserHeader>
+));
+
+// Writing Interface Component - extracted outside to prevent re-renders  
+const WritingInterface = React.memo(({ 
+  currentProject, 
+  currentStep, 
+  setCurrentView, 
+  setShowExportDropdown, 
+  showExportDropdown, 
+  exportBook, 
+  generateOutline, 
+  generateAllChapters, 
+  generateChapter, 
+  saveChapter, 
+  saveOutline, 
+  switchChapter, 
+  updateChapterContent, 
+  updateEditableOutline, 
+  setIsEditingOutline, 
+  loading, 
+  outline, 
+  chapterContent, 
+  currentChapter, 
+  allChapters, 
+  generatingAllChapters, 
+  generatingChapterNum, 
+  chapterProgress, 
+  savingChapter, 
+  exportingBook, 
+  isEditingOutline, 
+  editableOutline, 
+  savingOutline, 
+  getWritingStyleDisplay, 
+  quillModules 
+}) => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <UserHeader>
+      <button
+        onClick={() => setCurrentView('dashboard')}
+        className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+      >
+        ← Back to Dashboard
+      </button>
+      {currentStep >= 4 && (
+        <div className="relative">
+          <button
+            onClick={() => setShowExportDropdown(!showExportDropdown)}
+            className="px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105"
+          >
+            Export Book
+          </button>
+          {showExportDropdown && (
+            <div className="absolute right-0 mt-2 w-48 bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-600/50 shadow-xl z-50">
+              <button
+                onClick={() => exportBook('pdf')}
+                className="w-full px-4 py-2 text-left text-white hover:bg-gray-700/80 transition-colors rounded-t-lg"
+              >
+                📄 Export as PDF
+              </button>
+              <button
+                onClick={() => exportBook('docx')}
+                className="w-full px-4 py-2 text-left text-white hover:bg-gray-700/80 transition-colors"
+              >
+                📝 Export as DOCX
+              </button>
+              <button
+                onClick={() => exportBook('html')}
+                className="w-full px-4 py-2 text-left text-white hover:bg-gray-700/80 transition-colors rounded-b-lg"
+              >
+                🌐 Export as HTML
+              </button>
+            </div>
+          )}
+        </div>
+      )}
       
       <div className="container mx-auto px-6 py-8 pb-32 min-h-screen">
         <div className="max-w-6xl mx-auto min-h-full">
