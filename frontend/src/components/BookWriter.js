@@ -833,22 +833,22 @@ const BookWriter = () => {
                         )}
                       </button>
                       {showExportDropdown && (
-                        <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 w-48 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 shadow-xl z-50">
+                        <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 w-48 bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-600/50 shadow-xl z-50">
                           <button
                             onClick={() => exportBook('pdf')}
-                            className="w-full px-4 py-2 text-left text-white hover:bg-white/20 transition-colors rounded-t-lg"
+                            className="w-full px-4 py-2 text-left text-white hover:bg-gray-700/80 transition-colors rounded-t-lg"
                           >
                             📄 Export as PDF
                           </button>
                           <button
                             onClick={() => exportBook('docx')}
-                            className="w-full px-4 py-2 text-left text-white hover:bg-white/20 transition-colors"
+                            className="w-full px-4 py-2 text-left text-white hover:bg-gray-700/80 transition-colors"
                           >
                             📝 Export as DOCX
                           </button>
                           <button
                             onClick={() => exportBook('html')}
-                            className="w-full px-4 py-2 text-left text-white hover:bg-white/20 transition-colors rounded-b-lg"
+                            className="w-full px-4 py-2 text-left text-white hover:bg-gray-700/80 transition-colors rounded-b-lg"
                           >
                             🌐 Export as HTML
                           </button>
