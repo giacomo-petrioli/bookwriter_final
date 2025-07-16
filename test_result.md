@@ -376,6 +376,36 @@ frontend:
         agent: "main"
         comment: "CONTINUATION FIX: Fixed save chapter functionality that was previously not working. Enhanced error handling and validation. Improved local state management for chapter content. Fixed export book functionality with proper file download handling. Added better progress tracking and chapter state management. Need to test save chapter and export book functionality."
 
+  - task: "Edit Outline button populates with current content"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/BookWriter.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed Edit Outline button issue where editor showed empty content instead of current outline. Updated code to initialize editableOutline with current outline content when starting to edit (line 387: updateEditableOutline(outline)). Editor should now populate with existing outline content when Edit Outline button is clicked."
+      - working: "NA"
+        agent: "testing"
+        comment: "CODE REVIEW COMPLETED: Confirmed fix is implemented in BookWriter.js. When Edit Outline button is clicked, the code calls updateEditableOutline(outline) to populate the editor with current outline content. This should resolve the issue where editor appeared empty. TESTING BLOCKED: Cannot verify functionality due to Google OAuth authentication requirement in automated testing environment."
+
+  - task: "Button replacement in outline review step"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/BookWriter.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed button replacement in outline review step. Replaced 'Generate All Chapters' button with 'Edit Book' button while keeping 'Regenerate Outline' button. Edit Book button navigates back to step 1 (project setup) using editBook function."
+      - working: "NA"
+        agent: "testing"
+        comment: "CODE REVIEW COMPLETED: Confirmed button replacement is implemented correctly in BookWriter.js lines 453-468. In outline review step (step 3), there are now only 2 buttons: 1) 'Edit Book' button (line 455) that calls editBook() function to go back to step 1, 2) 'Regenerate Outline' button (line 462) that calls generateOutline(). No 'Generate All Chapters' button present in outline review step. TESTING BLOCKED: Cannot verify functionality due to Google OAuth authentication requirement in automated testing environment."
+
 metadata:
   created_by: "main_agent"
   version: "1.2"
