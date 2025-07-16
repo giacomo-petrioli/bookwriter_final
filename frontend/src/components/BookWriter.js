@@ -99,6 +99,7 @@ const BookWriter = () => {
   };
 
   const handleInputChange = (e) => {
+    e.preventDefault();
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -108,6 +109,7 @@ const BookWriter = () => {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     if (formData.title && formData.description && !loading) {
       createProject();
     }
