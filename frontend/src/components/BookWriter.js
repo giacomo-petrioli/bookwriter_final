@@ -418,7 +418,6 @@ const BookWriter = () => {
                     name="language"
                     value={formData.language}
                     onChange={handleInputChange}
-                    onKeyDown={handleInputKeyDown}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                   >
                     <option value="English" className="bg-gray-800 text-white">English</option>
