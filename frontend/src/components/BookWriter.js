@@ -884,8 +884,52 @@ const BookWriter = () => {
   // Main render
   return (
     <div className="App min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {currentView === 'dashboard' && <Dashboard />}
-      {currentView === 'writing' && <WritingInterface />}
+      {currentView === 'dashboard' && (
+        <Dashboard 
+          user={user}
+          projects={projects}
+          formData={formData}
+          loading={loading}
+          handleInputChange={handleInputChange}
+          handleFormSubmit={handleFormSubmit}
+          loadProject={loadProject}
+          getWritingStyleDisplay={getWritingStyleDisplay}
+        />
+      )}
+      {currentView === 'writing' && (
+        <WritingInterface 
+          currentProject={currentProject}
+          currentStep={currentStep}
+          setCurrentView={setCurrentView}
+          setShowExportDropdown={setShowExportDropdown}
+          showExportDropdown={showExportDropdown}
+          exportBook={exportBook}
+          generateOutline={generateOutline}
+          generateAllChapters={generateAllChapters}
+          generateChapter={generateChapter}
+          saveChapter={saveChapter}
+          saveOutline={saveOutline}
+          switchChapter={switchChapter}
+          updateChapterContent={updateChapterContent}
+          updateEditableOutline={updateEditableOutline}
+          setIsEditingOutline={setIsEditingOutline}
+          loading={loading}
+          outline={outline}
+          chapterContent={chapterContent}
+          currentChapter={currentChapter}
+          allChapters={allChapters}
+          generatingAllChapters={generatingAllChapters}
+          generatingChapterNum={generatingChapterNum}
+          chapterProgress={chapterProgress}
+          savingChapter={savingChapter}
+          exportingBook={exportingBook}
+          isEditingOutline={isEditingOutline}
+          editableOutline={editableOutline}
+          savingOutline={savingOutline}
+          getWritingStyleDisplay={getWritingStyleDisplay}
+          quillModules={quillModules}
+        />
+      )}
     </div>
   );
 };
