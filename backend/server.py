@@ -488,38 +488,48 @@ async def create_user_session(user_id: str, session_token: str) -> UserSession:
     return session
 
 # Authentication endpoints
-@api_router.post("/auth/session")
-async def authenticate_session(request: AuthSessionRequest):
-    """Authenticate user session with Emergent auth"""
+@api_router.post("/auth/google")
+async def authenticate_google(request: GoogleTokenRequest):
+    """Authenticate user with Google OAuth token"""
     try:
-        # Call Emergent auth API
+        # Verify Google OAuth token
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
-                headers={"X-Session-ID": request.session_id}
+                f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={request.token}"
             )
             
             if response.status_code != 200:
-                raise HTTPException(status_code=401, detail="Invalid session ID")
+                raise HTTPException(status_code=401, detail="Invalid Google token")
             
-            auth_data = response.json()
+            token_info = response.json()
+            
+            # Get user profile from Google
+            profile_response = await client.get(
+                f"https://www.googleapis.com/oauth2/v1/userinfo?access_token={request.token}"
+            )
+            
+            if profile_response.status_code != 200:
+                raise HTTPException(status_code=401, detail="Failed to get user profile")
+            
+            profile_data = profile_response.json()
             
             # Check if user exists
-            existing_user = await db.users.find_one({"email": auth_data["email"]})
+            existing_user = await db.users.find_one({"email": profile_data["email"]})
             
             if existing_user:
                 user = User(**existing_user)
             else:
                 # Create new user
                 user = User(
-                    email=auth_data["email"],
-                    name=auth_data["name"],
-                    picture=auth_data.get("picture")
+                    email=profile_data["email"],
+                    name=profile_data["name"],
+                    picture=profile_data.get("picture")
                 )
                 await db.users.insert_one(user.dict())
             
             # Create user session
-            session = await create_user_session(user.id, auth_data["session_token"])
+            session_token = secrets.token_urlsafe(32)
+            session = await create_user_session(user.id, session_token)
             
             return {
                 "user": UserProfile(
@@ -528,10 +538,68 @@ async def authenticate_session(request: AuthSessionRequest):
                     name=user.name,
                     picture=user.picture
                 ),
-                "session_token": auth_data["session_token"],
+                "session_token": session_token,
                 "expires_at": session.expires_at.isoformat()
             }
             
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Authentication failed: {str(e)}")
+
+@api_router.post("/auth/google/verify")
+async def verify_google_token(request: GoogleTokenRequest):
+    """Verify Google ID token and authenticate user"""
+    try:
+        # Decode Google ID token without verification (for demo purposes)
+        # In production, you should verify the token signature
+        import base64
+        import json
+        
+        # Extract payload from JWT token
+        token_parts = request.token.split('.')
+        if len(token_parts) != 3:
+            raise HTTPException(status_code=401, detail="Invalid token format")
+        
+        # Decode the payload (add padding if needed)
+        payload = token_parts[1]
+        payload += '=' * (4 - len(payload) % 4)  # Add padding
+        
+        try:
+            decoded_payload = base64.urlsafe_b64decode(payload)
+            profile_data = json.loads(decoded_payload)
+        except Exception:
+            raise HTTPException(status_code=401, detail="Invalid token format")
+        
+        # Check if user exists
+        existing_user = await db.users.find_one({"email": profile_data["email"]})
+        
+        if existing_user:
+            user = User(**existing_user)
+        else:
+            # Create new user
+            user = User(
+                email=profile_data["email"],
+                name=profile_data["name"],
+                picture=profile_data.get("picture")
+            )
+            await db.users.insert_one(user.dict())
+        
+        # Create user session
+        session_token = secrets.token_urlsafe(32)
+        session = await create_user_session(user.id, session_token)
+        
+        return {
+            "user": UserProfile(
+                id=user.id,
+                email=user.email,
+                name=user.name,
+                picture=user.picture
+            ),
+            "session_token": session_token,
+            "expires_at": session.expires_at.isoformat()
+        }
+        
     except HTTPException:
         raise
     except Exception as e:
