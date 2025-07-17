@@ -451,13 +451,23 @@ const WritingInterface = React.memo(({
                 </div>
                 
                 <div className="flex gap-4">
-                  <button
-                    onClick={generateAllChapters}
-                    disabled={loading || generatingAllChapters}
-                    className="px-8 py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-semibold text-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
-                  >
-                    {generatingAllChapters ? "Generating Chapters..." : "Generate All Chapters"}
-                  </button>
+                  {/* Show Edit Book if chapters exist, otherwise Generate All Chapters */}
+                  {allChapters && Object.keys(allChapters).length > 0 ? (
+                    <button
+                      onClick={() => setCurrentStep(4)}
+                      className="px-8 py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-semibold text-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105"
+                    >
+                      Edit Book
+                    </button>
+                  ) : (
+                    <button
+                      onClick={generateAllChapters}
+                      disabled={loading || generatingAllChapters}
+                      className="px-8 py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-semibold text-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+                    >
+                      {generatingAllChapters ? "Generating Chapters..." : "Generate All Chapters"}
+                    </button>
+                  )}
                   
                   <button
                     onClick={generateOutline}
