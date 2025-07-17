@@ -333,6 +333,18 @@ backend:
         comment: "COMPREHENSIVE TESTING COMPLETED: Enhanced literary content quality partially working but needs refinement. ✅ EXCELLENT: Creative chapter titles working ('The Manor's Breath' generated instead of generic titles). ✅ EXCELLENT: Dialogue variety with distinct character voices detected. ✅ EXCELLENT: Good balance between descriptive and action-oriented content. ✅ EXCELLENT: Emotional authenticity and human-like narrative detected. ✅ EXCELLENT: Narrative voice consistency maintained. ⚠️ MINOR: Limited natural speech patterns - may be too formal (needs more contractions). ❌ CRITICAL: Insufficient paragraph structure (less than 5 <p> tags detected). Need to enhance prompts to generate more paragraph breaks for better visual formatting."
 
 frontend:
+  - task: "Smart button logic for existing books with chapters"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/BookWriter.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "ENHANCED: Implemented smart button logic for existing books. When loading an existing book, if at least one chapter is already generated, shows 'Edit Book' button instead of 'Generate All Chapters'. This allows users to edit existing chapters and generate missing ones. The 'Edit Book' button navigates to step 4 (writing interface) where users can switch between chapters, edit content, and generate remaining chapters as needed."
+
   - task: "Multi-step book creation workflow UI"
     implemented: true
     working: "unknown"
