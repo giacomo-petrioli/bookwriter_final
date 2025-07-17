@@ -104,6 +104,9 @@ class BookProjectCreate(BaseModel):
 class AuthSessionRequest(BaseModel):
     session_id: str
 
+class GoogleTokenRequest(BaseModel):
+    token: str
+
 class UserProfile(BaseModel):
     id: str
     email: str
