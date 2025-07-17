@@ -452,10 +452,11 @@ const WritingInterface = React.memo(({
                 
                 <div className="flex gap-4">
                   <button
-                    onClick={editBook}
-                    className="px-8 py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-semibold text-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105"
+                    onClick={generateAllChapters}
+                    disabled={loading || generatingAllChapters}
+                    className="px-8 py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-semibold text-lg hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
                   >
-                    Edit Book
+                    {generatingAllChapters ? "Generating Chapters..." : "Generate All Chapters"}
                   </button>
                   
                   <button
