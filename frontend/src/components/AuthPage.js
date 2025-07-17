@@ -1,44 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import BookCraftLogo from './BookCraftLogo';
 
 const AuthPage = () => {
-  const { login } = useAuth();
+  const { loginWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Check for session ID in URL on component mount
-  useEffect(() => {
-    const handleAuthCallback = async () => {
-      const hash = window.location.hash;
-      if (hash && hash.includes('session_id=')) {
-        const sessionId = hash.split('session_id=')[1];
-        if (sessionId) {
-          try {
-            setLoading(true);
-            await login(sessionId);
-            // Clear the hash from URL
-            window.history.replaceState({}, document.title, window.location.pathname);
-          } catch (error) {
-            setError('Authentication failed. Please try again.');
-            console.error('Auth callback error:', error);
-          } finally {
-            setLoading(false);
-          }
-        }
-      }
-    };
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setLoading(true);
+      setError('');
+      await loginWithGoogle(credentialResponse.credential);
+    } catch (error) {
+      setError('Authentication failed. Please try again.');
+      console.error('Google login error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    handleAuthCallback();
-  }, [login]);
-
-  const handleLogin = () => {
-    setLoading(true);
-    setError('');
-    
-    // Redirect to Emergent auth with current URL as redirect parameter
-    const redirectUrl = encodeURIComponent(window.location.origin);
-    window.location.href = `https://auth.emergentagent.com/?redirect=${redirectUrl}`;
+  const handleGoogleError = () => {
+    setError('Google authentication failed. Please try again.');
+    setLoading(false);
   };
 
   return (
@@ -69,27 +54,32 @@ const AuthPage = () => {
               Welcome Back
             </h2>
             
-            <button
-              onClick={handleLogin}
-              disabled={loading}
-              className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg font-semibold text-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Signing In...
-                </span>
-              ) : (
-                "Sign In / Sign Up"
-              )}
-            </button>
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                disabled={loading}
+                theme="filled_black"
+                size="large"
+                text="signin_with"
+                shape="rectangular"
+                logo_alignment="left"
+              />
+            </div>
+
+            {loading && (
+              <div className="flex items-center justify-center mt-4">
+                <svg className="animate-spin h-5 w-5 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span className="ml-2 text-white">Signing in...</span>
+              </div>
+            )}
 
             <div className="text-center">
               <p className="text-gray-400 text-sm">
-                Secure authentication powered by Emergent
+                Secure authentication powered by Google
               </p>
             </div>
           </div>
