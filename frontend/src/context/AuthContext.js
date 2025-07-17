@@ -42,11 +42,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (sessionId) => {
+  const loginWithGoogle = async (credential) => {
     try {
       setLoading(true);
-      const response = await axios.post(`${API_URL}/api/auth/session`, {
-        session_id: sessionId
+      const response = await axios.post(`${API_URL}/api/auth/google/verify`, {
+        token: credential
       });
       
       const { user: userData, session_token } = response.data;
@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     isAuthenticated,
-    login,
+    loginWithGoogle,
     logout,
     checkAuthStatus
   };
