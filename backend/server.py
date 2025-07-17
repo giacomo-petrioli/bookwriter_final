@@ -1,7 +1,8 @@
-from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Depends, Header
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Depends, Header, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
@@ -28,6 +29,10 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.oxml.shared import OxmlElement, qn
 import re
 from html import unescape
+from authlib.integrations.starlette_client import OAuth
+from authlib.integrations.starlette_client import StarletteOAuth2App
+import jwt
+import json
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
