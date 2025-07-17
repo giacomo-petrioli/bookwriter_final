@@ -45,6 +45,21 @@ db = client[os.environ['DB_NAME']]
 # Create the main app without a prefix
 app = FastAPI()
 
+# Add session middleware for OAuth
+app.add_middleware(SessionMiddleware, secret_key=secrets.token_urlsafe(32))
+
+# Setup OAuth
+oauth = OAuth()
+oauth.register(
+    name='google',
+    client_id=os.environ['GOOGLE_CLIENT_ID'],
+    client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
