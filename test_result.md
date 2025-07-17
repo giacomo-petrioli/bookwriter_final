@@ -407,12 +407,15 @@ frontend:
 
   - task: "Button replacement in outline review step"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/components/BookWriter.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
+      - working: true
+        agent: "main"
+        comment: "FIXED: Replaced illogical 'Edit Book' button with 'Generate All Chapters' button in outline review step (step 3). The 'Edit Book' button didn't make sense after outline generation since the book hasn't been created yet. Now shows 'Generate All Chapters' button that proceeds to step 4 (writing phase) and 'Regenerate Outline' button. Added proper loading states and disabled states for better UX."
       - working: "NA"
         agent: "main"
         comment: "Fixed button replacement in outline review step. Replaced 'Generate All Chapters' button with 'Edit Book' button while keeping 'Regenerate Outline' button. Edit Book button navigates back to step 1 (project setup) using editBook function."
