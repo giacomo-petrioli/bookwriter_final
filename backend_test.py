@@ -3259,9 +3259,25 @@ As we stand at this technological crossroads, understanding the implications of 
         return passed, total, test_results
 
 def main():
+    """Main function to run Google OAuth authentication tests"""
     tester = BookWriterAPITester()
-    success = tester.run_all_tests()
-    sys.exit(0 if success else 1)
+    
+    print("🚀 Starting Google OAuth Authentication Testing...")
+    print(f"Backend URL: {BACKEND_URL}")
+    print("=" * 80)
+    
+    # Run comprehensive Google OAuth tests
+    success = tester.test_google_oauth_comprehensive()
+    
+    print("\n" + "=" * 80)
+    if success:
+        print("🎉 GOOGLE OAUTH AUTHENTICATION TESTING COMPLETED SUCCESSFULLY!")
+        print("✅ All Google OAuth authentication components are working correctly")
+        sys.exit(0)
+    else:
+        print("❌ GOOGLE OAUTH AUTHENTICATION TESTING FAILED!")
+        print("⚠️ Some Google OAuth authentication components need attention")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
