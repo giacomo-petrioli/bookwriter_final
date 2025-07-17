@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://e1f73b00-e609-4b86-b1d8-2b6a1288847a.preview.emergentagent.com/api"
+BACKEND_URL = "https://fb4a0bef-72cd-4932-ab6d-089fe67fe73c.preview.emergentagent.com/api"
 
 class BookWriterAPITester:
     def __init__(self):
