@@ -16,8 +16,10 @@ const BookWriter = () => {
   const [currentView, setCurrentView] = useState('dashboard');
   const [currentStep, setCurrentStep] = useState(1);
   const [projects, setProjects] = useState([]);
+  const [userStats, setUserStats] = useState(null);
   const [currentProject, setCurrentProject] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
