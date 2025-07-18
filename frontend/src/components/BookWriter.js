@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from '../context/AuthContext';
 import UserHeader from './UserHeader';
-import BookCraftLogo from './BookCraftLogo';
 
 // Configure axios timeout
 axios.defaults.timeout = 120000; // 2 minutes timeout for individual requests
