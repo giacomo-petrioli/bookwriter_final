@@ -88,12 +88,67 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithEmailPassword = async (email, password) => {
+    try {
+      setLoading(true);
+      const response = await axios.post(`${API_URL}/api/auth/login`, {
+        email,
+        password
+      });
+      
+      const { user: userData, session_token } = response.data;
+      
+      // Store token and set headers
+      localStorage.setItem('auth_token', session_token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
+      
+      setUser(userData);
+      setIsAuthenticated(true);
+      
+      return userData;
+    } catch (error) {
+      console.error('Email/password login failed:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const registerWithEmailPassword = async (email, password, name) => {
+    try {
+      setLoading(true);
+      const response = await axios.post(`${API_URL}/api/auth/register`, {
+        email,
+        password,
+        name
+      });
+      
+      const { user: userData, session_token } = response.data;
+      
+      // Store token and set headers
+      localStorage.setItem('auth_token', session_token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
+      
+      setUser(userData);
+      setIsAuthenticated(true);
+      
+      return userData;
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     loading,
     isAuthenticated,
     login: loginWithGoogle, // Add alias for backwards compatibility
     loginWithGoogle,
+    loginWithEmailPassword,
+    registerWithEmailPassword,
     logout,
     checkAuthStatus
   };
