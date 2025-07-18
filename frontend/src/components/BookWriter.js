@@ -164,11 +164,18 @@ const BookWriter = () => {
   };
 
   const getWritingStyleDisplay = (style) => {
-    switch(style) {
-      case 'story': return 'Story';
-      case 'descriptive': return 'Descriptive';
-      default: return 'Story';
-    }
+    const styles = {
+      story: "Story",
+      descriptive: "Descriptive",
+      academic: "Academic",
+      technical: "Technical",
+      biography: "Biography",
+      self_help: "Self-Help",
+      children: "Children's",
+      poetry: "Poetry",
+      business: "Business"
+    };
+    return styles[style] || style;
   };
 
   const editBook = () => {
