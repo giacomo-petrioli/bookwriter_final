@@ -42,10 +42,11 @@ const BookWriter = () => {
   const [editableOutline, setEditableOutline] = useState("");
   const [savingOutline, setSavingOutline] = useState(false);
 
-  // Load projects on component mount
+  // Load projects and stats on component mount
   useEffect(() => {
     if (user) {
       loadProjects();
+      loadUserStats();
     }
   }, [user]);
 
