@@ -725,6 +725,56 @@ async def verify_google_token(request: GoogleTokenRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Authentication failed: {str(e)}")
 
+@api_router.get("/user/stats")
+async def get_user_stats(current_user: User = Depends(get_current_user)):
+    """Get user statistics for dashboard"""
+    try:
+        # Get user's projects
+        projects = await db.book_projects.find({"user_id": current_user.id}).to_list(1000)
+        
+        # Calculate statistics
+        total_books = len(projects)
+        total_chapters = 0
+        total_words = 0
+        completed_books = 0
+        
+        for project in projects:
+            chapters_content = project.get("chapters_content", {})
+            project_chapters = len(chapters_content)
+            total_chapters += project_chapters
+            
+            # Calculate words in chapters
+            for chapter_content in chapters_content.values():
+                if chapter_content:
+                    # Remove HTML tags and count words
+                    clean_text = re.sub(r'<[^>]+>', '', chapter_content)
+                    words = len(clean_text.split())
+                    total_words += words
+            
+            # Check if book is completed (has all chapters)
+            if project_chapters >= project.get("chapters", 0):
+                completed_books += 1
+        
+        # Calculate recent activity (last 30 days)
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        recent_projects = await db.book_projects.find({
+            "user_id": current_user.id,
+            "updated_at": {"$gte": thirty_days_ago}
+        }).to_list(1000)
+        
+        return {
+            "total_books": total_books,
+            "completed_books": completed_books,
+            "total_chapters": total_chapters,
+            "total_words": total_words,
+            "recent_activity": len(recent_projects),
+            "avg_words_per_chapter": round(total_words / total_chapters) if total_chapters > 0 else 0,
+            "user_since": current_user.created_at.strftime("%B %Y") if current_user.created_at else "Recently"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching user stats: {str(e)}")
+
 @api_router.get("/auth/profile")
 async def get_user_profile(current_user: User = Depends(get_current_user)):
     """Get current user profile"""
