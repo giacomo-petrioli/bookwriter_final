@@ -50,6 +50,9 @@ app = FastAPI()
 # Add session middleware for OAuth
 app.add_middleware(SessionMiddleware, secret_key=secrets.token_urlsafe(32))
 
+# Password hashing context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 # Setup OAuth
 oauth = OAuth()
 oauth.register(
