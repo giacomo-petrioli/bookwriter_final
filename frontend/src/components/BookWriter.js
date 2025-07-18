@@ -179,7 +179,7 @@ const BookWriter = () => {
   };
 
   const editBook = () => {
-    setCurrentStep(4);
+    setCurrentStep(1);
     setCurrentView('writing');
   };
 
