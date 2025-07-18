@@ -516,6 +516,96 @@ async def create_user_session(user_id: str, session_token: str) -> UserSession:
     return session
 
 # Authentication endpoints
+@api_router.post("/auth/register")
+async def register_user(request: RegisterRequest):
+    """Register a new user with email and password"""
+    try:
+        # Validate input
+        if not request.email or not request.name or not request.password:
+            raise HTTPException(status_code=400, detail="Email, name, and password are required")
+        
+        # Validate password strength
+        if not validate_password(request.password):
+            raise HTTPException(status_code=400, detail="Password must be at least 8 characters long")
+        
+        # Check if user already exists
+        existing_user = await db.users.find_one({"email": request.email})
+        if existing_user:
+            raise HTTPException(status_code=400, detail="User with this email already exists")
+        
+        # Create new user
+        password_hash = hash_password(request.password)
+        user = User(
+            email=request.email,
+            name=request.name,
+            password_hash=password_hash,
+            auth_provider="email"
+        )
+        
+        await db.users.insert_one(user.dict())
+        
+        # Create session
+        session_token = secrets.token_urlsafe(32)
+        session = await create_user_session(user.id, session_token)
+        
+        return {
+            "user": UserProfile(
+                id=user.id,
+                email=user.email,
+                name=user.name,
+                picture=user.picture
+            ),
+            "session_token": session_token,
+            "expires_at": session.expires_at.isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
+
+@api_router.post("/auth/login")
+async def login_user(request: EmailPasswordRequest):
+    """Login user with email and password"""
+    try:
+        # Validate input
+        if not request.email or not request.password:
+            raise HTTPException(status_code=400, detail="Email and password are required")
+        
+        # Find user
+        user_data = await db.users.find_one({"email": request.email})
+        if not user_data:
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        user = User(**user_data)
+        
+        # Verify password (only for email auth users)
+        if user.auth_provider == "email":
+            if not user.password_hash or not verify_password(request.password, user.password_hash):
+                raise HTTPException(status_code=401, detail="Invalid email or password")
+        else:
+            raise HTTPException(status_code=401, detail="This account uses Google authentication")
+        
+        # Create session
+        session_token = secrets.token_urlsafe(32)
+        session = await create_user_session(user.id, session_token)
+        
+        return {
+            "user": UserProfile(
+                id=user.id,
+                email=user.email,
+                name=user.name,
+                picture=user.picture
+            ),
+            "session_token": session_token,
+            "expires_at": session.expires_at.isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
+
 @api_router.post("/auth/google")
 async def authenticate_google(request: GoogleTokenRequest):
     """Authenticate user with Google OAuth token"""
