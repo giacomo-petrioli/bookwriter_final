@@ -92,6 +92,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     isAuthenticated,
+    login: loginWithGoogle, // Add alias for backwards compatibility
     loginWithGoogle,
     logout,
     checkAuthStatus
