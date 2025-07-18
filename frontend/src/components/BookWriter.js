@@ -14,7 +14,7 @@ const API = `${BACKEND_URL}/api`;
 
 const BookWriter = () => {
   const { user, logout } = useAuth();
-  const [currentView, setCurrentView] = useState('dashboard'); // Start with dashboard for authenticated users
+  const [currentView, setCurrentView] = useState('dashboard');
   const [currentStep, setCurrentStep] = useState(1);
   const [projects, setProjects] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
