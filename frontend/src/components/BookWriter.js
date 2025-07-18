@@ -62,6 +62,18 @@ const BookWriter = () => {
     }
   };
 
+  const loadUserStats = async () => {
+    try {
+      setStatsLoading(true);
+      const response = await axios.get(`${API}/user/stats`);
+      setUserStats(response.data);
+    } catch (error) {
+      console.error("Error loading user stats:", error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
