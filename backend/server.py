@@ -458,6 +458,18 @@ def clean_ai_response(response: str) -> str:
     
     return cleaned_response
 
+def hash_password(password: str) -> str:
+    """Hash a password for storing."""
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash."""
+    return pwd_context.verify(plain_password, hashed_password)
+
+def validate_password(password: str) -> bool:
+    """Validate password strength."""
+    return len(password) >= 8
+
 # Authentication helper functions
 async def get_current_user(authorization: str = Header(None)):
     """Get current user from session token"""
