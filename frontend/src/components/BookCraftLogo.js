@@ -110,9 +110,6 @@ const BookCraftLogo = ({ className = "w-8 h-8", useImage = false }) => {
           <line x1="105" y1="130" x2="145" y2="132" stroke="#E2E8F0" strokeWidth="1.5" />
         </g>
       </svg>
-      
-      {/* Additional glow effect around the entire logo */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 blur-lg -z-10"></div>
     </div>
   );
 };
