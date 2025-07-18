@@ -90,6 +90,7 @@ const BookWriter = () => {
       setCurrentStep(2);
       setCurrentView('writing');
       await loadProjects();
+      await loadUserStats(); // Refresh stats
     } catch (error) {
       console.error("Error creating project:", error);
     } finally {
