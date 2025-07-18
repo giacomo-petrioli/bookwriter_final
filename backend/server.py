@@ -641,7 +641,8 @@ async def authenticate_google(request: GoogleTokenRequest):
                 user = User(
                     email=profile_data["email"],
                     name=profile_data["name"],
-                    picture=profile_data.get("picture")
+                    picture=profile_data.get("picture"),
+                    auth_provider="google"
                 )
                 await db.users.insert_one(user.dict())
             
