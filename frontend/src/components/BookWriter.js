@@ -115,19 +115,51 @@ const BookWriter = () => {
   };
 
   const generateAllChapters = async () => {
-    if (!currentProject) return;
+    if (!currentProject || !currentProject.outline) return;
+
+    setGeneratingAllChapters(true);
+    setGeneratingChapterNum(0);
+    setChapterProgress({});
 
     try {
-      setGeneratingAllChapters(true);
-      const response = await axios.post(`${API}/generate-all-chapters`, {
-        project_id: currentProject.id
-      });
-      setAllChapters(response.data.chapters || {});
+      const totalChapters = currentProject.chapters;
+      const newChapters = {};
+
+      for (let i = 1; i <= totalChapters; i++) {
+        setGeneratingChapterNum(i);
+        setChapterProgress(prev => ({
+          ...prev,
+          [i]: { status: 'generating', progress: 0 }
+        }));
+
+        try {
+          const response = await axios.post(`${API}/generate-chapter`, {
+            project_id: currentProject.id,
+            chapter_number: i
+          });
+
+          newChapters[i] = response.data.chapter_content;
+          setChapterProgress(prev => ({
+            ...prev,
+            [i]: { status: 'completed', progress: 100 }
+          }));
+        } catch (error) {
+          console.error(`Error generating chapter ${i}:`, error);
+          setChapterProgress(prev => ({
+            ...prev,
+            [i]: { status: 'error', progress: 0 }
+          }));
+        }
+      }
+
+      setAllChapters(newChapters);
       setCurrentStep(4);
+      setCurrentView('writing');
     } catch (error) {
       console.error("Error generating chapters:", error);
     } finally {
       setGeneratingAllChapters(false);
+      setGeneratingChapterNum(0);
     }
   };
 
