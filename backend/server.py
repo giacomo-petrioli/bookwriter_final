@@ -114,6 +114,15 @@ class AuthSessionRequest(BaseModel):
 class GoogleTokenRequest(BaseModel):
     token: str
 
+class EmailPasswordRequest(BaseModel):
+    email: str
+    password: str
+
+class RegisterRequest(BaseModel):
+    email: str
+    name: str
+    password: str
+
 class UserProfile(BaseModel):
     id: str
     email: str
