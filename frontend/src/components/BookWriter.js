@@ -913,6 +913,10 @@ const BookWriter = () => {
           handleFormSubmit={handleFormSubmit}
           loadProject={loadProject}
           getWritingStyleDisplay={getWritingStyleDisplay}
+          setCurrentStep={setCurrentStep}
+          allChapters={allChapters}
+          generateAllChapters={generateAllChapters}
+          generatingAllChapters={generatingAllChapters}
         />
       )}
       {currentView === 'writing' && (
