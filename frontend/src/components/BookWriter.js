@@ -615,7 +615,7 @@ const BookWriter = () => {
 
   // Main render
   return (
-    <div className="App min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="App min-h-screen">
       {currentView === 'dashboard' && <Dashboard />}
       {currentView === 'writing' && <WritingInterface />}
     </div>
