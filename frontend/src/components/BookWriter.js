@@ -21,7 +21,11 @@ const Dashboard = React.memo(({
   handleInputChange, 
   handleFormSubmit, 
   loadProject, 
-  getWritingStyleDisplay 
+  getWritingStyleDisplay,
+  setCurrentStep,
+  allChapters,
+  generateAllChapters,
+  generatingAllChapters
 }) => (
   <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
     <UserHeader>
