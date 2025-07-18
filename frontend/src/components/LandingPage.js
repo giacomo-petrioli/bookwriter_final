@@ -4,13 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import BookCraftLogo from './BookCraftLogo';
 
 const LandingPage = () => {
-  const { login } = useAuth();
+  const { loginWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleLogin = async (credentialResponse) => {
     setIsLoading(true);
     try {
-      await login(credentialResponse.credential);
+      await loginWithGoogle(credentialResponse.credential);
     } catch (error) {
       console.error('Login failed:', error);
     } finally {
@@ -24,7 +24,7 @@ const LandingPage = () => {
       <header className="relative z-10 p-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <BookCraftLogo size="md" />
+            <BookCraftLogo className="w-8 h-8" />
             <h1 className="text-2xl font-bold text-white">BookCraft AI</h1>
           </div>
           <nav className="hidden md:flex space-x-8">
@@ -39,7 +39,7 @@ const LandingPage = () => {
       <section className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-8">
-            <BookCraftLogo size="xl" className="mx-auto mb-6" />
+            <BookCraftLogo className="w-24 h-24 mx-auto mb-6" />
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
               Write Amazing Books with 
               <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent"> AI</span>
@@ -59,11 +59,12 @@ const LandingPage = () => {
               <GoogleLogin
                 onSuccess={handleGoogleLogin}
                 onError={() => console.log('Login Failed')}
-                useOneTap
+                useOneTap={false}
                 size="large"
                 theme="filled_blue"
                 text="signin_with"
                 disabled={isLoading}
+                width="300"
               />
             </div>
             
@@ -196,7 +197,7 @@ const LandingPage = () => {
       <footer className="py-8 px-6 border-t border-white/10">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center space-x-3 mb-4 md:mb-0">
-            <BookCraftLogo size="sm" />
+            <BookCraftLogo className="w-6 h-6" />
             <span className="text-gray-300">BookCraft AI</span>
           </div>
           <div className="text-gray-400 text-sm">
