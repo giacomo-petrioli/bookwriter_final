@@ -428,7 +428,7 @@ frontend:
     status_history:
       - working: true
         agent: "main"
-        comment: "COMPLETED: Fixed authentication redirect flow by updating ProtectedRoute.js to use AuthPage instead of LandingPage for unauthenticated users. AuthPage provides the proper tabbed authentication interface with Google OAuth and email/password options. After successful login, users should now be automatically redirected to BookWriter app instead of staying on home page. The authentication flow now properly manages state transitions from login to main application."
+        comment: "UPDATED: Fixed authentication redirect flow by redesigning the complete user journey. Instead of immediately showing AuthPage to unauthenticated users, ProtectedRoute now shows LandingPage first with a prominent 'Get Started' button. When clicked, this button navigates to AuthPage. Enhanced authentication state management in AuthContext with better error handling, state resets, and timing improvements to prevent users from getting stuck on signup page after successful Google login. The flow now properly manages state transitions: Home → Auth → Successful Login → BookWriter App."
 
   - task: "Smart button logic for existing books with chapters"
     implemented: true
