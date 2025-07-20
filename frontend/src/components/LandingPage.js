@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
-import BookCraftLogo from './BookCraftLogo';
 
 const LandingPage = () => {
   const { loginWithGoogle } = useAuth();
