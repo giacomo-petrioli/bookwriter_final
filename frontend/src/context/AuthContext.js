@@ -45,11 +45,13 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = async (credential) => {
     try {
       setLoading(true);
+      console.log('Google login attempt started...');
       const response = await axios.post(`${API_URL}/api/auth/google/verify`, {
         token: credential
       });
       
       const { user: userData, session_token } = response.data;
+      console.log('Google login successful, setting user data...', userData);
       
       // Store token and set headers
       localStorage.setItem('auth_token', session_token);
@@ -57,6 +59,7 @@ export const AuthProvider = ({ children }) => {
       
       setUser(userData);
       setIsAuthenticated(true);
+      console.log('Authentication state updated - user should be redirected to app');
       
       return userData;
     } catch (error) {
