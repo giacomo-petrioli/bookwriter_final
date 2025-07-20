@@ -5,8 +5,6 @@ import AuthPage from './AuthPage';
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
-  console.log('ProtectedRoute - isAuthenticated:', isAuthenticated, 'loading:', loading);
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
@@ -19,11 +17,9 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    console.log('User not authenticated, showing AuthPage');
     return <AuthPage />;
   }
 
-  console.log('User authenticated, showing BookWriter app');
   return children;
 };
 
