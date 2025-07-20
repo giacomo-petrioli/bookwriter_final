@@ -88,6 +88,21 @@ const AuthPage = ({ onBack }) => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
       <div className="max-w-md w-full mx-4">
         <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 shadow-2xl">
+          {/* Back Button */}
+          {onBack && (
+            <div className="mb-4">
+              <button
+                onClick={onBack}
+                className="flex items-center text-gray-300 hover:text-white transition-colors"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Home
+              </button>
+            </div>
+          )}
+          
           {/* Logo and Branding */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
