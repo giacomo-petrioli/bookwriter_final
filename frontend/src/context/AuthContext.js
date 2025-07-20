@@ -24,12 +24,21 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
+      console.log('Checking auth status...');
       const token = localStorage.getItem('auth_token');
+      console.log('Stored token:', token ? 'exists' : 'not found');
+      
       if (token) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         const response = await axios.get(`${API_URL}/api/auth/profile`);
+        console.log('Auth check successful:', response.data);
+        
         setUser(response.data);
         setIsAuthenticated(true);
+      } else {
+        console.log('No token found, user not authenticated');
+        setIsAuthenticated(false);
+        setUser(null);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
