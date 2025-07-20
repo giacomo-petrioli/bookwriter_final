@@ -393,6 +393,31 @@ backend:
         comment: "COMPREHENSIVE TESTING COMPLETED: Enhanced literary content quality partially working but needs refinement. ✅ EXCELLENT: Creative chapter titles working ('The Manor's Breath' generated instead of generic titles). ✅ EXCELLENT: Dialogue variety with distinct character voices detected. ✅ EXCELLENT: Good balance between descriptive and action-oriented content. ✅ EXCELLENT: Emotional authenticity and human-like narrative detected. ✅ EXCELLENT: Narrative voice consistency maintained. ⚠️ MINOR: Limited natural speech patterns - may be too formal (needs more contractions). ❌ CRITICAL: Insufficient paragraph structure (less than 5 <p> tags detected). Need to enhance prompts to generate more paragraph breaks for better visual formatting."
 
 frontend:
+frontend:
+  - task: "Logo removal from main/home page"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/AuthPage.js, /app/frontend/src/components/LandingPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "COMPLETED: Successfully removed BookCraftLogo from all main/authentication pages. Removed logo imports and logo components from AuthPage.js (lines 4, 95) and LandingPage.js (lines 4, 27, 42, 200). Authentication page now shows clean interface with just 'BookCraft AI' text title without any logo graphics. Main page is now cleaner and more professional looking."
+
+  - task: "Fixed login redirect flow to app"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ProtectedRoute.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "COMPLETED: Fixed authentication redirect flow by updating ProtectedRoute.js to use AuthPage instead of LandingPage for unauthenticated users. AuthPage provides the proper tabbed authentication interface with Google OAuth and email/password options. After successful login, users should now be automatically redirected to BookWriter app instead of staying on home page. The authentication flow now properly manages state transitions from login to main application."
+
   - task: "Smart button logic for existing books with chapters"
     implemented: true
     working: true
