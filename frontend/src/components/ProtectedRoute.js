@@ -3,9 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import LandingPage from './LandingPage';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
+
+  console.log('ProtectedRoute State:', { isAuthenticated, loading, user: user?.email });
 
   if (loading) {
+    console.log('Still loading authentication...');
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
@@ -17,9 +20,11 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
+    console.log('User not authenticated, showing LandingPage');
     return <LandingPage />;
   }
 
+  console.log('User authenticated, showing BookWriter app');
   return children;
 };
 
