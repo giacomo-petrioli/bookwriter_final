@@ -102,6 +102,8 @@ export const AuthProvider = ({ children }) => {
   const loginWithEmailPassword = async (email, password) => {
     try {
       setLoading(true);
+      setIsAuthenticated(false); // Reset state before login attempt
+      
       const response = await axios.post(`${API_URL}/api/auth/login`, {
         email,
         password
@@ -113,12 +115,21 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('auth_token', session_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
       
+      // Update state
       setUser(userData);
       setIsAuthenticated(true);
+      
+      // Force a small delay to ensure state has time to update
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       return userData;
     } catch (error) {
       console.error('Email/password login failed:', error);
+      // Ensure we're not authenticated on failure
+      setIsAuthenticated(false);
+      setUser(null);
+      localStorage.removeItem('auth_token');
+      delete axios.defaults.headers.common['Authorization'];
       throw error;
     } finally {
       setLoading(false);
@@ -128,6 +139,8 @@ export const AuthProvider = ({ children }) => {
   const registerWithEmailPassword = async (email, password, name) => {
     try {
       setLoading(true);
+      setIsAuthenticated(false); // Reset state before registration attempt
+      
       const response = await axios.post(`${API_URL}/api/auth/register`, {
         email,
         password,
@@ -140,12 +153,21 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('auth_token', session_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
       
+      // Update state
       setUser(userData);
       setIsAuthenticated(true);
+      
+      // Force a small delay to ensure state has time to update
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       return userData;
     } catch (error) {
       console.error('Registration failed:', error);
+      // Ensure we're not authenticated on failure
+      setIsAuthenticated(false);
+      setUser(null);
+      localStorage.removeItem('auth_token');
+      delete axios.defaults.headers.common['Authorization'];
       throw error;
     } finally {
       setLoading(false);
