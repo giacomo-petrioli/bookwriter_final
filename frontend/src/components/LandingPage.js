@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
+import AuthPage from './AuthPage';
 
 const LandingPage = () => {
   const { loginWithGoogle } = useAuth();
