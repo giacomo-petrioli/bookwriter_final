@@ -194,7 +194,6 @@ const LandingPage = () => {
       <footer className="py-8 px-6 border-t border-white/10">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center space-x-3 mb-4 md:mb-0">
-            <BookCraftLogo className="w-6 h-6" />
             <span className="text-gray-300">BookCraft AI</span>
           </div>
           <div className="text-gray-400 text-sm">
