@@ -19,8 +19,8 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    console.log('User not authenticated, showing LandingPage');
-    return <LandingPage />;
+    console.log('User not authenticated, showing AuthPage');
+    return <AuthPage />;
   }
 
   console.log('User authenticated, showing BookWriter app');
