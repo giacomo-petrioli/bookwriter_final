@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    return <AuthPage />;
+    return <LandingPage />;
   }
 
   return children;
