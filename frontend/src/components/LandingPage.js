@@ -68,29 +68,28 @@ const LandingPage = () => {
           {/* CTA Section */}
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 mb-12 max-w-md mx-auto">
             <h3 className="text-2xl font-bold text-white mb-4">Start Writing Today</h3>
-            <p className="text-gray-300 mb-6">Sign in with Google to begin your writing journey</p>
+            <p className="text-gray-300 mb-6">Join thousands of writers creating amazing books with AI assistance</p>
             
-            <div className="flex justify-center">
-              <GoogleLogin
-                onSuccess={handleGoogleLogin}
-                onError={() => console.log('Login Failed')}
-                useOneTap={false}
-                size="large"
-                theme="filled_blue"
-                text="signin_with"
-                disabled={isLoading}
-                width="300"
-              />
-            </div>
+            <button
+              onClick={handleGetStarted}
+              disabled={isLoading}
+              className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg hover:from-purple-700 hover:to-pink-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Get Started - It's Free!
+            </button>
             
             {isLoading && (
               <div className="mt-4 text-center">
-                <div className="inline-flex items-center px-4 py-2 bg-blue-500/20 rounded-full">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent mr-2"></div>
-                  <span className="text-blue-300">Signing you in...</span>
+                <div className="inline-flex items-center px-4 py-2 bg-purple-500/20 rounded-full">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-400 border-t-transparent mr-2"></div>
+                  <span className="text-purple-300">Setting up your account...</span>
                 </div>
               </div>
             )}
+            
+            <p className="text-gray-400 text-sm mt-4 text-center">
+              No credit card required • Start writing in minutes
+            </p>
           </div>
 
           {/* Features Grid */}
