@@ -4,18 +4,35 @@ import { useAuth } from '../context/AuthContext';
 import AuthPage from './AuthPage';
 
 const LandingPage = () => {
-  const { loginWithGoogle } = useAuth();
+  const { loginWithGoogle, isAuthenticated, loading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [showAuthPage, setShowAuthPage] = useState(false);
+
+  // If user is authenticated, this shouldn't render (ProtectedRoute handles it)
+  // But adding as safety check
+  if (isAuthenticated) {
+    return null; // ProtectedRoute should handle showing BookWriter
+  }
+
+  // Show AuthPage if user clicked signup button
+  if (showAuthPage) {
+    return <AuthPage onBack={() => setShowAuthPage(false)} />;
+  }
 
   const handleGoogleLogin = async (credentialResponse) => {
     setIsLoading(true);
     try {
       await loginWithGoogle(credentialResponse.credential);
+      // After successful login, ProtectedRoute should automatically show BookWriter
     } catch (error) {
       console.error('Login failed:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGetStarted = () => {
+    setShowAuthPage(true);
   };
 
   return (
