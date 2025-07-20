@@ -45,6 +45,8 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = async (credential) => {
     try {
       setLoading(true);
+      setIsAuthenticated(false); // Reset state before login attempt
+      
       const response = await axios.post(`${API_URL}/api/auth/google/verify`, {
         token: credential
       });
@@ -55,12 +57,21 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('auth_token', session_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
       
+      // Update state
       setUser(userData);
       setIsAuthenticated(true);
+      
+      // Force a small delay to ensure state has time to update
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       return userData;
     } catch (error) {
       console.error('Login failed:', error);
+      // Ensure we're not authenticated on failure
+      setIsAuthenticated(false);
+      setUser(null);
+      localStorage.removeItem('auth_token');
+      delete axios.defaults.headers.common['Authorization'];
       throw error;
     } finally {
       setLoading(false);
