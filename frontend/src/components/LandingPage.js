@@ -3,23 +3,13 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 
 const LandingPage = () => {
-  const { loginWithGoogle, isAuthenticated, loading } = useAuth();
+  const { loginWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-
-  // Redirect to app if already authenticated
-  React.useEffect(() => {
-    if (isAuthenticated && !loading) {
-      // User is authenticated, but we're still showing LandingPage
-      // This shouldn't happen with ProtectedRoute, but adding as safety measure
-      console.log('User is authenticated, redirecting to app');
-    }
-  }, [isAuthenticated, loading]);
 
   const handleGoogleLogin = async (credentialResponse) => {
     setIsLoading(true);
     try {
       await loginWithGoogle(credentialResponse.credential);
-      // The ProtectedRoute should automatically show BookWriter after successful login
     } catch (error) {
       console.error('Login failed:', error);
     } finally {
