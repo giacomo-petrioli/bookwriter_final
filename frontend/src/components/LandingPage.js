@@ -37,7 +37,6 @@ const LandingPage = () => {
       <section className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-8">
-            <BookCraftLogo className="w-24 h-24 mx-auto mb-6" />
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
               Write Amazing Books with 
               <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent"> AI</span>
