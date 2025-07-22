@@ -972,23 +972,66 @@ const BookWriter = () => {
                   />
                 )}
                 
-                <div className="flex gap-3 mt-8">
-                  <button
-                    onClick={generateOutline}
-                    disabled={generatingOutline}
-                    className="px-6 py-3 border border-purple-500 text-purple-600 rounded-xl hover:bg-purple-50 transition-colors disabled:opacity-50"
-                  >
-                    {generatingOutline ? "Regenerating..." : "Regenerate Outline"}
-                  </button>
+                  <div className="flex gap-3 mt-8">
+                    <button
+                      onClick={generateOutline}
+                      disabled={generatingOutline || generatingAllChapters}
+                      className="px-6 py-3 border border-purple-500 text-purple-600 rounded-xl hover:bg-purple-50 transition-colors disabled:opacity-50"
+                    >
+                      {generatingOutline ? "Regenerating..." : "Regenerate Outline"}
+                    </button>
+                    
+                    <button
+                      onClick={generateAllChapters}
+                      disabled={generatingAllChapters || !outline}
+                      className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-medium hover:from-green-600 hover:to-teal-600 transition-all duration-200 disabled:opacity-50"
+                    >
+                      {generatingAllChapters ? (
+                        <div className="flex items-center justify-center">
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
+                          Generating Chapter {generatingChapterNum}...
+                        </div>
+                      ) : (
+                        "Generate All Chapters"
+                      )}
+                    </button>
+                  </div>
                   
-                  <button
-                    onClick={generateAllChapters}
-                    disabled={generatingAllChapters || !outline}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-medium hover:from-green-600 hover:to-teal-600 transition-all duration-200 disabled:opacity-50"
-                  >
-                    {generatingAllChapters ? "Generating All Chapters..." : "Generate All Chapters"}
-                  </button>
-                </div>
+                  {/* Chapter Generation Progress */}
+                  {generatingAllChapters && (
+                    <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                      <h4 className="text-lg font-semibold text-blue-900 mb-4">
+                        Generating Chapters ({Object.keys(chapterProgress).filter(key => chapterProgress[key].status === 'completed').length}/{currentProject?.chapters || 0})
+                      </h4>
+                      <div className="space-y-3">
+                        {Array.from({ length: currentProject?.chapters || 0 }, (_, i) => i + 1).map(chapterNum => {
+                          const progress = chapterProgress[chapterNum];
+                          return (
+                            <div key={chapterNum} className="flex items-center">
+                              <span className="w-20 text-sm text-blue-700">Chapter {chapterNum}</span>
+                              <div className="flex-1 mx-3">
+                                <div className="w-full bg-blue-200 rounded-full h-2">
+                                  <div 
+                                    className={`h-2 rounded-full transition-all duration-300 ${
+                                      progress?.status === 'completed' ? 'bg-green-500' :
+                                      progress?.status === 'generating' ? 'bg-blue-500' :
+                                      progress?.status === 'error' ? 'bg-red-500' : 'bg-gray-300'
+                                    }`}
+                                    style={{ width: progress?.progress ? `${progress.progress}%` : '0%' }}
+                                  ></div>
+                                </div>
+                              </div>
+                              <span className="text-xs text-blue-600 w-16">
+                                {progress?.status === 'completed' ? '✓ Done' :
+                                 progress?.status === 'generating' ? 'Writing...' :
+                                 progress?.status === 'error' ? '✗ Error' : 'Waiting'}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
               </div>
             </div>
           </div>
