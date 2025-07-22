@@ -949,7 +949,7 @@ const BookWriter = () => {
                 </div>
                 
                 {editingOutline ? (
-                  <div className="mb-6">
+                  <div className="mb-6 writing-interface">
                     <ReactQuill
                       value={editableOutline}
                       onChange={setEditableOutline}
@@ -964,30 +964,6 @@ const BookWriter = () => {
                         ],
                       }}
                     />
-                    <style jsx>{`
-                      .ql-editor {
-                        color: #374151 !important;
-                        background-color: white !important;
-                        font-size: 14px;
-                        line-height: 1.6;
-                      }
-                      .ql-editor p {
-                        color: #374151 !important;
-                      }
-                      .ql-editor h1, .ql-editor h2, .ql-editor h3 {
-                        color: #1f2937 !important;
-                      }
-                      .ql-toolbar {
-                        border-top: 1px solid #d1d5db;
-                        border-left: 1px solid #d1d5db;
-                        border-right: 1px solid #d1d5db;
-                      }
-                      .ql-container {
-                        border-bottom: 1px solid #d1d5db;
-                        border-left: 1px solid #d1d5db;
-                        border-right: 1px solid #d1d5db;
-                      }
-                    `}</style>
                   </div>
                 ) : (
                   <div 
