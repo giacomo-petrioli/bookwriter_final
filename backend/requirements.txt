@@ -45,3 +45,4 @@ frozenlist
 authlib>=1.3.0
 itsdangerous>=2.2.0
 regex
+tokenizers
