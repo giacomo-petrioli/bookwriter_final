@@ -408,8 +408,8 @@ const BookWriter = () => {
                       <div className="w-2 h-2 bg-green-600 rounded-full"></div>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-900">Gemini 2.0 Flash-Lite</p>
-                      <p className="text-xs text-slate-600">Latest AI model for creative writing</p>
+                      <p className="text-sm font-medium text-slate-900">Advanced AI Model</p>
+                      <p className="text-xs text-slate-600">Powered by cutting-edge technology</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
