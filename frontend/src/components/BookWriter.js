@@ -1094,7 +1094,7 @@ const BookWriter = () => {
                   </div>
                   
                   {allChapters && allChapters[selectedChapter] ? (
-                    <div>
+                    <div className="writing-interface">
                       <ReactQuill
                         value={editableChapter}
                         onChange={setEditableChapter}
@@ -1111,45 +1111,6 @@ const BookWriter = () => {
                           ],
                         }}
                       />
-                      <style jsx>{`
-                        .ql-editor {
-                          color: #374151 !important;
-                          background-color: white !important;
-                          font-size: 16px;
-                          line-height: 1.7;
-                          padding: 20px;
-                        }
-                        .ql-editor p {
-                          color: #374151 !important;
-                          margin-bottom: 12px;
-                        }
-                        .ql-editor h1, .ql-editor h2, .ql-editor h3 {
-                          color: #1f2937 !important;
-                          font-weight: bold;
-                        }
-                        .ql-editor h1 {
-                          font-size: 28px;
-                          margin: 20px 0 16px 0;
-                        }
-                        .ql-editor h2 {
-                          font-size: 24px;
-                          margin: 18px 0 14px 0;
-                        }
-                        .ql-editor h3 {
-                          font-size: 20px;
-                          margin: 16px 0 12px 0;
-                        }
-                        .ql-toolbar {
-                          border-top: 1px solid #d1d5db;
-                          border-left: 1px solid #d1d5db;
-                          border-right: 1px solid #d1d5db;
-                        }
-                        .ql-container {
-                          border-bottom: 1px solid #d1d5db;
-                          border-left: 1px solid #d1d5db;
-                          border-right: 1px solid #d1d5db;
-                        }
-                      `}</style>
                     </div>
                   ) : (
                     <div className="text-center py-20">
