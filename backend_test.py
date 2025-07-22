@@ -729,6 +729,18 @@ class BookWriterAPITester:
                 error_data = response.json()
                 if "already exists" in error_data.get("detail", ""):
                     self.log("✅ Registration correctly prevents duplicate users")
+                    # Try to login with the same credentials
+                    login_data = {
+                        "email": registration_data["email"],
+                        "password": registration_data["password"]
+                    }
+                    login_response = self.session.post(f"{self.base_url}/auth/login", json=login_data)
+                    if login_response.status_code == 200:
+                        login_result = login_response.json()
+                        self.auth_token = login_result.get("session_token")
+                        self.test_user_data = login_result.get("user")
+                        self.session.headers.update({'Authorization': f'Bearer {self.auth_token}'})
+                        self.log("✅ Successfully logged in existing user")
                     return True
                 else:
                     self.log(f"❌ Registration validation error: {error_data.get('detail')}", "ERROR")
