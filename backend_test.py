@@ -3494,8 +3494,12 @@ As we stand at this technological crossroads, understanding the implications of 
                 self.log("Setting up authentication for export tests...")
                 auth_success = self.test_email_password_registration()
                 if not auth_success:
-                    self.log("❌ Failed to authenticate - cannot test export functionality", "ERROR")
-                    return False
+                    # Try login if registration failed (user might already exist)
+                    self.log("Registration failed, trying login...")
+                    auth_success = self.test_email_password_login()
+                    if not auth_success:
+                        self.log("❌ Failed to authenticate - cannot test export functionality", "ERROR")
+                        return False
             
             # Ensure we have a test project with content
             if not self.test_project_id:
