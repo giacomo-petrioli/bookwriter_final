@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import LandingPage from './LandingPage';
 
@@ -6,6 +6,11 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading, user } = useAuth();
 
   console.log('ProtectedRoute State:', { isAuthenticated, loading, user: user?.email });
+
+  // Force re-render when authentication state changes
+  useEffect(() => {
+    console.log('Authentication state changed in ProtectedRoute:', { isAuthenticated, loading, user: user?.email });
+  }, [isAuthenticated, loading, user]);
 
   if (loading) {
     console.log('Still loading authentication...');
