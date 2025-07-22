@@ -115,7 +115,7 @@ const BookWriter = () => {
   };
 
   const generateAllChapters = async () => {
-    if (!currentProject || !currentProject.outline) return;
+    if (!currentProject || !outline) return;
 
     setGeneratingAllChapters(true);
     setGeneratingChapterNum(0);
