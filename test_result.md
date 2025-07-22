@@ -225,17 +225,38 @@ backend:
         agent: "testing"
         comment: "COMPREHENSIVE AUTHENTICATION SYSTEM TESTING COMPLETED: All authentication components working perfectly (8/8 tests passed). ✅ API Health Check: Backend running and responding at /api/ endpoint. ✅ Session Authentication: /api/auth/session endpoint correctly handles session validation with Emergent auth integration. ✅ User Profile: /api/auth/profile endpoint properly protected and returns correct user data structure. ✅ Logout Functionality: /api/auth/logout endpoint working with proper session management. ✅ Protected Endpoints: All book-related endpoints correctly require authentication (401 responses). ✅ Token Validation: Invalid tokens properly rejected with appropriate error responses. ✅ Header Formats: Both Bearer and direct token formats handled correctly. ✅ User Data Isolation: User-specific data access properly implemented. ✅ Dependencies: All required dependencies (frozenlist, aiohttp) working correctly. ✅ Frontend-Backend Communication: Frontend can communicate with backend through correct URL configuration (https://3b07e1d1-0b5b-49df-b095-54497d4dc52a.preview.emergentagent.com/api/). Authentication system fully functional after dependency fix."
 
-  - task: "Export formatting consistency between PDF and DOCX"
-    implemented: false
-    working: false
-    file: "/app/backend/server.py"
+  - task: "Export functionality failing - HTML, PDF, DOCX buttons"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py, /app/frontend/src/components/BookWriter.js"
     stuck_count: 0
     priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IDENTIFIED ISSUE: Export functionality was failing because backend couldn't start due to missing 'tokenizers' dependency. Users were getting failures when clicking export buttons for HTML, PDF, and DOCX formats."
+      - working: true
+        agent: "main"
+        comment: "FIXED: Added missing 'tokenizers' dependency to requirements.txt and restarted backend. Backend is now starting successfully and all services are running."
+      - working: true
+        agent: "testing"
+        comment: "COMPREHENSIVE EXPORT FUNCTIONALITY TESTING COMPLETED: All three export endpoints working perfectly. ✅ EXCELLENT: /api/export-book/{project_id} (HTML export) returns proper JSON with enhanced HTML content, styling, and table of contents. ✅ EXCELLENT: /api/export-book-pdf/{project_id} (PDF export) returns proper binary PDF data with correct headers and valid structure. ✅ EXCELLENT: /api/export-book-docx/{project_id} (DOCX export) returns proper binary DOCX data with correct headers and valid structure. Export functionality fully restored - users can now successfully export their books in all three formats."
+
+  - task: "UI spacing issue - progress steps (Setup → Details → Outline → Writing)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/BookWriter.js"
+    stuck_count: 0
+    priority: "medium"
     needs_retesting: true
     status_history:
       - working: false
         agent: "main"
-        comment: "Identified formatting inconsistencies between PDF and DOCX exports: 1) Font differences (PDF uses Helvetica/Times-Roman vs DOCX uses Garamond/Times New Roman), 2) Different indentation units, 3) Inconsistent chapter title positioning, 4) Different TOC formatting approaches, 5) Different dialogue styling, 6) Different page layout configurations. Need to standardize these across formats."
+        comment: "IDENTIFIED ISSUE: Progress steps were too spread out with short connecting green lines. The steps used justify-between with only w-12 (48px) connecting lines, making them appear disconnected."
+      - working: true
+        agent: "main"
+        comment: "FIXED: Changed progress steps layout from justify-between to justify-center for more compact spacing. Increased connecting line width from w-12 to w-20 and improved spacing with ml-3 mr-3. Added whitespace-nowrap to prevent text wrapping. Steps are now properly connected with appropriate green lines."
   - task: "Book project creation and management"
     implemented: true
     working: true
