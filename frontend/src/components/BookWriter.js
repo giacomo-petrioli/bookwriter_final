@@ -1000,7 +1000,7 @@ const BookWriter = () => {
     return (
       <div className="min-h-screen bg-slate-50">
         <UserHeader>
-          <span className="text-gray-600">Writing & Editing</span>
+          <span className="text-slate-900 font-medium">Writing & Editing</span>
         </UserHeader>
         
         <div className="container mx-auto px-6 py-8">
