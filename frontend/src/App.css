@@ -399,3 +399,99 @@
     --glass-border: rgba(255, 255, 255, 0.12);
   }
 }
+
+/* Light theme ReactQuill styles for BookWriter interface */
+.writing-interface .ql-toolbar {
+  background: white !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.writing-interface .ql-container {
+  background: white !important;
+  border: 1px solid #d1d5db !important;
+  border-top: none !important;
+  border-radius: 0 0 12px 12px !important;
+}
+
+.writing-interface .ql-editor {
+  color: #374151 !important;
+  font-family: 'Inter', 'Georgia', serif !important;
+  line-height: 1.7 !important;
+  font-size: 16px !important;
+  padding: 20px !important;
+  background: white !important;
+}
+
+.writing-interface .ql-editor p {
+  color: #374151 !important;
+  margin-bottom: 12px;
+}
+
+.writing-interface .ql-editor h1, 
+.writing-interface .ql-editor h2, 
+.writing-interface .ql-editor h3 {
+  color: #1f2937 !important;
+  font-weight: bold;
+}
+
+.writing-interface .ql-editor h1 {
+  font-size: 28px;
+  margin: 20px 0 16px 0;
+}
+
+.writing-interface .ql-editor h2 {
+  font-size: 24px;
+  margin: 18px 0 14px 0;
+}
+
+.writing-interface .ql-editor h3 {
+  font-size: 20px;
+  margin: 16px 0 12px 0;
+}
+
+.writing-interface .ql-editor.ql-blank::before {
+  color: #9ca3af !important;
+  font-style: italic;
+}
+
+.writing-interface .ql-toolbar .ql-stroke {
+  stroke: #374151 !important;
+}
+
+.writing-interface .ql-toolbar .ql-fill {
+  fill: #374151 !important;
+}
+
+.writing-interface .ql-toolbar button {
+  color: #374151 !important;
+}
+
+.writing-interface .ql-toolbar button:hover {
+  background: #f3f4f6 !important;
+  border-radius: 4px;
+}
+
+.writing-interface .ql-toolbar button.ql-active {
+  background: #e5e7eb !important;
+  border-radius: 4px;
+  color: #1f2937 !important;
+}
+
+.writing-interface .ql-toolbar .ql-picker-label {
+  color: #374151 !important;
+}
+
+.writing-interface .ql-toolbar .ql-picker-options {
+  background: white !important;
+  border: 1px solid #d1d5db !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.writing-interface .ql-toolbar .ql-picker-item {
+  color: #374151 !important;
+}
+
+.writing-interface .ql-toolbar .ql-picker-item:hover {
+  background: #f3f4f6 !important;
+}
