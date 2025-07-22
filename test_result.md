@@ -419,16 +419,19 @@ frontend:
         comment: "COMPLETED: Successfully removed BookCraftLogo from all main/authentication pages. Removed logo imports and logo components from AuthPage.js (lines 4, 95) and LandingPage.js (lines 4, 27, 42, 200). Authentication page now shows clean interface with just 'BookCraft AI' text title without any logo graphics. Main page is now cleaner and more professional looking."
 
   - task: "Fixed login redirect flow to app"
-    implemented: true
-    working: true
+    implemented: false
+    working: false
     file: "/app/frontend/src/components/ProtectedRoute.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: true
     status_history:
       - working: true
         agent: "main"
         comment: "UPDATED: Fixed authentication redirect flow by redesigning the complete user journey. Instead of immediately showing AuthPage to unauthenticated users, ProtectedRoute now shows LandingPage first with a prominent 'Get Started' button. When clicked, this button navigates to AuthPage. Enhanced authentication state management in AuthContext with better error handling, state resets, and timing improvements to prevent users from getting stuck on signup page after successful Google login. The flow now properly manages state transitions: Home → Auth → Successful Login → BookWriter App."
+      - working: false
+        agent: "user"
+        comment: "CURRENT ISSUE: User reports that after logging in with Google account (and also email/password), they get redirected back to the home page instead of the actual BookWriter app. Both authentication methods have the same redirect problem. The authentication works but the flow doesn't properly navigate to the main application."
 
   - task: "Smart button logic for existing books with chapters"
     implemented: true
