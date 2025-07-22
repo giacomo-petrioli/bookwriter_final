@@ -949,20 +949,46 @@ const BookWriter = () => {
                 </div>
                 
                 {editingOutline ? (
-                  <ReactQuill
-                    value={editableOutline}
-                    onChange={setEditableOutline}
-                    className="mb-6"
-                    style={{ height: '400px' }}
-                    modules={{
-                      toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['clean']
-                      ],
-                    }}
-                  />
+                  <div className="mb-6">
+                    <ReactQuill
+                      value={editableOutline}
+                      onChange={setEditableOutline}
+                      style={{ height: '400px' }}
+                      theme="snow"
+                      modules={{
+                        toolbar: [
+                          [{ 'header': [1, 2, 3, false] }],
+                          ['bold', 'italic', 'underline'],
+                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                          ['clean']
+                        ],
+                      }}
+                    />
+                    <style jsx>{`
+                      .ql-editor {
+                        color: #374151 !important;
+                        background-color: white !important;
+                        font-size: 14px;
+                        line-height: 1.6;
+                      }
+                      .ql-editor p {
+                        color: #374151 !important;
+                      }
+                      .ql-editor h1, .ql-editor h2, .ql-editor h3 {
+                        color: #1f2937 !important;
+                      }
+                      .ql-toolbar {
+                        border-top: 1px solid #d1d5db;
+                        border-left: 1px solid #d1d5db;
+                        border-right: 1px solid #d1d5db;
+                      }
+                      .ql-container {
+                        border-bottom: 1px solid #d1d5db;
+                        border-left: 1px solid #d1d5db;
+                        border-right: 1px solid #d1d5db;
+                      }
+                    `}</style>
+                  </div>
                 ) : (
                   <div 
                     className="prose max-w-none mb-6 p-4 bg-gray-50 rounded-lg border"
