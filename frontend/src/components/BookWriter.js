@@ -741,7 +741,7 @@ const BookWriter = () => {
 
     // Progress steps renderer
     const renderProgressSteps = () => (
-      <div className="flex items-center justify-between mb-8 px-4">
+      <div className="flex items-center justify-center mb-8 px-4">
         {[
           { step: 1, label: "Setup", completed: currentStep >= 1 },
           { step: 2, label: "Details", completed: currentStep >= 2 },
@@ -756,7 +756,7 @@ const BookWriter = () => {
             }`}>
               {item.completed && currentStep > item.step ? '✓' : item.step}
             </div>
-            <span className={`ml-2 font-medium ${
+            <span className={`ml-3 mr-3 font-medium whitespace-nowrap ${
               item.completed ? 'text-green-600' : 
               currentStep === item.step ? 'text-purple-600' : 
               'text-gray-500'
@@ -764,7 +764,7 @@ const BookWriter = () => {
               {item.label}
             </span>
             {index < 3 && (
-              <div className={`w-12 h-1 mx-4 ${
+              <div className={`w-20 h-1 mx-3 ${
                 currentStep > item.step ? 'bg-green-500' : 'bg-gray-200'
               }`}></div>
             )}
