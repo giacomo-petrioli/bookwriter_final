@@ -1098,7 +1098,7 @@ const BookWriter = () => {
                       <ReactQuill
                         value={editableChapter}
                         onChange={setEditableChapter}
-                        style={{ height: '500px' }}
+                        style={{ height: '400px' }}
                         theme="snow"
                         modules={{
                           toolbar: [
@@ -1111,6 +1111,7 @@ const BookWriter = () => {
                           ],
                         }}
                       />
+                      <div className="mt-16"></div>
                     </div>
                   ) : (
                     <div className="text-center py-20">
