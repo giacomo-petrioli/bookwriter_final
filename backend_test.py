@@ -3481,6 +3481,79 @@ As we stand at this technological crossroads, understanding the implications of 
             self.log(f"❌ PDF/DOCX export formatting test failed: {str(e)}", "ERROR")
             return False
 
+    def test_export_functionality_comprehensive(self):
+        """Test all export functionality endpoints comprehensively"""
+        try:
+            self.log("=" * 70)
+            self.log("COMPREHENSIVE EXPORT FUNCTIONALITY TESTING")
+            self.log("Testing HTML, PDF, and DOCX export endpoints")
+            self.log("=" * 70)
+            
+            # First, ensure we have authentication
+            if not self.auth_token:
+                self.log("Setting up authentication for export tests...")
+                auth_success = self.test_email_password_registration()
+                if not auth_success:
+                    self.log("❌ Failed to authenticate - cannot test export functionality", "ERROR")
+                    return False
+            
+            # Ensure we have a test project with content
+            if not self.test_project_id:
+                self.log("Creating test project for export testing...")
+                project_success = self.test_create_project()
+                if not project_success:
+                    self.log("❌ Failed to create test project - cannot test export functionality", "ERROR")
+                    return False
+            
+            # Generate outline and at least one chapter for meaningful export testing
+            self.log("Generating outline for export testing...")
+            outline_success = self.test_generate_outline()
+            if not outline_success:
+                self.log("❌ Failed to generate outline - export tests may be limited", "WARNING")
+            
+            self.log("Generating chapter 1 for export testing...")
+            chapter_success = self.test_generate_chapter()
+            if not chapter_success:
+                self.log("❌ Failed to generate chapter - export tests may be limited", "WARNING")
+            
+            # Now test all export endpoints
+            export_tests = [
+                ("HTML Export", self.test_export_book),
+                ("PDF Export", self.test_pdf_export),
+                ("DOCX Export", self.test_docx_export),
+            ]
+            
+            passed_tests = 0
+            total_tests = len(export_tests)
+            
+            for test_name, test_func in export_tests:
+                self.log(f"\n--- Running {test_name} ---")
+                try:
+                    if test_func():
+                        passed_tests += 1
+                        self.log(f"✅ {test_name} PASSED")
+                    else:
+                        self.log(f"❌ {test_name} FAILED")
+                except Exception as e:
+                    self.log(f"❌ {test_name} FAILED with exception: {str(e)}")
+                
+                time.sleep(1)  # Brief pause between tests
+            
+            self.log("\n" + "=" * 70)
+            self.log(f"EXPORT FUNCTIONALITY TEST RESULTS: {passed_tests}/{total_tests} PASSED")
+            self.log("=" * 70)
+            
+            if passed_tests == total_tests:
+                self.log("🎉 ALL EXPORT TESTS PASSED!")
+                return True
+            else:
+                self.log(f"⚠️ {total_tests - passed_tests} EXPORT TESTS FAILED")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Comprehensive export functionality test failed: {str(e)}", "ERROR")
+            return False
+
     def run_all_tests(self):
         """Run all backend tests with focus on authentication system testing"""
         self.log("=" * 80)
