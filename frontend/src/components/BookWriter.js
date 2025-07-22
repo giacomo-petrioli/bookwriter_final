@@ -1072,6 +1072,28 @@ const BookWriter = () => {
                       </div>
                     </div>
                   )}
+                  
+                  {/* Success message and navigation after generation */}
+                  {!generatingAllChapters && allChapters && Object.keys(allChapters).length > 0 && (
+                    <div className="mt-6 p-4 bg-green-50 rounded-xl border border-green-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-lg font-semibold text-green-900 mb-2">
+                            ✅ All Chapters Generated Successfully!
+                          </h4>
+                          <p className="text-green-700">
+                            {Object.keys(allChapters).length} chapters have been generated and are ready for editing.
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setCurrentStep(4)}
+                          className="px-6 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
+                        >
+                          Go to Writing Interface
+                        </button>
+                      </div>
+                    </div>
+                  )}
               </div>
             </div>
           </div>
