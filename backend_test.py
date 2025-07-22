@@ -1462,7 +1462,7 @@ class BookWriterAPITester:
                     "max-width: 800px",
                     "margin: 0 auto",
                     ".book-info",
-                    ".outline",
+                    ".table-of-contents",
                     ".chapter"
                 ]
                 
