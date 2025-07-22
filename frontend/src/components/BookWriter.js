@@ -673,29 +673,69 @@ const BookWriter = () => {
       if (!currentProject) return;
       
       try {
-        const response = await axios.post(`${API}/export-book`, {
-          project_id: currentProject.id,
-          format: format
-        }, {
-          responseType: 'blob'
+        let endpoint;
+        let responseType = 'blob';
+        let mimeType;
+        let fileExtension;
+        
+        switch (format) {
+          case 'html':
+            endpoint = `${API}/export-book/${currentProject.id}`;
+            responseType = 'json';
+            break;
+          case 'pdf':
+            endpoint = `${API}/export-book-pdf/${currentProject.id}`;
+            mimeType = 'application/pdf';
+            fileExtension = 'pdf';
+            break;
+          case 'docx':
+            endpoint = `${API}/export-book-docx/${currentProject.id}`;
+            mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            fileExtension = 'docx';
+            break;
+          default:
+            console.error('Unsupported format:', format);
+            return;
+        }
+        
+        const response = await axios.get(endpoint, {
+          responseType: responseType,
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('session_token')}`
+          }
         });
         
-        const blob = new Blob([response.data], {
-          type: format === 'pdf' ? 'application/pdf' : 
-                format === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' :
-                'text/html'
-        });
+        if (format === 'html') {
+          // For HTML, we get JSON response with HTML content
+          const htmlContent = response.data.html;
+          const blob = new Blob([htmlContent], { type: 'text/html' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = response.data.filename || `${currentProject.title}.html`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else {
+          // For PDF and DOCX, we get blob directly
+          const blob = new Blob([response.data], { type: mimeType });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = `${currentProject.title}.${fileExtension}`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }
         
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `${currentProject.title}.${format}`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
+        console.log(`Successfully exported book as ${format.toUpperCase()}`);
       } catch (error) {
         console.error(`Error exporting as ${format}:`, error);
+        alert(`Failed to export as ${format.toUpperCase()}. Please try again.`);
       }
     };
 
