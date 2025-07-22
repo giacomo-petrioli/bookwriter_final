@@ -187,12 +187,6 @@ const BookWriter = () => {
   const Dashboard = () => (
     <div className="min-h-screen bg-slate-50">
       <UserHeader>
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-            <div className="w-2 h-2 bg-white rounded-full"></div>
-          </div>
-          <span className="text-sm text-gray-300">Online</span>
-        </div>
       </UserHeader>
       
       <div className="container mx-auto px-6 py-8">
