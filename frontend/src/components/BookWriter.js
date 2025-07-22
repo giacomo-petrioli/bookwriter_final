@@ -153,8 +153,8 @@ const BookWriter = () => {
       }
 
       setAllChapters(newChapters);
-      setCurrentStep(4);
-      setCurrentView('writing');
+      // Don't change step or view - stay on current page
+      console.log(`Successfully generated ${Object.keys(newChapters).length} chapters`);
     } catch (error) {
       console.error("Error generating chapters:", error);
     } finally {
