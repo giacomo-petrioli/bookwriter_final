@@ -271,9 +271,6 @@ const BookWriter = () => {
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-slate-900">Create New Book</h3>
-                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                    <span className="text-white text-lg">✨</span>
-                  </div>
                 </div>
                 
                 <form onSubmit={handleFormSubmit} className="space-y-6">
