@@ -3558,24 +3558,40 @@ As we stand at this technological crossroads, understanding the implications of 
         return passed, total, test_results
 
 def main():
-    """Main function to run Google OAuth authentication tests"""
+    """Main function to run comprehensive authentication system tests"""
     tester = BookWriterAPITester()
     
-    print("🚀 Starting Google OAuth Authentication Testing...")
+    print("🚀 Starting Comprehensive Authentication System Testing...")
     print(f"Backend URL: {BACKEND_URL}")
     print("=" * 80)
     
-    # Run comprehensive Google OAuth tests
-    success = tester.test_google_oauth_comprehensive()
+    # Run comprehensive authentication tests
+    auth_success = tester.test_authentication_system_comprehensive()
     
     print("\n" + "=" * 80)
-    if success:
-        print("🎉 GOOGLE OAUTH AUTHENTICATION TESTING COMPLETED SUCCESSFULLY!")
-        print("✅ All Google OAuth authentication components are working correctly")
+    
+    # Run email/password authentication tests
+    email_success = tester.test_email_password_comprehensive()
+    
+    print("\n" + "=" * 80)
+    
+    # Run Google OAuth authentication tests
+    oauth_success = tester.test_google_oauth_comprehensive()
+    
+    print("\n" + "=" * 80)
+    if auth_success and email_success and oauth_success:
+        print("🎉 ALL AUTHENTICATION TESTING COMPLETED SUCCESSFULLY!")
+        print("✅ All authentication components are working correctly")
         sys.exit(0)
     else:
-        print("❌ GOOGLE OAUTH AUTHENTICATION TESTING FAILED!")
-        print("⚠️ Some Google OAuth authentication components need attention")
+        print("❌ SOME AUTHENTICATION TESTS FAILED!")
+        print("⚠️ Some authentication components need attention")
+        if not auth_success:
+            print("  - Core authentication system issues")
+        if not email_success:
+            print("  - Email/password authentication issues")
+        if not oauth_success:
+            print("  - Google OAuth authentication issues")
         sys.exit(1)
 
 if __name__ == "__main__":
