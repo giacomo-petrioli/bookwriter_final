@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 
 const AuthPage = ({ onBack }) => {
-  const { loginWithGoogle, loginWithEmailPassword, registerWithEmailPassword } = useAuth();
+  const { loginWithGoogle, loginWithEmailPassword, registerWithEmailPassword, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState('google');
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -14,6 +14,13 @@ const AuthPage = ({ onBack }) => {
     name: '',
     confirmPassword: ''
   });
+
+  // Check if user becomes authenticated while on AuthPage
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('User authenticated on AuthPage, should redirect to app');
+    }
+  }, [isAuthenticated]);
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
