@@ -67,14 +67,17 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('auth_token', session_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
       
-      // Update state
+      // Update state with proper sequencing
       setUser(userData);
       setIsAuthenticated(true);
       
       console.log('Authentication state updated:', { userData, isAuthenticated: true });
       
-      // Force a small delay to ensure state has time to update
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Force a small delay to ensure state propagates properly
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Trigger a re-check to ensure components update
+      setLoading(false);
       
       return userData;
     } catch (error) {
@@ -84,9 +87,8 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       localStorage.removeItem('auth_token');
       delete axios.defaults.headers.common['Authorization'];
-      throw error;
-    } finally {
       setLoading(false);
+      throw error;
     }
   };
 
