@@ -14,11 +14,9 @@ const UserHeader = ({ children }) => {
   return (
     <nav className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 p-6">
       <div className="container mx-auto flex justify-between items-center">
-        {/* Professional Brand - No Logo */}
+        {/* Professional Brand - With Logo */}
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">BC</span>
-          </div>
+          <BookCraftLogo className="w-8 h-8" />
           <h1 className="text-2xl font-bold text-white tracking-tight">BookCraft AI</h1>
         </div>
         
