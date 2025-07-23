@@ -757,8 +757,25 @@ const BookWriter = () => {
         const chapterContent = response.data.chapter_content;
         setAllChapters(prev => ({...prev, [chapterNum]: chapterContent}));
         setEditableChapter(chapterContent);
+        
+        // Update credit balance if returned
+        if (response.data.remaining_credits !== undefined) {
+          setCreditBalance(response.data.remaining_credits);
+        }
+        
+        // Show credit cost information
+        if (response.data.credit_cost) {
+          console.log(`Chapter ${chapterNum} generated. Cost: ${response.data.credit_cost} credit(s). Remaining: ${response.data.remaining_credits}`);
+        }
       } catch (error) {
         console.error(`Error generating chapter ${chapterNum}:`, error);
+        
+        // Handle specific credit-related errors
+        if (error.response?.status === 402) {
+          alert(`Insufficient credits: ${error.response.data.detail}`);
+          // Refresh credit balance to show current amount
+          refreshCreditBalance();
+        }
       } finally {
         setGeneratingChapter(false);
       }
