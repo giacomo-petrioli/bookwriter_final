@@ -36,6 +36,20 @@ const UserHeader = ({ children }) => {
     setShowUserMenu(false);
   };
 
+  const refreshCreditBalance = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        const response = await axios.get(`${API_URL}/api/credits/balance`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCreditBalance(response.data.credit_balance);
+      }
+    } catch (error) {
+      console.error('Failed to refresh credit balance:', error);
+    }
+  };
+
   return (
     <nav className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 p-6">
       <div className="container mx-auto flex justify-between items-center">
