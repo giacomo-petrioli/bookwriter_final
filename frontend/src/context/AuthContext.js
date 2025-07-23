@@ -30,6 +30,7 @@ export const AuthProvider = ({ children }) => {
       
       if (token) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        console.log('Making auth check request to:', `${API_URL}/api/auth/profile`);
         const response = await axios.get(`${API_URL}/api/auth/profile`);
         console.log('Auth check successful:', response.data);
         
@@ -41,7 +42,10 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error('Auth check failed:', error.response?.status, error.response?.data || error.message);
+      if (error.response?.status === 401) {
+        console.log('Token expired or invalid, clearing auth state');
+      }
       localStorage.removeItem('auth_token');
       delete axios.defaults.headers.common['Authorization'];
       setIsAuthenticated(false);
