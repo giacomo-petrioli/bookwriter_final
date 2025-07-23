@@ -382,12 +382,14 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     isAuthenticated,
+    backendReady,
     login: loginWithGoogle, // Add alias for backwards compatibility
     loginWithGoogle,
     loginWithEmailPassword,
     registerWithEmailPassword,
     logout,
-    checkAuthStatus
+    checkAuthStatus,
+    checkBackendHealth
   };
 
   return (
