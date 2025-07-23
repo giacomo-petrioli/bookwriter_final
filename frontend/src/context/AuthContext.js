@@ -59,7 +59,9 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Starting Google login...');
       setLoading(true);
+      setIsAuthenticated(false); // Ensure we start with clean state
       
+      console.log('Making Google login request to:', `${API_URL}/api/auth/google/verify`);
       const response = await axios.post(`${API_URL}/api/auth/google/verify`, {
         token: credential
       });
@@ -67,6 +69,11 @@ export const AuthProvider = ({ children }) => {
       console.log('Google login response:', response.data);
       const { user: userData, session_token } = response.data;
       
+      if (!session_token) {
+        throw new Error('No session token received from server');
+      }
+      
+      console.log('Storing token and updating state...');
       // Store token and set headers
       localStorage.setItem('auth_token', session_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
@@ -75,17 +82,17 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       setIsAuthenticated(true);
       
-      console.log('Authentication state updated:', { userData, isAuthenticated: true });
+      console.log('Authentication state updated:', { userData: userData?.email, isAuthenticated: true });
       
-      // Force a small delay to ensure state propagates properly
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Longer delay to ensure state propagates properly across all components
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Trigger a re-check to ensure components update
+      console.log('Google login completed successfully');
       setLoading(false);
       
       return userData;
     } catch (error) {
-      console.error('Google login failed:', error);
+      console.error('Google login failed:', error.response?.data || error.message);
       // Ensure we're not authenticated on failure
       setIsAuthenticated(false);
       setUser(null);
