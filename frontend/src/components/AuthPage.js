@@ -282,7 +282,7 @@ const AuthPage = ({ onBack }) => {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !backendReady}
                   className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
