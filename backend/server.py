@@ -954,6 +954,60 @@ async def logout(authorization: str = Header(None)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Logout failed: {str(e)}")
 
+# Credit management endpoints
+@api_router.get("/credits/balance", response_model=CreditBalanceResponse)
+async def get_credit_balance(current_user: User = Depends(get_current_user)):
+    """Get user's current credit balance"""
+    try:
+        balance = await get_user_credit_balance(current_user.id)
+        return CreditBalanceResponse(
+            credit_balance=balance,
+            user_id=current_user.id
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching credit balance: {str(e)}")
+
+@api_router.get("/credits/history")
+async def get_credit_history(current_user: User = Depends(get_current_user), limit: int = 50):
+    """Get user's credit transaction history"""
+    try:
+        transactions = await db.credit_transactions.find(
+            {"user_id": current_user.id}
+        ).sort("created_at", -1).limit(limit).to_list(length=limit)
+        
+        return [CreditTransactionResponse(**transaction) for transaction in transactions]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching credit history: {str(e)}")
+
+@api_router.post("/credits/calculate-book-cost", response_model=BookCostResponse)
+async def calculate_book_cost_endpoint(request: BookCostRequest):
+    """Calculate the cost to generate a book"""
+    try:
+        cost_info = calculate_book_cost(request.pages, request.chapters)
+        return BookCostResponse(**cost_info)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error calculating book cost: {str(e)}")
+
+@api_router.post("/credits/purchase")
+async def purchase_credits(request: CreditPurchaseRequest, current_user: User = Depends(get_current_user)):
+    """Purchase credits (placeholder for future payment integration)"""
+    try:
+        # For now, we'll add credits directly (in production, integrate with payment processor)
+        new_balance = await add_credits(
+            current_user.id,
+            request.amount,
+            "credit_purchase",
+            f"Purchased {request.amount} credits"
+        )
+        
+        return {
+            "success": True,
+            "message": f"Successfully added {request.amount} credits",
+            "new_balance": new_balance
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Credit purchase failed: {str(e)}")
+
 # Helper function to extract chapter titles from outline
 def extract_chapter_titles(outline: str) -> dict:
     """Extract chapter titles from the outline HTML"""
