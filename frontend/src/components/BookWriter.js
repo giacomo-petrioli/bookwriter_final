@@ -326,6 +326,13 @@ const BookWriter = () => {
                         name="pages"
                         value={formData.pages}
                         onChange={handleInputChange}
+                        onKeyDown={(e) => {
+                          console.log('Key pressed in pages:', e.key, 'Code:', e.code, 'Target:', e.target.name);
+                          if (e.key === 'i' || e.key === 'I') {
+                            console.log('I key detected in pages, preventing default behavior');
+                            e.stopPropagation();
+                          }
+                        }}
                         min="10"
                         max="1000"
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
