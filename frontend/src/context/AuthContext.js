@@ -15,20 +15,72 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [backendReady, setBackendReady] = useState(false);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
-  useEffect(() => {
-    // Only check auth status on initial load if there's a token stored
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      checkAuthStatus();
-    } else {
-      // No token, immediately set loading to false and not authenticated
-      setLoading(false);
-      setIsAuthenticated(false);
-      setUser(null);
+  // Backend health check with retry logic
+  const checkBackendHealth = async (maxRetries = 5, delay = 1000) => {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        console.log(`Backend health check attempt ${i + 1}/${maxRetries}...`);
+        const response = await axios.get(`${API_URL}/api/`, { timeout: 5000 });
+        if (response.status === 200) {
+          console.log('Backend is healthy and ready');
+          setBackendReady(true);
+          return true;
+        }
+      } catch (error) {
+        console.warn(`Backend health check failed (attempt ${i + 1}/${maxRetries}):`, error.message);
+        if (i < maxRetries - 1) {
+          console.log(`Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 1.5; // Exponential backoff
+        }
+      }
     }
+    console.error('Backend failed to become available after multiple attempts');
+    setBackendReady(false);
+    setLoading(false);
+    return false;
+  };
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        console.log('Initializing authentication...');
+        
+        // First, check if backend is available
+        const isBackendHealthy = await checkBackendHealth();
+        
+        if (!isBackendHealthy) {
+          console.error('Backend not available, skipping auth check');
+          setLoading(false);
+          setIsAuthenticated(false);
+          setUser(null);
+          return;
+        }
+
+        // Only check auth status if there's a token stored
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          console.log('Found stored token, checking auth status...');
+          await checkAuthStatus();
+        } else {
+          console.log('No stored token, user not authenticated');
+          setLoading(false);
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Auth initialization failed:', error);
+        setLoading(false);
+        setIsAuthenticated(false);
+        setUser(null);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const checkAuthStatus = async () => {
