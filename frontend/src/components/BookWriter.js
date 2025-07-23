@@ -345,23 +345,6 @@ const BookWriter = () => {
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
-                      onKeyDown={(e) => {
-                        if (e.key === 'i' || e.key === 'I') {
-                          console.log('I key detected in description, preventing all default behaviors');
-                          e.preventDefault();
-                          e.stopPropagation();
-                          // Manually handle the input at cursor position
-                          const textarea = e.target;
-                          const start = textarea.selectionStart;
-                          const end = textarea.selectionEnd;
-                          const newValue = formData.description.substring(0, start) + 'i' + formData.description.substring(end);
-                          setFormData(prev => ({ ...prev, description: newValue }));
-                          // Set cursor position after the inserted 'i'
-                          setTimeout(() => {
-                            textarea.setSelectionRange(start + 1, start + 1);
-                          }, 0);
-                        }
-                      }}
                       rows="4"
                       placeholder="Describe what your book is about..."
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
