@@ -866,8 +866,9 @@ const BookWriter = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">Pages</label>
                       <input
                         type="number"
+                        name="pages"
                         value={formData.pages}
-                        onChange={(e) => setFormData({...formData, pages: parseInt(e.target.value)})}
+                        onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
                         min="20"
                         max="1000"
