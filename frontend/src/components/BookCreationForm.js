@@ -136,6 +136,62 @@ const BookCreationForm = memo(({
           </select>
         </div>
         
+        {/* Credit Cost Display */}
+        {bookCost && (
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                <div className="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mr-2">
+                  <span className="text-xs font-bold text-white">₵</span>
+                </div>
+                Credit Cost
+              </h3>
+              {creditBalance !== null && (
+                <div className="text-sm text-gray-600">
+                  Your balance: <span className="font-semibold text-purple-600">{creditBalance} credits</span>
+                </div>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-gray-600">Requested chapters:</span>
+                <span className="font-semibold text-gray-800 ml-2">{bookCost.requested_chapters}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">Minimum required:</span>
+                <span className="font-semibold text-gray-800 ml-2">{bookCost.minimum_chapters}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">Pages per chapter:</span>
+                <span className="font-semibold text-gray-800 ml-2">~{bookCost.pages_per_chapter.toFixed(1)}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">Total cost:</span>
+                <span className="font-bold text-purple-600 ml-2">{bookCost.total_cost} credits</span>
+              </div>
+            </div>
+            
+            {bookCost.requested_chapters < bookCost.minimum_chapters && (
+              <div className="mt-3 p-2 bg-yellow-100 border border-yellow-300 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  📘 <strong>Note:</strong> Your book will have {bookCost.minimum_chapters} chapters 
+                  (max 10 pages each) instead of {bookCost.requested_chapters} to meet the page requirement.
+                </p>
+              </div>
+            )}
+            
+            {creditBalance !== null && creditBalance < bookCost.total_cost && (
+              <div className="mt-3 p-3 bg-red-100 border border-red-300 rounded-lg">
+                <p className="text-sm text-red-800">
+                  ⚠️ <strong>Insufficient Credits:</strong> You need {bookCost.total_cost} credits 
+                  but have {creditBalance}. Please purchase {bookCost.total_cost - creditBalance} more credits.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+        
         <div className="flex gap-4">
           <button
             type="button"
