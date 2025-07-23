@@ -124,8 +124,9 @@ const BookWriter = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    const processedValue = type === 'number' ? parseInt(value) || 0 : value;
+    setFormData(prev => ({ ...prev, [name]: processedValue }));
   };
 
   const handleFormSubmit = async (e) => {
