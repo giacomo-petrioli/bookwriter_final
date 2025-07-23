@@ -3699,7 +3699,7 @@ As we stand at this technological crossroads, understanding the implications of 
                 ("AI Outline Generation", self.test_generate_outline),
                 ("AI Chapter Generation", self.test_generate_chapter),
                 ("Content Editing", self.test_update_chapter),
-                ("Export Functionality", self.test_export_functionality),
+                ("Export Functionality", self.test_export_functionality_comprehensive),
             ]
             
             passed_tests = 0
