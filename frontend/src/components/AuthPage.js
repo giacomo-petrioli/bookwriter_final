@@ -3,7 +3,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 
 const AuthPage = ({ onBack }) => {
-  const { loginWithGoogle, loginWithEmailPassword, registerWithEmailPassword, isAuthenticated } = useAuth();
+  const { loginWithGoogle, loginWithEmailPassword, registerWithEmailPassword, isAuthenticated, backendReady } = useAuth();
   const [activeTab, setActiveTab] = useState('google');
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
