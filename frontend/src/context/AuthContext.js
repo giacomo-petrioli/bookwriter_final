@@ -144,17 +144,12 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('auth_token', session_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
       
-      // Update state with proper sequencing
+      // Update state immediately
       setUser(userData);
       setIsAuthenticated(true);
-      
-      console.log('Email login successful:', { userData, isAuthenticated: true });
-      
-      // Force a small delay to ensure state propagates properly
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      // Trigger a re-check to ensure components update
       setLoading(false);
+      
+      console.log('Email login successful:', { userData: userData?.email });
       
       return userData;
     } catch (error) {
