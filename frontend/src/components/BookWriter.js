@@ -53,6 +53,13 @@ const BookWriter = () => {
       // Calculate initial book cost with default form values
       calculateBookCost(formData.pages, formData.chapters);
     }
+
+    // Cleanup function to clear any pending cost calculation timeouts
+    return () => {
+      if (window.bookCostTimeout) {
+        clearTimeout(window.bookCostTimeout);
+      }
+    };
   }, [user]);
 
 
