@@ -918,7 +918,8 @@ async def get_user_stats(current_user: User = Depends(get_current_user)):
             "total_words": total_words,
             "recent_activity": len(recent_projects),
             "avg_words_per_chapter": round(total_words / total_chapters) if total_chapters > 0 else 0,
-            "user_since": current_user.created_at.strftime("%B %Y") if current_user.created_at else "Recently"
+            "user_since": current_user.created_at.strftime("%B %Y") if current_user.created_at else "Recently",
+            "credit_balance": current_user.credit_balance
         }
         
     except Exception as e:
