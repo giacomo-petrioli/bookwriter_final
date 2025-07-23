@@ -83,36 +83,74 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const checkAuthStatus = async () => {
-    try {
-      console.log('Checking auth status...');
-      const token = localStorage.getItem('auth_token');
-      console.log('Stored token:', token ? 'exists' : 'not found');
-      
-      if (token) {
+  const checkAuthStatus = async (maxRetries = 3) => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Checking auth status (attempt ${attempt}/${maxRetries})...`);
+        const token = localStorage.getItem('auth_token');
+        console.log('Stored token:', token ? 'exists' : 'not found');
+        
+        if (!token) {
+          console.log('No token found, user not authenticated');
+          setIsAuthenticated(false);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        if (!backendReady) {
+          console.log('Backend not ready, checking health first...');
+          const isHealthy = await checkBackendHealth(3, 500);
+          if (!isHealthy) {
+            throw new Error('Backend not available');
+          }
+        }
+
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         console.log('Making auth check request to:', `${API_URL}/api/auth/profile`);
-        const response = await axios.get(`${API_URL}/api/auth/profile`);
-        console.log('Auth check successful:', response.data);
         
-        setUser(response.data);
-        setIsAuthenticated(true);
-      } else {
-        console.log('No token found, user not authenticated');
-        setIsAuthenticated(false);
-        setUser(null);
+        const response = await axios.get(`${API_URL}/api/auth/profile`, { 
+          timeout: 10000,
+          validateStatus: (status) => status < 500 // Don't throw on 4xx errors
+        });
+        
+        if (response.status === 200) {
+          console.log('Auth check successful:', response.data);
+          setUser(response.data);
+          setIsAuthenticated(true);
+          setLoading(false);
+          return;
+        } else if (response.status === 401) {
+          console.log('Token expired or invalid');
+          throw new Error('Token invalid');
+        }
+      } catch (error) {
+        console.warn(`Auth check attempt ${attempt} failed:`, error.message);
+        
+        if (error.response?.status === 401 || error.message === 'Token invalid') {
+          console.log('Token expired or invalid, clearing auth state');
+          localStorage.removeItem('auth_token');
+          delete axios.defaults.headers.common['Authorization'];
+          setIsAuthenticated(false);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        
+        // If this is the last attempt, give up
+        if (attempt === maxRetries) {
+          console.error('Auth check failed after all retries');
+          localStorage.removeItem('auth_token');
+          delete axios.defaults.headers.common['Authorization'];
+          setIsAuthenticated(false);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       }
-    } catch (error) {
-      console.error('Auth check failed:', error.response?.status, error.response?.data || error.message);
-      if (error.response?.status === 401) {
-        console.log('Token expired or invalid, clearing auth state');
-      }
-      localStorage.removeItem('auth_token');
-      delete axios.defaults.headers.common['Authorization'];
-      setIsAuthenticated(false);
-      setUser(null);
-    } finally {
-      setLoading(false);
     }
   };
 
