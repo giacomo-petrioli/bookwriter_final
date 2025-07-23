@@ -175,7 +175,7 @@ const AuthPage = ({ onBack }) => {
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={handleGoogleError}
-                  disabled={loading}
+                  disabled={loading || !backendReady}
                   theme="filled_black"
                   size="large"
                   text={isSignUp ? "signup_with" : "signin_with"}
