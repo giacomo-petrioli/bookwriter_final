@@ -303,6 +303,13 @@ const BookWriter = () => {
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
+                      onKeyDown={(e) => {
+                        console.log('Key pressed in description:', e.key, 'Code:', e.code, 'Target:', e.target.name);
+                        if (e.key === 'i' || e.key === 'I') {
+                          console.log('I key detected in description, preventing default behavior');
+                          e.stopPropagation();
+                        }
+                      }}
                       rows="4"
                       placeholder="Describe what your book is about..."
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
