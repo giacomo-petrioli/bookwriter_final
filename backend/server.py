@@ -153,6 +153,35 @@ class ChapterUpdate(BaseModel):
     chapter_number: int
     content: str
 
+class CreditPurchaseRequest(BaseModel):
+    amount: int
+    payment_method: str = "stripe"  # Future payment integration
+
+class BookCostRequest(BaseModel):
+    pages: int
+    chapters: int
+
+class BookCostResponse(BaseModel):
+    pages: int
+    requested_chapters: int
+    minimum_chapters: int
+    cost_per_chapter: int
+    total_cost: int
+    pages_per_chapter: float
+    
+class CreditBalanceResponse(BaseModel):
+    credit_balance: int
+    user_id: str
+
+class CreditTransactionResponse(BaseModel):
+    id: str
+    amount: int
+    transaction_type: str
+    description: str
+    book_project_id: Optional[str]
+    chapter_number: Optional[int]
+    created_at: datetime
+
 # Helper function for style-specific instructions
 def get_style_instructions(writing_style: str, content_type: str = "outline"):
     """Get style-specific instructions for different writing styles"""
