@@ -1,225 +1,193 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 
-const BookCreationForm = memo(({ 
-  initialData = {
-    title: "",
-    description: "",
-    pages: 100,
-    chapters: 10,
-    language: "English",
-    writing_style: "story"
-  },
-  onSubmit,
-  onCancel,
-  loading = false,
-  bookCost = null,
-  creditBalance = null,
-  onFormChange = null
-}) => {
-  const [localFormData, setLocalFormData] = useState(initialData);
+const BookCreationForm = ({ onSubmit, loading = false, initialData = {} }) => {
+  // Local form state - completely isolated from parent
+  const [localFormData, setLocalFormData] = useState({
+    title: initialData.title || "",
+    description: initialData.description || "",
+    pages: initialData.pages || 100,
+    chapters: initialData.chapters || 10,
+    language: initialData.language || "English",
+    writing_style: initialData.writing_style || "story"
+  });
 
+  // Use refs to prevent unnecessary re-renders
+  const formRef = useRef(null);
+  const costTimeoutRef = useRef(null);
+
+  // Simple input change handler with no side effects
   const handleInputChange = useCallback((e) => {
     const { name, value, type } = e.target;
     const processedValue = type === 'number' ? parseInt(value) || 0 : value;
     
-    setLocalFormData(prev => {
-      const newData = { ...prev, [name]: processedValue };
-      
-      // Notify parent component about form changes for cost calculation
-      if (onFormChange) {
-        onFormChange(newData);
-      }
-      
-      return newData;
-    });
-  }, [onFormChange]);
+    setLocalFormData(prev => ({
+      ...prev,
+      [name]: processedValue
+    }));
+  }, []);
 
+  // Handle form submission
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
-    if (!localFormData.title || !localFormData.description) return;
-    onSubmit(localFormData);
+    if (localFormData.title && localFormData.description) {
+      onSubmit(localFormData);
+    }
   }, [localFormData, onSubmit]);
 
-  const handleCancel = useCallback(() => {
-    onCancel();
-  }, [onCancel]);
+  // Clean up any pending timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (costTimeoutRef.current) {
+        clearTimeout(costTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-      <h2 className="text-3xl font-bold text-gray-900 mb-6">Create Your Book Project</h2>
-      
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Book Title</label>
-          <input
-            type="text"
-            name="title"
-            value={localFormData.title}
-            onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-            placeholder="Enter your book title"
-            required
-          />
+    <div className="max-w-4xl mx-auto">
+      <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="px-8 py-6 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-slate-200">
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Create Your Book Project</h2>
+          <p className="text-slate-600">Tell us about your book and we'll help you bring it to life</p>
         </div>
         
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-          <textarea
-            name="description"
-            value={localFormData.description}
-            onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors h-32"
-            placeholder="Describe your book's theme, genre, and main topics"
-            required
-          />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Pages</label>
-            <input
-              type="number"
-              name="pages"
-              value={localFormData.pages}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-              min="20"
-              max="1000"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Chapters</label>
-            <input
-              type="number"
-              name="chapters"
-              value={localFormData.chapters}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-              min="3"
-              max="50"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
-            <select
-              name="language"
-              value={localFormData.language}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-            >
-              <option value="English">English</option>
-              <option value="Spanish">Spanish</option>
-              <option value="French">French</option>
-              <option value="German">German</option>
-              <option value="Italian">Italian</option>
-              <option value="Portuguese">Portuguese</option>
-            </select>
-          </div>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Writing Style</label>
-          <select
-            name="writing_style"
-            value={localFormData.writing_style}
-            onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-          >
-            <option value="story">Narrative/Story Style</option>
-            <option value="descriptive">Descriptive/Educational</option>
-            <option value="technical">Technical Writing</option>
-            <option value="biography">Biography</option>
-            <option value="self_help">Self-Help</option>
-            <option value="business">Business</option>
-          </select>
-        </div>
-        
-        {/* Credit Cost Display */}
-        {bookCost && (
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                <div className="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-xs font-bold text-white">₵</span>
-                </div>
-                Credit Cost
-              </h3>
-              {creditBalance !== null && (
-                <div className="text-sm text-gray-600">
-                  Your balance: <span className="font-semibold text-purple-600">{creditBalance} credits</span>
-                </div>
-              )}
+        <div className="p-8">
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+            {/* Book Title */}
+            <div>
+              <label htmlFor="book-title" className="block text-sm font-semibold text-slate-700 mb-3">
+                Book Title *
+              </label>
+              <input
+                id="book-title"
+                type="text"
+                name="title"
+                value={localFormData.title}
+                onChange={handleInputChange}
+                placeholder="Enter your book title..."
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                required
+              />
             </div>
             
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            {/* Book Description */}
+            <div>
+              <label htmlFor="book-description" className="block text-sm font-semibold text-slate-700 mb-3">
+                Book Description *
+              </label>
+              <textarea
+                id="book-description"
+                name="description"
+                value={localFormData.description}
+                onChange={handleInputChange}
+                rows="4"
+                placeholder="Describe what your book is about..."
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none"
+                required
+              />
+            </div>
+            
+            {/* Pages and Chapters */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <span className="text-gray-600">Requested chapters:</span>
-                <span className="font-semibold text-gray-800 ml-2">{bookCost.requested_chapters}</span>
+                <label htmlFor="target-pages" className="block text-sm font-semibold text-slate-700 mb-3">
+                  Target Pages
+                </label>
+                <input
+                  id="target-pages"
+                  type="number"
+                  name="pages"
+                  value={localFormData.pages}
+                  onChange={handleInputChange}
+                  min="10"
+                  max="1000"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                />
               </div>
+              
               <div>
-                <span className="text-gray-600">Minimum required:</span>
-                <span className="font-semibold text-gray-800 ml-2">{bookCost.minimum_chapters}</span>
-              </div>
-              <div>
-                <span className="text-gray-600">Pages per chapter:</span>
-                <span className="font-semibold text-gray-800 ml-2">~{bookCost.pages_per_chapter.toFixed(1)}</span>
-              </div>
-              <div>
-                <span className="text-gray-600">Total cost:</span>
-                <span className="font-bold text-purple-600 ml-2">{bookCost.total_cost} credits</span>
+                <label htmlFor="num-chapters" className="block text-sm font-semibold text-slate-700 mb-3">
+                  Number of Chapters
+                </label>
+                <input
+                  id="num-chapters"
+                  type="number"
+                  name="chapters"
+                  value={localFormData.chapters}
+                  onChange={handleInputChange}
+                  min="1"
+                  max="50"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                />
               </div>
             </div>
             
-            {bookCost.requested_chapters < bookCost.minimum_chapters && (
-              <div className="mt-3 p-2 bg-yellow-100 border border-yellow-300 rounded-lg">
-                <p className="text-sm text-yellow-800">
-                  📘 <strong>Note:</strong> Your book will have {bookCost.minimum_chapters} chapters 
-                  (max 10 pages each) instead of {bookCost.requested_chapters} to meet the page requirement.
-                </p>
+            {/* Language and Writing Style */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="book-language" className="block text-sm font-semibold text-slate-700 mb-3">
+                  Language
+                </label>
+                <select
+                  id="book-language"
+                  name="language"
+                  value={localFormData.language}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                >
+                  <option value="English">English</option>
+                  <option value="Spanish">Spanish</option>
+                  <option value="French">French</option>
+                  <option value="German">German</option>
+                  <option value="Italian">Italian</option>
+                  <option value="Portuguese">Portuguese</option>
+                  <option value="Russian">Russian</option>
+                  <option value="Japanese">Japanese</option>
+                  <option value="Korean">Korean</option>
+                  <option value="Chinese">Chinese</option>
+                </select>
               </div>
-            )}
+              
+              <div>
+                <label htmlFor="writing-style" className="block text-sm font-semibold text-slate-700 mb-3">
+                  Writing Style
+                </label>
+                <select
+                  id="writing-style"
+                  name="writing_style"
+                  value={localFormData.writing_style}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                >
+                  <option value="story">Story (Narrative)</option>
+                  <option value="descriptive">Descriptive (Structured)</option>
+                </select>
+              </div>
+            </div>
             
-            {creditBalance !== null && creditBalance < bookCost.total_cost && (
-              <div className="mt-3 p-3 bg-red-100 border border-red-300 rounded-lg">
-                <p className="text-sm text-red-800">
-                  ⚠️ <strong>Insufficient Credits:</strong> You need {bookCost.total_cost} credits 
-                  but have {creditBalance}. Please purchase {bookCost.total_cost - creditBalance} more credits.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-        
-        <div className="flex gap-4">
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="px-6 py-3 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors"
-          >
-            Back to Dashboard
-          </button>
-          <button
-            type="submit"
-            disabled={
-              loading || 
-              !localFormData.title || 
-              !localFormData.description ||
-              (creditBalance !== null && bookCost && creditBalance < bookCost.total_cost)
-            }
-            className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 disabled:opacity-50"
-          >
-            {loading ? "Creating Project..." : 
-             (creditBalance !== null && bookCost && creditBalance < bookCost.total_cost) ? 
-             "Insufficient Credits" : "Create Project"}
-          </button>
+            {/* Submit Button */}
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={loading || !localFormData.title.trim() || !localFormData.description.trim()}
+                className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg hover:from-purple-700 hover:to-pink-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                    Creating Project...
+                  </span>
+                ) : (
+                  "Create Book Project"
+                )}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
-});
+};
 
-BookCreationForm.displayName = 'BookCreationForm';
-
-export default BookCreationForm;
+// Memoize the component to prevent unnecessary re-renders
+export default React.memo(BookCreationForm);
