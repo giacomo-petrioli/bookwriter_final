@@ -307,10 +307,20 @@ const BookWriter = () => {
                       value={formData.description}
                       onChange={handleInputChange}
                       onKeyDown={(e) => {
-                        console.log('Key pressed in description:', e.key, 'Code:', e.code, 'Target:', e.target.name);
                         if (e.key === 'i' || e.key === 'I') {
-                          console.log('I key detected in description, preventing default behavior');
+                          console.log('I key detected in description, preventing all default behaviors');
+                          e.preventDefault();
                           e.stopPropagation();
+                          // Manually handle the input at cursor position
+                          const textarea = e.target;
+                          const start = textarea.selectionStart;
+                          const end = textarea.selectionEnd;
+                          const newValue = formData.description.substring(0, start) + 'i' + formData.description.substring(end);
+                          setFormData(prev => ({ ...prev, description: newValue }));
+                          // Set cursor position after the inserted 'i'
+                          setTimeout(() => {
+                            textarea.setSelectionRange(start + 1, start + 1);
+                          }, 0);
                         }
                       }}
                       rows="4"
