@@ -46,6 +46,17 @@ const UserHeader = ({ children }) => {
         </div>
         
         <div className="flex items-center space-x-4">
+          {/* Credit Balance Display */}
+          <div className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-purple-600/20 to-blue-600/20 backdrop-blur-sm border border-purple-500/30 rounded-xl">
+            <div className="w-5 h-5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+              <span className="text-xs font-bold text-white">₵</span>
+            </div>
+            <span className="text-white font-semibold text-sm">
+              {creditBalance !== null ? creditBalance : '...'}
+            </span>
+            <span className="text-gray-300 text-xs">credits</span>
+          </div>
+          
           {children}
           
           {/* User Menu */}
