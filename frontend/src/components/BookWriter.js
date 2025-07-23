@@ -131,7 +131,7 @@ const BookWriter = () => {
     setFormData(prev => ({ ...prev, [name]: processedValue }));
   }, []);
 
-  const handleFormSubmit = useCallback(async (formDataToSubmit) => {
+  const handleFormSubmitDirect = useCallback(async (formDataToSubmit) => {
     if (!formDataToSubmit.title || !formDataToSubmit.description) return;
 
     try {
@@ -149,6 +149,25 @@ const BookWriter = () => {
       setLoading(false);
     }
   }, []);
+
+  const handleFormSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    if (!formData.title || !formData.description) return;
+
+    try {
+      setLoading(true);
+      const response = await axios.post(`${API}/projects`, formData);
+      setCurrentProject(response.data);
+      setCurrentStep(2);
+      setCurrentView('writing');
+      await loadProjects();
+      await loadUserStats(); // Refresh stats
+    } catch (error) {
+      console.error("Error creating project:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [formData]);
 
   const handleFormCancel = useCallback(() => {
     setCurrentView('dashboard');
