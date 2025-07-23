@@ -840,8 +840,9 @@ const BookWriter = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Book Title</label>
                     <input
                       type="text"
+                      name="title"
                       value={formData.title}
-                      onChange={(e) => setFormData({...formData, title: e.target.value})}
+                      onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
                       placeholder="Enter your book title"
                       required
