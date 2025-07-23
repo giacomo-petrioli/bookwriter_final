@@ -527,6 +527,114 @@ async def create_user_session(user_id: str, session_token: str) -> UserSession:
     await db.user_sessions.insert_one(session.dict())
     return session
 
+# Credit management functions
+async def get_user_credit_balance(user_id: str) -> int:
+    """Get user's current credit balance"""
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user.get("credit_balance", 0)
+
+async def deduct_credits(user_id: str, amount: int, transaction_type: str, description: str, 
+                        book_project_id: str = None, chapter_number: int = None) -> bool:
+    """Deduct credits from user account and record transaction"""
+    try:
+        # Get current balance
+        user = await db.users.find_one({"id": user_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        current_balance = user.get("credit_balance", 0)
+        
+        # Check if user has sufficient credits
+        if current_balance < amount:
+            return False
+        
+        # Deduct credits
+        new_balance = current_balance - amount
+        await db.users.update_one(
+            {"id": user_id},
+            {"$set": {"credit_balance": new_balance, "updated_at": datetime.utcnow()}}
+        )
+        
+        # Record transaction
+        transaction = CreditTransaction(
+            user_id=user_id,
+            amount=-amount,  # Negative for deduction
+            transaction_type=transaction_type,
+            description=description,
+            book_project_id=book_project_id,
+            chapter_number=chapter_number
+        )
+        await db.credit_transactions.insert_one(transaction.dict())
+        
+        return True
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Credit deduction failed: {str(e)}")
+
+async def add_credits(user_id: str, amount: int, transaction_type: str, description: str) -> int:
+    """Add credits to user account and record transaction"""
+    try:
+        # Get current balance
+        user = await db.users.find_one({"id": user_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        current_balance = user.get("credit_balance", 0)
+        new_balance = current_balance + amount
+        
+        # Add credits
+        await db.users.update_one(
+            {"id": user_id},
+            {"$set": {"credit_balance": new_balance, "updated_at": datetime.utcnow()}}
+        )
+        
+        # Record transaction
+        transaction = CreditTransaction(
+            user_id=user_id,
+            amount=amount,  # Positive for addition
+            transaction_type=transaction_type,
+            description=description
+        )
+        await db.credit_transactions.insert_one(transaction.dict())
+        
+        return new_balance
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Credit addition failed: {str(e)}")
+
+def calculate_book_cost(pages: int, chapters: int) -> dict:
+    """Calculate the minimum cost to generate a book"""
+    # Ensure minimum chapters based on max 10 pages per chapter
+    min_chapters = max(chapters, (pages + 9) // 10)  # Round up division
+    
+    return {
+        "pages": pages,
+        "requested_chapters": chapters,
+        "minimum_chapters": min_chapters,
+        "cost_per_chapter": 1,
+        "total_cost": min_chapters,
+        "pages_per_chapter": pages / min_chapters if min_chapters > 0 else 0
+    }
+
+async def is_chapter_regeneration(book_project_id: str, chapter_number: int) -> bool:
+    """Check if this is a chapter regeneration (already exists)"""
+    project = await db.book_projects.find_one({"id": book_project_id})
+    if not project:
+        return False
+    
+    generated_chapters = project.get("generated_chapters", [])
+    return chapter_number in generated_chapters
+
+async def mark_chapter_as_generated(book_project_id: str, chapter_number: int):
+    """Mark a chapter as generated in the project"""
+    await db.book_projects.update_one(
+        {"id": book_project_id},
+        {
+            "$addToSet": {"generated_chapters": chapter_number},
+            "$set": {"updated_at": datetime.utcnow()}
+        }
+    )
+
 # Authentication endpoints
 @api_router.post("/auth/register")
 async def register_user(request: RegisterRequest):
