@@ -11,7 +11,10 @@ const BookCreationForm = memo(({
   },
   onSubmit,
   onCancel,
-  loading = false
+  loading = false,
+  bookCost = null,
+  creditBalance = null,
+  onFormChange = null
 }) => {
   const [localFormData, setLocalFormData] = useState(initialData);
 
