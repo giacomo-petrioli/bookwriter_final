@@ -1111,9 +1111,10 @@ class BookWriterAPITester:
             project_data = {
                 "title": "AI and the Future of Work",
                 "description": "A comprehensive exploration of how artificial intelligence is transforming the modern workplace, examining both opportunities and challenges for workers, businesses, and society.",
-                "pages": 250,
-                "chapters": 10,
-                "language": "English"
+                "pages": 50,
+                "chapters": 5,
+                "language": "English",
+                "writing_style": "descriptive"
             }
             
             response = self.session.post(f"{self.base_url}/projects", json=project_data)
