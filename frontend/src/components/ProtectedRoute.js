@@ -5,7 +5,7 @@ import LandingPage from './LandingPage';
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading, user, backendReady } = useAuth();
 
-  console.log('ProtectedRoute State:', { isAuthenticated, loading, user: user?.email });
+  console.log('ProtectedRoute State:', { isAuthenticated, loading, backendReady, user: user?.email });
 
   // Force re-render when authentication state changes
   useEffect(() => {
