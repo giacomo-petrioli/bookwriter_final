@@ -22,11 +22,17 @@ const BookCreationForm = memo(({
     const { name, value, type } = e.target;
     const processedValue = type === 'number' ? parseInt(value) || 0 : value;
     
-    setLocalFormData(prev => ({
-      ...prev,
-      [name]: processedValue
-    }));
-  }, []);
+    setLocalFormData(prev => {
+      const newData = { ...prev, [name]: processedValue };
+      
+      // Notify parent component about form changes for cost calculation
+      if (onFormChange) {
+        onFormChange(newData);
+      }
+      
+      return newData;
+    });
+  }, [onFormChange]);
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
