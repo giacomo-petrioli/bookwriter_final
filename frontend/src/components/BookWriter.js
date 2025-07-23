@@ -130,14 +130,14 @@ const BookWriter = () => {
     setFormData(prev => ({ ...prev, [name]: processedValue }));
   };
 
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.title || !formData.description) return;
+  const handleFormSubmit = useCallback(async (formDataToSubmit) => {
+    if (!formDataToSubmit.title || !formDataToSubmit.description) return;
 
     try {
       setLoading(true);
-      const response = await axios.post(`${API}/projects`, formData);
+      const response = await axios.post(`${API}/projects`, formDataToSubmit);
       setCurrentProject(response.data);
+      setFormData(formDataToSubmit); // Update parent state
       setCurrentStep(2);
       setCurrentView('writing');
       await loadProjects();
@@ -147,7 +147,11 @@ const BookWriter = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const handleFormCancel = useCallback(() => {
+    setCurrentView('dashboard');
+  }, []);
 
   const loadProject = async (projectId) => {
     try {
