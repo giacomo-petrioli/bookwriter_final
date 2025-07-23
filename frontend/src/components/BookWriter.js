@@ -948,6 +948,12 @@ const BookWriter = () => {
                 onSubmit={handleFormSubmitDirect}
                 onCancel={handleFormCancel}
                 loading={loading}
+                bookCost={bookCost}
+                creditBalance={creditBalance}
+                onFormChange={(newData) => {
+                  calculateBookCost(newData.pages, newData.chapters);
+                  setFormData(newData);
+                }}
               />
             </div>
           </div>
