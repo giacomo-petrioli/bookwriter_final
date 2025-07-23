@@ -9,9 +9,9 @@ const ProtectedRoute = ({ children }) => {
 
   // Force re-render when authentication state changes
   useEffect(() => {
-    console.log('Authentication state changed in ProtectedRoute:', { isAuthenticated, loading, user: user?.email });
+    console.log('Authentication state changed in ProtectedRoute:', { isAuthenticated, loading, backendReady, user: user?.email });
     console.log('Current localStorage token:', localStorage.getItem('auth_token') ? 'exists' : 'not found');
-  }, [isAuthenticated, loading, user]);
+  }, [isAuthenticated, loading, user, backendReady]);
 
   if (loading) {
     console.log('Still loading authentication...');
