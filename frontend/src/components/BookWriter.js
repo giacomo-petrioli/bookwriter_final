@@ -119,10 +119,37 @@ const BookWriter = () => {
       setStatsLoading(true);
       const response = await axios.get(`${API}/user/stats`);
       setUserStats(response.data);
+      // Update credit balance from user stats
+      if (response.data.credit_balance !== undefined) {
+        setCreditBalance(response.data.credit_balance);
+      }
     } catch (error) {
       console.error("Error loading user stats:", error);
     } finally {
       setStatsLoading(false);
+    }
+  };
+
+  const refreshCreditBalance = async () => {
+    try {
+      const response = await axios.get(`${API}/credits/balance`);
+      setCreditBalance(response.data.credit_balance);
+    } catch (error) {
+      console.error("Error loading credit balance:", error);
+    }
+  };
+
+  const calculateBookCost = async (pages, chapters) => {
+    try {
+      const response = await axios.post(`${API}/credits/calculate-book-cost`, {
+        pages: pages,
+        chapters: chapters
+      });
+      setBookCost(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error calculating book cost:", error);
+      return null;
     }
   };
 
