@@ -55,54 +55,7 @@ const BookWriter = () => {
     }
   }, [user]);
 
-  // Add global keyboard event debugging
-  useEffect(() => {
-    const handleGlobalKeyDown = (e) => {
-      if (e.key === 'i' || e.key === 'I') {
-        console.log('GLOBAL KEYDOWN - I key pressed:', {
-          key: e.key,
-          code: e.code,
-          target: e.target.tagName,
-          targetName: e.target.name,
-          targetType: e.target.type,
-          activeElement: document.activeElement.tagName,
-          activeElementName: document.activeElement.name
-        });
-        
-        // If the target is an input or textarea, prevent the problematic behavior
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-          console.log('Preventing I key default behavior on input field');
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          
-          // Manually handle the input
-          if (e.target.type === 'text' || e.target.tagName === 'TEXTAREA') {
-            const start = e.target.selectionStart;
-            const end = e.target.selectionEnd;
-            const currentValue = e.target.value;
-            const newValue = currentValue.substring(0, start) + 'i' + currentValue.substring(end);
-            
-            // Trigger the change event manually
-            const changeEvent = new Event('input', { bubbles: true });
-            e.target.value = newValue;
-            e.target.dispatchEvent(changeEvent);
-            
-            // Set cursor position
-            setTimeout(() => {
-              e.target.setSelectionRange(start + 1, start + 1);
-            }, 0);
-          }
-        }
-      }
-    };
 
-    // Add the event listener with capture phase to intercept early
-    document.addEventListener('keydown', handleGlobalKeyDown, true);
-    
-    return () => {
-      document.removeEventListener('keydown', handleGlobalKeyDown, true);
-    };
-  }, []);
 
   const loadProjects = async () => {
     try {
