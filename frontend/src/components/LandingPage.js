@@ -4,23 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import AuthPage from './AuthPage';
 
 const LandingPage = () => {
-  const { loginWithGoogle, isAuthenticated, loading } = useAuth();
+  const { loginWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showAuthPage, setShowAuthPage] = useState(false);
-
-  // If user is authenticated while on landing page, don't render the landing page content
-  // ProtectedRoute will handle showing BookWriter
-  if (isAuthenticated) {
-    console.log('User authenticated on LandingPage, ProtectedRoute should show BookWriter');
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-lg">Redirecting to your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
 
   // Show AuthPage if user clicked signup button
   if (showAuthPage) {
