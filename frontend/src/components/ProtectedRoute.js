@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import LandingPage from './LandingPage';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading, user } = useAuth();
+  const { isAuthenticated, loading, user, backendReady } = useAuth();
 
   console.log('ProtectedRoute State:', { isAuthenticated, loading, user: user?.email });
 
