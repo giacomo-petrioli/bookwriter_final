@@ -114,18 +114,23 @@ const BookWriter = () => {
     const processedValue = type === 'number' ? parseInt(value) || 0 : value;
     setFormData(prev => {
       const newData = { ...prev, [name]: processedValue };
-      
-      // Calculate cost when pages or chapters change
-      if (name === 'pages' || name === 'chapters') {
-        calculateBookCost(
-          name === 'pages' ? processedValue : newData.pages,
-          name === 'chapters' ? processedValue : newData.chapters
-        );
-      }
-      
       return newData;
     });
-  }, []);
+
+    // Debounce the cost calculation to avoid triggering on every keystroke
+    if (name === 'pages' || name === 'chapters') {
+      // Clear any existing timeout
+      if (window.bookCostTimeout) {
+        clearTimeout(window.bookCostTimeout);
+      }
+      
+      // Set a new timeout to calculate cost after user stops typing
+      window.bookCostTimeout = setTimeout(() => {
+        const currentData = { ...formData, [name]: processedValue };
+        calculateBookCost(currentData.pages, currentData.chapters);
+      }, 500); // Wait 500ms after user stops typing
+    }
+  }, [formData]);
 
   const handleFormSubmitDirect = useCallback(async (formDataToSubmit) => {
     if (!formDataToSubmit.title || !formDataToSubmit.description) return;
