@@ -76,8 +76,19 @@ class User(BaseModel):
     picture: Optional[str] = None
     password_hash: Optional[str] = None  # For email/password auth
     auth_provider: str = "google"  # "google" or "email"
+    credit_balance: int = Field(default=10)  # Starting credits for new users
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CreditTransaction(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    amount: int  # Positive for credit addition, negative for usage
+    transaction_type: str  # "chapter_generation", "chapter_regeneration", "credit_purchase", "bonus"
+    description: str
+    book_project_id: Optional[str] = None  # Link to book project if applicable
+    chapter_number: Optional[int] = None  # Chapter number if applicable
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class UserSession(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
