@@ -1268,6 +1268,37 @@ async def generate_chapter(request: ChapterRequest, current_user: User = Depends
         if not project_obj.outline:
             raise HTTPException(status_code=400, detail="Project must have an outline before generating chapters")
         
+        # Check if this is a regeneration
+        is_regeneration = await is_chapter_regeneration(request.project_id, request.chapter_number)
+        credit_cost = 1  # Base cost for chapter generation
+        
+        # Get current credit balance
+        current_balance = await get_user_credit_balance(current_user.id)
+        
+        # Check if user has sufficient credits
+        if current_balance < credit_cost:
+            raise HTTPException(
+                status_code=402, 
+                detail=f"Insufficient credits. You need {credit_cost} credit(s) but have {current_balance}. Please purchase more credits."
+            )
+        
+        # Determine transaction type and description
+        transaction_type = "chapter_regeneration" if is_regeneration else "chapter_generation"
+        description = f"{'Regenerated' if is_regeneration else 'Generated'} Chapter {request.chapter_number} for '{project_obj.title}'"
+        
+        # Deduct credits before generation
+        credit_deducted = await deduct_credits(
+            current_user.id,
+            credit_cost,
+            transaction_type,
+            description,
+            request.project_id,
+            request.chapter_number
+        )
+        
+        if not credit_deducted:
+            raise HTTPException(status_code=402, detail="Failed to deduct credits")
+        
         # Extract chapter titles from outline
         chapter_titles = extract_chapter_titles(project_obj.outline)
         chapter_title = chapter_titles.get(request.chapter_number, f"Chapter {request.chapter_number}")
