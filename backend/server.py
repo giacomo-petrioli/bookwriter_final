@@ -1430,11 +1430,20 @@ Begin your response immediately with the chapter title. Do not include any expla
             }
         )
         
+        # Mark chapter as generated for future regeneration tracking
+        await mark_chapter_as_generated(request.project_id, request.chapter_number)
+        
+        # Get updated credit balance
+        new_balance = await get_user_credit_balance(current_user.id)
+        
         return {
             "chapter_content": cleaned_response,
             "chapter_number": request.chapter_number,
             "chapter_title": chapter_title,
-            "project_id": request.project_id
+            "project_id": request.project_id,
+            "credit_cost": credit_cost,
+            "remaining_credits": new_balance,
+            "was_regeneration": is_regeneration
         }
         
     except Exception as e:
