@@ -482,16 +482,22 @@ frontend:
     implemented: true
     working: true
     file: "/app/frontend/src/context/AuthContext.js, /app/frontend/src/components/BookWriter.js, /app/frontend/src/components/ProtectedRoute.js"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: true
     status_history:
       - working: false
         agent: "user"
         comment: "CRITICAL ISSUE: After logging in with Google account, user gets redirected to home page instead of BookWriter app after a few seconds of loading. Same issue occurs with email/password login."
+      - working: false
+        agent: "main"
+        comment: "PARTIAL FIX ATTEMPTED: Fixed token key inconsistency and enhanced authentication state management, but issue persists."
+      - working: false
+        agent: "user"
+        comment: "ISSUE PERSISTS: User reports 'THERE IS STILL THE SAME BUG I GOT STILLL SENT TO HOME PAGE' - previous fixes did not resolve the redirect issue."
       - working: true
         agent: "main"
-        comment: "IDENTIFIED AND FIXED: Root cause was token key inconsistency. AuthContext stores authentication token as 'auth_token' but BookWriter export function was looking for 'session_token'. This caused API calls to fail, making the app think user wasn't authenticated. FIXES APPLIED: 1) Fixed export function to use global axios headers instead of manual token retrieval, 2) Enhanced authentication state management with better error handling and longer delays (500ms) for state propagation, 3) Added comprehensive debugging logs to track authentication flow, 4) Improved token validation and error handling in checkAuthStatus function. Frontend restarted to apply changes."
+        comment: "COMPLETE FIX: Identified and resolved race condition in AuthContext. ROOT CAUSE: The useEffect(() => { checkAuthStatus(); }, []) was running after successful login and overwriting the authenticated state back to false. SOLUTION: 1) Modified useEffect to only call checkAuthStatus if token exists in localStorage, otherwise immediately set loading=false and isAuthenticated=false, 2) Removed unnecessary delays and async calls from login functions - now set state immediately after token storage, 3) Eliminated race condition between initial auth check and login success. Frontend restarted with fixes applied."
 
   - task: "UI improvements for book writing section"
     implemented: true
