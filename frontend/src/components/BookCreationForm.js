@@ -202,10 +202,17 @@ const BookCreationForm = memo(({
           </button>
           <button
             type="submit"
-            disabled={loading || !localFormData.title || !localFormData.description}
+            disabled={
+              loading || 
+              !localFormData.title || 
+              !localFormData.description ||
+              (creditBalance !== null && bookCost && creditBalance < bookCost.total_cost)
+            }
             className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 disabled:opacity-50"
           >
-            {loading ? "Creating Project..." : "Create Project"}
+            {loading ? "Creating Project..." : 
+             (creditBalance !== null && bookCost && creditBalance < bookCost.total_cost) ? 
+             "Insufficient Credits" : "Create Project"}
           </button>
         </div>
       </form>
