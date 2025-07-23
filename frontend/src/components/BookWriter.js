@@ -701,7 +701,7 @@ const BookWriter = () => {
         const response = await axios.get(endpoint, {
           responseType: responseType,
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('session_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
           }
         });
         
