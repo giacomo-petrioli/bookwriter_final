@@ -125,6 +125,12 @@ const BookWriter = () => {
   };
 
 
+  const handleInputChange = useCallback((e) => {
+    const { name, value, type } = e.target;
+    const processedValue = type === 'number' ? parseInt(value) || 0 : value;
+    setFormData(prev => ({ ...prev, [name]: processedValue }));
+  }, []);
+
   const handleFormSubmit = useCallback(async (formDataToSubmit) => {
     if (!formDataToSubmit.title || !formDataToSubmit.description) return;
 
