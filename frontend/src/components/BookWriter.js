@@ -233,13 +233,21 @@ const BookWriter = () => {
   const generateAllChapters = async () => {
     if (!currentProject || !outline) return;
 
+    // Check if user has sufficient credits before starting
+    const totalChapters = currentProject.chapters;
+    if (creditBalance !== null && creditBalance < totalChapters) {
+      alert(`Insufficient credits. You need ${totalChapters} credits to generate all chapters but have ${creditBalance}. Please purchase more credits or generate chapters individually.`);
+      return;
+    }
+
     setGeneratingAllChapters(true);
     setGeneratingChapterNum(0);
     setChapterProgress({});
 
     try {
-      const totalChapters = currentProject.chapters;
       const newChapters = {};
+      let creditsUsed = 0;
+      let currentBalance = creditBalance;
 
       for (let i = 1; i <= totalChapters; i++) {
         setGeneratingChapterNum(i);
@@ -259,18 +267,38 @@ const BookWriter = () => {
             ...prev,
             [i]: { status: 'completed', progress: 100 }
           }));
+
+          // Update credit tracking
+          if (response.data.credit_cost) {
+            creditsUsed += response.data.credit_cost;
+          }
+          if (response.data.remaining_credits !== undefined) {
+            currentBalance = response.data.remaining_credits;
+            setCreditBalance(currentBalance);
+          }
         } catch (error) {
           console.error(`Error generating chapter ${i}:`, error);
           setChapterProgress(prev => ({
             ...prev,
             [i]: { status: 'error', progress: 0 }
           }));
+
+          // Handle credit-related errors
+          if (error.response?.status === 402) {
+            alert(`Insufficient credits for chapter ${i}: ${error.response.data.detail}`);
+            break; // Stop generating if we run out of credits
+          }
         }
       }
 
       setAllChapters(newChapters);
       // Don't change step or view - stay on current page
-      console.log(`Successfully generated ${Object.keys(newChapters).length} chapters`);
+      const successfulChapters = Object.keys(newChapters).length;
+      console.log(`Successfully generated ${successfulChapters} chapters. Credits used: ${creditsUsed}`);
+      
+      if (successfulChapters > 0) {
+        alert(`Successfully generated ${successfulChapters} chapter(s). Credits used: ${creditsUsed}. Remaining credits: ${currentBalance}`);
+      }
     } catch (error) {
       console.error("Error generating chapters:", error);
     } finally {
