@@ -19,7 +19,16 @@ export const AuthProvider = ({ children }) => {
   const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
   useEffect(() => {
-    checkAuthStatus();
+    // Only check auth status on initial load if there's a token stored
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      checkAuthStatus();
+    } else {
+      // No token, immediately set loading to false and not authenticated
+      setLoading(false);
+      setIsAuthenticated(false);
+      setUser(null);
+    }
   }, []);
 
   const checkAuthStatus = async () => {
