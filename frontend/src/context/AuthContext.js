@@ -87,17 +87,12 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('auth_token', session_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
       
-      // Update state with proper sequencing
+      // Update state immediately
       setUser(userData);
       setIsAuthenticated(true);
-      
-      console.log('Authentication state updated:', { userData: userData?.email, isAuthenticated: true });
-      
-      // Longer delay to ensure state propagates properly across all components
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      console.log('Google login completed successfully');
       setLoading(false);
+      
+      console.log('Google login completed successfully, user should now be authenticated');
       
       return userData;
     } catch (error) {
