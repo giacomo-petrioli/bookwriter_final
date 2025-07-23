@@ -247,39 +247,68 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithEmailPassword = async (email, password) => {
-    try {
-      setLoading(true);
-      setIsAuthenticated(false); // Reset state before login attempt
-      
-      const response = await axios.post(`${API_URL}/api/auth/login`, {
-        email,
-        password
-      });
-      
-      const { user: userData, session_token } = response.data;
-      
-      // Store token and set headers
-      localStorage.setItem('auth_token', session_token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
-      
-      // Update state immediately
-      setUser(userData);
-      setIsAuthenticated(true);
-      setLoading(false);
-      
-      console.log('Email login successful:', { userData: userData?.email });
-      
-      return userData;
-    } catch (error) {
-      console.error('Email/password login failed:', error);
-      // Ensure we're not authenticated on failure
-      setIsAuthenticated(false);
-      setUser(null);
-      localStorage.removeItem('auth_token');
-      delete axios.defaults.headers.common['Authorization'];
-      setLoading(false);
-      throw error;
+  const loginWithEmailPassword = async (email, password, maxRetries = 3) => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Starting email login (attempt ${attempt}/${maxRetries})...`);
+        setLoading(true);
+        setIsAuthenticated(false); // Reset state before login attempt
+        
+        // Check if backend is ready
+        if (!backendReady) {
+          console.log('Backend not ready for email login, checking health...');
+          const isHealthy = await checkBackendHealth(5, 1000);
+          if (!isHealthy) {
+            throw new Error('Backend is not available for authentication');
+          }
+        }
+        
+        const response = await axios.post(`${API_URL}/api/auth/login`, {
+          email,
+          password
+        }, { 
+          timeout: 15000,
+          validateStatus: (status) => status < 500
+        });
+        
+        if (response.status !== 200) {
+          throw new Error(response.data?.detail || 'Login failed');
+        }
+        
+        const { user: userData, session_token } = response.data;
+        
+        // Store token and set headers
+        localStorage.setItem('auth_token', session_token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
+        
+        // Update state immediately
+        setUser(userData);
+        setIsAuthenticated(true);
+        setLoading(false);
+        
+        console.log('Email login successful:', { userData: userData?.email });
+        
+        return userData;
+      } catch (error) {
+        console.error(`Email login attempt ${attempt} failed:`, error.message);
+        
+        // Clear auth state on failure
+        setIsAuthenticated(false);
+        setUser(null);
+        localStorage.removeItem('auth_token');
+        delete axios.defaults.headers.common['Authorization'];
+        
+        // If this is the last attempt, give up
+        if (attempt === maxRetries) {
+          setLoading(false);
+          throw error;
+        }
+        
+        // Wait before retrying
+        const delay = 2000 * attempt;
+        console.log(`Retrying email login in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
     }
   };
 
