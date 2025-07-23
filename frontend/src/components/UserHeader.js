@@ -1,10 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import BookCraftLogo from './BookCraftLogo';
+import axios from 'axios';
 
 const UserHeader = ({ children }) => {
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [creditBalance, setCreditBalance] = useState(null);
+
+  const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
+  // Fetch credit balance
+  useEffect(() => {
+    const fetchCreditBalance = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          const response = await axios.get(`${API_URL}/api/credits/balance`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setCreditBalance(response.data.credit_balance);
+        }
+      } catch (error) {
+        console.error('Failed to fetch credit balance:', error);
+      }
+    };
+
+    if (user) {
+      fetchCreditBalance();
+    }
+  }, [user, API_URL]);
 
   const handleLogout = async () => {
     await logout();
