@@ -3646,6 +3646,93 @@ As we stand at this technological crossroads, understanding the implications of 
         
         return passed, total, test_results
 
+    def test_backend_book_creation_workflow(self):
+        """Test the backend components that support book creation workflow"""
+        try:
+            self.log("=" * 70)
+            self.log("TESTING BACKEND BOOK CREATION WORKFLOW SUPPORT")
+            self.log("=" * 70)
+            
+            # First, test authentication to get a valid session
+            self.log("Setting up authentication for workflow testing...")
+            
+            # Try email/password registration for testing
+            registration_data = {
+                "email": "workflow.test@bookcraft.ai",
+                "name": "Workflow Test User",
+                "password": "testpassword123"
+            }
+            
+            response = self.session.post(f"{self.base_url}/auth/register", json=registration_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                self.auth_token = data.get("session_token")
+                self.test_user_data = data.get("user")
+                self.session.headers.update({'Authorization': f'Bearer {self.auth_token}'})
+                self.log("✅ Authentication setup successful")
+            elif response.status_code == 400 and "already exists" in response.json().get("detail", ""):
+                # Try to login instead
+                login_data = {
+                    "email": registration_data["email"],
+                    "password": registration_data["password"]
+                }
+                login_response = self.session.post(f"{self.base_url}/auth/login", json=login_data)
+                if login_response.status_code == 200:
+                    login_result = login_response.json()
+                    self.auth_token = login_result.get("session_token")
+                    self.test_user_data = login_result.get("user")
+                    self.session.headers.update({'Authorization': f'Bearer {self.auth_token}'})
+                    self.log("✅ Authentication setup successful (existing user)")
+                else:
+                    self.log("❌ Failed to authenticate for workflow testing", "ERROR")
+                    return False
+            else:
+                self.log("❌ Failed to set up authentication for workflow testing", "ERROR")
+                return False
+            
+            # Test book creation workflow components
+            workflow_tests = [
+                ("Project Creation", self.test_create_project),
+                ("Project Retrieval", self.test_get_projects),
+                ("Specific Project Access", self.test_get_specific_project),
+                ("AI Outline Generation", self.test_generate_outline),
+                ("AI Chapter Generation", self.test_generate_chapter),
+                ("Content Editing", self.test_update_chapter),
+                ("Export Functionality", self.test_export_functionality),
+            ]
+            
+            passed_tests = 0
+            total_tests = len(workflow_tests)
+            
+            for test_name, test_func in workflow_tests:
+                self.log(f"\n--- Testing {test_name} ---")
+                try:
+                    if test_func():
+                        passed_tests += 1
+                        self.log(f"✅ {test_name} PASSED")
+                    else:
+                        self.log(f"❌ {test_name} FAILED")
+                except Exception as e:
+                    self.log(f"❌ {test_name} FAILED with exception: {str(e)}")
+                
+                time.sleep(1)  # Brief pause between tests
+            
+            self.log("\n" + "=" * 70)
+            self.log(f"BOOK CREATION WORKFLOW TEST RESULTS: {passed_tests}/{total_tests} PASSED")
+            self.log("=" * 70)
+            
+            if passed_tests == total_tests:
+                self.log("🎉 ALL BOOK CREATION WORKFLOW TESTS PASSED!")
+                return True
+            else:
+                self.log(f"⚠️ {total_tests - passed_tests} WORKFLOW TESTS FAILED")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Book creation workflow test failed: {str(e)}", "ERROR")
+            return False
+
 def test_backend_book_creation_workflow(self):
     """Test the backend components that support book creation workflow"""
     try:
