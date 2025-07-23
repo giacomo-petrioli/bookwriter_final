@@ -108,6 +108,7 @@ class BookProject(BaseModel):
     writing_style: str = "story"  # "story", "descriptive", "academic", "technical", "biography", "self_help", "children", "poetry", "business"
     outline: Optional[str] = None
     chapters_content: Optional[dict] = {}
+    generated_chapters: Optional[list] = []  # Track which chapter numbers have been generated
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
