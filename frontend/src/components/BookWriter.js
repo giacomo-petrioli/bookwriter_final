@@ -859,7 +859,7 @@ const BookWriter = () => {
               
               <BookCreationForm
                 initialData={formData}
-                onSubmit={handleFormSubmit}
+                onSubmit={handleFormSubmitDirect}
                 onCancel={handleFormCancel}
                 loading={loading}
               />
