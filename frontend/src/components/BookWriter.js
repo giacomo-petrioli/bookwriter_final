@@ -363,10 +363,11 @@ const BookWriter = () => {
                         value={formData.chapters}
                         onChange={handleInputChange}
                         onKeyDown={(e) => {
-                          console.log('Key pressed in chapters:', e.key, 'Code:', e.code, 'Target:', e.target.name);
                           if (e.key === 'i' || e.key === 'I') {
-                            console.log('I key detected in chapters, preventing default behavior');
+                            console.log('I key detected in chapters field, blocking the event');
+                            e.preventDefault();
                             e.stopPropagation();
+                            // Note: For number inputs, we don't allow 'i' character
                           }
                         }}
                         min="1"
