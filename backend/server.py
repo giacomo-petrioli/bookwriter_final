@@ -1077,11 +1077,29 @@ async def root():
 async def create_project(project_data: BookProjectCreate, current_user: User = Depends(get_current_user)):
     """Create a new book project"""
     try:
+        # Validate and adjust chapter requirements based on page limit
+        cost_info = calculate_book_cost(project_data.pages, project_data.chapters)
+        
+        # Update chapters to minimum required if user specified too few
+        if project_data.chapters < cost_info["minimum_chapters"]:
+            project_data.chapters = cost_info["minimum_chapters"]
+        
+        # Check if user has sufficient credits for the book
+        current_balance = await get_user_credit_balance(current_user.id)
+        if current_balance < cost_info["total_cost"]:
+            raise HTTPException(
+                status_code=402,
+                detail=f"Insufficient credits. This book requires {cost_info['total_cost']} credits ({cost_info['minimum_chapters']} chapters × 1 credit each) but you have {current_balance}. Please purchase more credits."
+            )
+        
         project_dict = project_data.dict()
         project_dict["user_id"] = current_user.id  # Associate with current user
         project_obj = BookProject(**project_dict)
         await db.book_projects.insert_one(project_obj.dict())
+        
         return project_obj
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating project: {str(e)}")
 
