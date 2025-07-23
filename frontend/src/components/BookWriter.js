@@ -50,6 +50,8 @@ const BookWriter = () => {
     if (user) {
       loadProjects();
       loadUserStats();
+      // Calculate initial book cost with default form values
+      calculateBookCost(formData.pages, formData.chapters);
     }
   }, [user]);
 
