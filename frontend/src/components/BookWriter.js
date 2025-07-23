@@ -376,14 +376,6 @@ const BookWriter = () => {
                         name="chapters"
                         value={formData.chapters}
                         onChange={handleInputChange}
-                        onKeyDown={(e) => {
-                          if (e.key === 'i' || e.key === 'I') {
-                            console.log('I key detected in chapters field, blocking the event');
-                            e.preventDefault();
-                            e.stopPropagation();
-                            // Note: For number inputs, we don't allow 'i' character
-                          }
-                        }}
                         min="1"
                         max="50"
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
