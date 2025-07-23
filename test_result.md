@@ -364,6 +364,9 @@ backend:
       - working: "needs_improvement"
         agent: "testing"
         comment: "COMPREHENSIVE TESTING COMPLETED: Enhanced content generation partially working but needs word count improvement. ✅ Content generation using Gemini 2.0 Flash Lite model working well. ✅ Enhanced prompts include word count targets (250-300 words per page). ✅ Content quality is good with proper structure and formatting. ❌ CRITICAL ISSUE: Generated content doesn't meet word count requirements - story chapters: 3170 words (expected ~6875), descriptive chapters: 2647 words (expected ~6875). Need to enhance prompts to generate more substantial content or adjust expectations. Current content is about 46% of target length."
+      - working: "needs_improvement"
+        agent: "testing"
+        comment: "COMPREHENSIVE CONTENT GENERATION TESTING COMPLETED: Backend working after fixing jinja2 dependency issue. ✅ EXCELLENT: API health check and authentication working perfectly. ✅ EXCELLENT: Outline generation working well with proper HTML formatting and markdown cleanup. ✅ EXCELLENT: Descriptive writing style achieving 62.9% of target word count (4760/7562 words) - acceptable performance. ❌ CRITICAL ISSUE: Story writing style severely underperforming at only 19.6% of target word count (1484/7562 words). ❌ CRITICAL ISSUE: Story chapters have 0 paragraph breaks, indicating poor formatting. The word count issue is confirmed and more severe for story style than descriptive style. Need to enhance AI prompts specifically for story style to generate longer, more detailed content with proper paragraph structure."
 
   - task: "Improved outline formatting with HTML"
     implemented: true
