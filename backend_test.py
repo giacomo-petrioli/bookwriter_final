@@ -3691,6 +3691,14 @@ As we stand at this technological crossroads, understanding the implications of 
                 self.log("❌ Failed to set up authentication for workflow testing", "ERROR")
                 return False
             
+            # Add credits to test user for testing
+            self.log("Adding credits for testing...")
+            credits_response = self.session.post(f"{self.base_url}/credits/purchase", json={"amount": 50})
+            if credits_response.status_code == 200:
+                self.log("✅ Credits added successfully")
+            else:
+                self.log("⚠️ Could not add credits, using existing balance", "WARNING")
+            
             # Test book creation workflow components
             workflow_tests = [
                 ("Project Creation", self.test_create_project),
