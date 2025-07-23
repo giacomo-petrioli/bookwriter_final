@@ -157,7 +157,19 @@ const BookWriter = () => {
   const handleInputChange = useCallback((e) => {
     const { name, value, type } = e.target;
     const processedValue = type === 'number' ? parseInt(value) || 0 : value;
-    setFormData(prev => ({ ...prev, [name]: processedValue }));
+    setFormData(prev => {
+      const newData = { ...prev, [name]: processedValue };
+      
+      // Calculate cost when pages or chapters change
+      if (name === 'pages' || name === 'chapters') {
+        calculateBookCost(
+          name === 'pages' ? processedValue : newData.pages,
+          name === 'chapters' ? processedValue : newData.chapters
+        );
+      }
+      
+      return newData;
+    });
   }, []);
 
   const handleFormSubmitDirect = useCallback(async (formDataToSubmit) => {
