@@ -18,6 +18,8 @@ const BookWriter = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [projects, setProjects] = useState([]);
   const [userStats, setUserStats] = useState(null);
+  const [creditBalance, setCreditBalance] = useState(null);
+  const [bookCost, setBookCost] = useState(null);
   const [currentProject, setCurrentProject] = useState(null);
   const [loading, setLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(true);
