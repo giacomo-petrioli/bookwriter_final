@@ -332,16 +332,6 @@ const BookWriter = () => {
                       name="title"
                       value={formData.title}
                       onChange={handleInputChange}
-                      onKeyDown={(e) => {
-                        if (e.key === 'i' || e.key === 'I') {
-                          console.log('I key detected in title, preventing all default behaviors');
-                          e.preventDefault();
-                          e.stopPropagation();
-                          // Manually handle the input
-                          const newValue = formData.title + 'i';
-                          setFormData(prev => ({ ...prev, title: newValue }));
-                        }
-                      }}
                       placeholder="Enter your book title..."
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                     />
