@@ -154,46 +154,75 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = async (credential) => {
-    try {
-      console.log('Starting Google login...');
-      setLoading(true);
-      setIsAuthenticated(false); // Ensure we start with clean state
-      
-      console.log('Making Google login request to:', `${API_URL}/api/auth/google/verify`);
-      const response = await axios.post(`${API_URL}/api/auth/google/verify`, {
-        token: credential
-      });
-      
-      console.log('Google login response:', response.data);
-      const { user: userData, session_token } = response.data;
-      
-      if (!session_token) {
-        throw new Error('No session token received from server');
+  const loginWithGoogle = async (credential, maxRetries = 3) => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Starting Google login (attempt ${attempt}/${maxRetries})...`);
+        setLoading(true);
+        setIsAuthenticated(false); // Ensure we start with clean state
+        
+        // Check if backend is ready before attempting login
+        if (!backendReady) {
+          console.log('Backend not ready for Google login, checking health...');
+          const isHealthy = await checkBackendHealth(5, 1000);
+          if (!isHealthy) {
+            throw new Error('Backend is not available for authentication');
+          }
+        }
+        
+        console.log('Making Google login request to:', `${API_URL}/api/auth/google/verify`);
+        
+        const response = await axios.post(`${API_URL}/api/auth/google/verify`, {
+          token: credential
+        }, { 
+          timeout: 15000,
+          validateStatus: (status) => status < 500 // Don't throw on 4xx errors
+        });
+        
+        if (response.status !== 200) {
+          throw new Error(`Authentication failed: ${response.data?.detail || 'Unknown error'}`);
+        }
+        
+        console.log('Google login response:', response.data);
+        const { user: userData, session_token } = response.data;
+        
+        if (!session_token) {
+          throw new Error('No session token received from server');
+        }
+        
+        console.log('Storing token and updating state...');
+        // Store token and set headers
+        localStorage.setItem('auth_token', session_token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
+        
+        // Update state immediately
+        setUser(userData);
+        setIsAuthenticated(true);
+        setLoading(false);
+        
+        console.log('Google login completed successfully, user should now be authenticated');
+        
+        return userData;
+      } catch (error) {
+        console.error(`Google login attempt ${attempt} failed:`, error.message);
+        
+        // Clear auth state on failure
+        setIsAuthenticated(false);
+        setUser(null);
+        localStorage.removeItem('auth_token');
+        delete axios.defaults.headers.common['Authorization'];
+        
+        // If this is the last attempt, give up
+        if (attempt === maxRetries) {
+          setLoading(false);
+          throw new Error(`Google authentication failed after ${maxRetries} attempts: ${error.message}`);
+        }
+        
+        // Wait before retrying (longer delay for each attempt)
+        const delay = 2000 * attempt;
+        console.log(`Retrying Google login in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
-      
-      console.log('Storing token and updating state...');
-      // Store token and set headers
-      localStorage.setItem('auth_token', session_token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${session_token}`;
-      
-      // Update state immediately
-      setUser(userData);
-      setIsAuthenticated(true);
-      setLoading(false);
-      
-      console.log('Google login completed successfully, user should now be authenticated');
-      
-      return userData;
-    } catch (error) {
-      console.error('Google login failed:', error.response?.data || error.message);
-      // Ensure we're not authenticated on failure
-      setIsAuthenticated(false);
-      setUser(null);
-      localStorage.removeItem('auth_token');
-      delete axios.defaults.headers.common['Authorization'];
-      setLoading(false);
-      throw error;
     }
   };
 
