@@ -429,6 +429,394 @@ def get_style_instructions(writing_style: str, content_type: str = "outline"):
 - <ul> and <li> for strategies and action items
 - <strong> for key business terms and metrics
 - <em> for emphasis and important concepts"""
+        },
+        "health": {
+            "outline": """Create a health/wellness outline that:
+- Focuses on evidence-based health information and practices
+- Includes practical lifestyle recommendations and tips
+- Organizes content by health topics or body systems
+- Uses accessible medical terminology with explanations
+- Provides actionable health strategies and prevention methods
+- Includes real-life wellness examples and case studies
+- Addresses common health concerns and solutions""",
+            "chapter": """Write in a health/wellness style that:
+- Uses clear, accessible language for health concepts
+- Provides evidence-based information and recommendations
+- Includes practical tips and actionable advice
+- Addresses common health concerns with empathy
+- Uses encouraging, motivational tone for wellness
+- Incorporates real-life examples and success stories
+- Maintains professional credibility while being approachable""",
+            "formatting": """Use health HTML formatting:
+- <h2> for chapter titles with health topic names
+- <h3> for main health concepts or conditions
+- <h4> for specific symptoms, treatments, or tips
+- <p> for explanations and health advice
+- <ul> and <li> for symptoms, treatments, and recommendations
+- <strong> for important health warnings and key points
+- <em> for medical terms and emphasis"""
+        },
+        "travel": {
+            "outline": """Create a travel/adventure outline that:
+- Organizes content by destinations, themes, or journey progression
+- Includes practical travel information and cultural insights
+- Focuses on personal experiences and storytelling
+- Incorporates local culture, food, and customs
+- Provides travel tips and practical advice
+- Balances adventure narrative with useful information
+- Includes historical and geographical context""",
+            "chapter": """Write in a travel/adventure style that:
+- Uses vivid, descriptive language to paint locations
+- Incorporates personal experiences and anecdotes
+- Includes dialogue and cultural interactions
+- Provides practical travel advice and tips
+- Balances storytelling with informational content
+- Uses engaging narrative to bring places to life
+- Maintains enthusiasm and wanderlust throughout""",
+            "formatting": """Use travel HTML formatting:
+- <h2> for chapter titles with destination or theme names
+- <h3> for specific locations or travel experiences
+- <p> for narrative descriptions and travel stories
+- <ul> and <li> for travel tips and recommendations
+- <strong> for important travel information and warnings
+- <em> for foreign words and cultural terms"""
+        },
+        "cooking": {
+            "outline": """Create a cooking/recipe outline that:
+- Organizes content by meal types, cuisines, or skill levels
+- Includes ingredient lists and cooking techniques
+- Focuses on practical cooking instructions and tips
+- Incorporates cultural and historical food context
+- Provides variations and substitutions for recipes
+- Includes cooking fundamentals and kitchen skills
+- Balances recipes with cooking education""",
+            "chapter": """Write in a cooking/recipe style that:
+- Uses clear, step-by-step instructional language
+- Provides detailed ingredient lists and measurements
+- Includes cooking techniques and kitchen tips
+- Incorporates personal cooking stories and experiences
+- Explains the 'why' behind cooking methods
+- Uses encouraging, approachable tone for all skill levels
+- Includes variations and customization options""",
+            "formatting": """Use cooking HTML formatting:
+- <h2> for chapter titles with dish or technique names
+- <h3> for recipe names or cooking sections
+- <h4> for ingredients, instructions, or variations
+- <p> for cooking instructions and explanations
+- <ul> and <li> for ingredient lists and step-by-step instructions
+- <strong> for important cooking tips and warnings
+- <em> for cooking terms and techniques"""
+        },
+        "history": {
+            "outline": """Create a historical outline that:
+- Organizes content chronologically or thematically
+- Includes key historical events, figures, and periods
+- Provides historical context and cause-and-effect relationships
+- Incorporates primary sources and historical evidence
+- Balances broad historical trends with specific details
+- Addresses multiple perspectives and interpretations
+- Connects historical events to contemporary relevance""",
+            "chapter": """Write in a historical style that:
+- Uses engaging narrative to bring history to life
+- Incorporates historical details and authentic context
+- Includes dialogue and personal stories from the period
+- Provides analysis of causes and consequences
+- Balances storytelling with factual accuracy
+- Uses vivid descriptions of historical settings
+- Maintains scholarly credibility with accessible prose""",
+            "formatting": """Use historical HTML formatting:
+- <h2> for chapter titles with period or event names
+- <h3> for major historical events or themes
+- <h4> for specific dates, figures, or topics
+- <p> for historical narrative and analysis
+- <ul> and <li> for key events, dates, and figures
+- <strong> for important historical names and dates
+- <em> for historical terms and foreign words"""
+        },
+        "science": {
+            "outline": """Create a science/technology outline that:
+- Organizes content by scientific concepts or technological topics
+- Includes current research and technological advances
+- Focuses on explaining complex concepts clearly
+- Incorporates real-world applications and examples
+- Provides scientific method and evidence-based reasoning
+- Balances technical accuracy with accessibility
+- Addresses implications and future developments""",
+            "chapter": """Write in a science/technology style that:
+- Uses clear explanations for complex scientific concepts
+- Incorporates current research and discoveries
+- Includes real-world examples and applications
+- Provides evidence-based reasoning and analysis
+- Uses engaging analogies to explain difficult concepts
+- Maintains scientific accuracy while being accessible
+- Addresses both benefits and challenges of technology""",
+            "formatting": """Use science HTML formatting:
+- <h2> for chapter titles with scientific topic names
+- <h3> for major scientific concepts or discoveries
+- <h4> for specific theories, experiments, or technologies
+- <p> for scientific explanations and analysis
+- <ul> and <li> for scientific processes and key points
+- <strong> for important scientific terms and concepts
+- <em> for scientific names and technical terms"""
+        },
+        "philosophy": {
+            "outline": """Create a philosophy/ethics outline that:
+- Organizes content by philosophical concepts or ethical issues
+- Includes major philosophical arguments and perspectives
+- Focuses on critical thinking and logical reasoning
+- Incorporates historical and contemporary philosophers
+- Provides balanced examination of different viewpoints
+- Addresses practical applications of philosophical concepts
+- Encourages reader reflection and intellectual engagement""",
+            "chapter": """Write in a philosophy/ethics style that:
+- Uses thoughtful, reflective language and tone
+- Presents philosophical arguments clearly and logically
+- Includes diverse perspectives and viewpoints
+- Encourages critical thinking and self-reflection
+- Uses examples and thought experiments effectively
+- Maintains intellectual rigor while being accessible
+- Addresses practical implications of philosophical concepts""",
+            "formatting": """Use philosophy HTML formatting:
+- <h2> for chapter titles with philosophical topic names
+- <h3> for major philosophical concepts or arguments
+- <h4> for specific theories or ethical considerations
+- <p> for philosophical discourse and analysis
+- <ul> and <li> for key arguments and philosophical points
+- <strong> for important philosophical terms and concepts
+- <em> for emphasis and philosophical terminology"""
+        },
+        "psychology": {
+            "outline": """Create a psychology/mental health outline that:
+- Organizes content by psychological concepts or mental health topics
+- Includes evidence-based psychological theories and research
+- Focuses on understanding human behavior and mental processes
+- Incorporates practical applications and therapeutic approaches
+- Provides compassionate approach to mental health issues
+- Balances scientific rigor with human empathy
+- Addresses both individual and social psychological factors""",
+            "chapter": """Write in a psychology/mental health style that:
+- Uses empathetic, understanding language for sensitive topics
+- Incorporates scientific research and evidence-based practices
+- Includes real-life examples and case studies (anonymized)
+- Provides practical coping strategies and insights
+- Maintains professional credibility with accessible explanations
+- Addresses stigma and promotes mental health awareness
+- Uses encouraging, supportive tone throughout""",
+            "formatting": """Use psychology HTML formatting:
+- <h2> for chapter titles with psychological topic names
+- <h3> for major psychological concepts or conditions
+- <h4> for specific symptoms, treatments, or strategies
+- <p> for psychological explanations and advice
+- <ul> and <li> for symptoms, strategies, and key points
+- <strong> for important psychological terms and warnings
+- <em> for emphasis and psychological terminology"""
+        },
+        "mystery": {
+            "outline": """Create a mystery/thriller outline that:
+- Develops compelling mystery plot with clues and red herrings
+- Creates suspenseful pacing and tension throughout
+- Includes complex characters with hidden motives
+- Builds atmosphere and mood appropriate to the genre
+- Incorporates investigative elements and logical deduction
+- Provides satisfying resolution that ties up all loose ends
+- Balances action with character development""",
+            "chapter": """Write in a mystery/thriller style that:
+- Creates suspenseful atmosphere and tension
+- Uses clues and foreshadowing effectively
+- Develops complex characters with secrets and motives
+- Incorporates dialogue that reveals and conceals information
+- Builds pacing that maintains reader interest
+- Uses descriptive language to create mood and setting
+- Balances action sequences with investigative elements""",
+            "formatting": """Use mystery HTML formatting:
+- <h2> for chapter titles with intriguing, atmospheric names
+- <h3> for scene breaks or major plot developments
+- <p> for narrative with varied paragraph lengths for pacing
+- Use frequent paragraph breaks for dialogue and action
+- <strong> for important clues and revelations
+- <em> for internal thoughts and emphasis
+- Structure content with suspenseful scene transitions"""
+        },
+        "romance": {
+            "outline": """Create a romance/relationships outline that:
+- Develops emotional character arcs and relationship progression
+- Creates compelling romantic tension and chemistry
+- Includes realistic relationship challenges and growth
+- Incorporates diverse relationship dynamics and perspectives
+- Balances romantic elements with character development
+- Addresses themes of love, trust, and personal growth
+- Provides satisfying emotional resolution""",
+            "chapter": """Write in a romance/relationships style that:
+- Creates authentic emotional connections between characters
+- Uses dialogue that reveals chemistry and tension
+- Incorporates sensual and emotional descriptions appropriately
+- Develops realistic relationship challenges and conflicts
+- Balances romantic scenes with character development
+- Uses internal thoughts and emotions effectively
+- Maintains appropriate tone for the target audience""",
+            "formatting": """Use romance HTML formatting:
+- <h2> for chapter titles with romantic or emotional themes
+- <h3> for scene breaks or emotional transitions
+- <p> for narrative with focus on emotions and relationships
+- Use paragraph breaks for dialogue and emotional moments
+- <strong> for important emotional revelations
+- <em> for internal thoughts and romantic emphasis
+- Structure content with emotional pacing and development"""
+        },
+        "fantasy": {
+            "outline": """Create a fantasy/science fiction outline that:
+- Develops imaginative world-building with consistent rules
+- Creates compelling characters with unique abilities or challenges
+- Incorporates fantastical or futuristic elements seamlessly
+- Builds epic plots with high stakes and adventure
+- Includes magic systems or technological concepts
+- Balances world-building with character development
+- Addresses themes relevant to the human condition""",
+            "chapter": """Write in a fantasy/science fiction style that:
+- Creates vivid, imaginative descriptions of fantastical worlds
+- Develops characters with unique abilities and challenges
+- Incorporates magic or technology naturally into the narrative
+- Uses dialogue that fits the world and characters
+- Balances action and adventure with emotional depth
+- Builds tension through both external and internal conflicts
+- Maintains consistency in world-building and rules""",
+            "formatting": """Use fantasy HTML formatting:
+- <h2> for chapter titles with epic or mystical names
+- <h3> for scene breaks or major fantasy elements
+- <p> for world-building descriptions and narrative
+- Use paragraph breaks for action and dialogue
+- <strong> for important fantasy terms and revelations
+- <em> for magical incantations and emphasis
+- Structure content with adventure pacing and world-building"""
+        },
+        "horror": {
+            "outline": """Create a horror/supernatural outline that:
+- Develops frightening atmosphere and psychological tension
+- Creates compelling supernatural or psychological threats
+- Builds suspense through pacing and foreshadowing
+- Incorporates elements of fear and unease throughout
+- Balances horror elements with character development
+- Uses setting and atmosphere to enhance fear
+- Provides resolution that addresses the horror elements""",
+            "chapter": """Write in a horror/supernatural style that:
+- Creates atmospheric descriptions that build dread
+- Uses psychological tension and fear effectively
+- Incorporates supernatural elements naturally
+- Develops characters facing terrifying situations
+- Balances graphic content with psychological horror
+- Uses pacing to build and release tension
+- Maintains appropriate level of fear for the audience""",
+            "formatting": """Use horror HTML formatting:
+- <h2> for chapter titles with ominous or atmospheric names
+- <h3> for scene breaks or supernatural encounters
+- <p> for atmospheric descriptions and narrative
+- Use paragraph breaks for tension and dialogue
+- <strong> for important horror revelations and threats
+- <em> for supernatural elements and emphasis
+- Structure content with suspenseful pacing and atmosphere"""
+        },
+        "memoir": {
+            "outline": """Create a memoir/personal stories outline that:
+- Organizes content by life themes or chronological events
+- Includes personal reflections and insights
+- Focuses on meaningful life experiences and lessons learned
+- Incorporates emotional honesty and vulnerability
+- Balances personal details with universal themes
+- Provides growth and transformation narratives
+- Addresses how experiences shaped the author""",
+            "chapter": """Write in a memoir/personal style that:
+- Uses authentic, personal voice and perspective
+- Incorporates emotional honesty and vulnerability
+- Includes dialogue and personal anecdotes
+- Provides reflective insights and lessons learned
+- Balances personal details with broader themes
+- Uses storytelling techniques to engage readers
+- Maintains respect for privacy of others mentioned""",
+            "formatting": """Use memoir HTML formatting:
+- <h2> for chapter titles with personal or thematic names
+- <h3> for major life events or themes
+- <p> for personal narrative and reflections
+- <ul> and <li> for key insights and lessons learned
+- <strong> for important personal revelations
+- <em> for emphasis and reflective thoughts"""
+        },
+        "educational": {
+            "outline": """Create an educational/textbook outline that:
+- Organizes content by learning objectives and skill progression
+- Includes clear explanations of concepts and theories
+- Focuses on student comprehension and retention
+- Incorporates exercises, examples, and assessments
+- Provides structured learning path from basic to advanced
+- Balances theoretical knowledge with practical application
+- Addresses different learning styles and needs""",
+            "chapter": """Write in an educational/textbook style that:
+- Uses clear, instructional language appropriate for students
+- Provides step-by-step explanations of concepts
+- Includes relevant examples and practical applications
+- Incorporates exercises and learning activities
+- Uses consistent terminology and definitions
+- Maintains engaging tone while being informative
+- Addresses common student questions and misconceptions""",
+            "formatting": """Use educational HTML formatting:
+- <h2> for chapter titles with learning topic names
+- <h3> for major concepts or learning objectives
+- <h4> for sub-topics and detailed explanations
+- <p> for instructional content and explanations
+- <ul> and <li> for key points and learning objectives
+- <strong> for important terms and concepts
+- <em> for definitions and emphasis"""
+        },
+        "spiritual": {
+            "outline": """Create a spiritual/religious outline that:
+- Organizes content by spiritual themes or religious concepts
+- Includes respectful exploration of faith and beliefs
+- Focuses on personal growth and spiritual development
+- Incorporates diverse spiritual perspectives when appropriate
+- Provides practical guidance for spiritual practice
+- Balances theological concepts with personal application
+- Addresses questions of meaning and purpose""",
+            "chapter": """Write in a spiritual/religious style that:
+- Uses respectful, reverent language for sacred topics
+- Incorporates personal spiritual insights and experiences
+- Includes practical guidance for spiritual growth
+- Provides comfort and inspiration to readers
+- Balances theological concepts with accessible explanations
+- Uses appropriate religious or spiritual terminology
+- Maintains sensitivity to diverse spiritual beliefs""",
+            "formatting": """Use spiritual HTML formatting:
+- <h2> for chapter titles with spiritual theme names
+- <h3> for major spiritual concepts or practices
+- <h4> for specific teachings or spiritual exercises
+- <p> for spiritual guidance and reflections
+- <ul> and <li> for spiritual practices and key teachings
+- <strong> for important spiritual concepts and terms
+- <em> for scripture quotes and spiritual emphasis"""
+        },
+        "finance": {
+            "outline": """Create a finance/investment outline that:
+- Organizes content by financial concepts or investment strategies
+- Includes practical financial advice and planning strategies
+- Focuses on actionable financial guidance and education
+- Incorporates current market trends and economic principles
+- Provides risk assessment and management strategies
+- Balances technical financial concepts with accessibility
+- Addresses various financial goals and life stages""",
+            "chapter": """Write in a finance/investment style that:
+- Uses clear, professional language for financial concepts
+- Provides practical, actionable financial advice
+- Includes real-world examples and case studies
+- Incorporates current market data and trends
+- Addresses risk management and financial planning
+- Uses encouraging tone while being realistic about challenges
+- Maintains credibility with evidence-based recommendations""",
+            "formatting": """Use finance HTML formatting:
+- <h2> for chapter titles with financial topic names
+- <h3> for major financial concepts or strategies
+- <h4> for specific financial instruments or techniques
+- <p> for financial explanations and advice
+- <ul> and <li> for financial strategies and key points
+- <strong> for important financial terms and warnings
+- <em> for financial terminology and emphasis"""
         }
     }
     
