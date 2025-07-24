@@ -159,8 +159,30 @@ const BookCreationForm = ({ onSubmit, loading = false, initialData = {} }) => {
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 >
-                  <option value="story">Story (Narrative)</option>
-                  <option value="descriptive">Descriptive (Structured)</option>
+                  <option value="story">📚 Story (Narrative Fiction)</option>
+                  <option value="descriptive">📖 Descriptive (Structured Non-Fiction)</option>
+                  <option value="academic">🎓 Academic (Research & Analysis)</option>
+                  <option value="technical">⚙️ Technical (How-To & Manuals)</option>
+                  <option value="biography">👤 Biography (Life Stories)</option>
+                  <option value="self_help">💪 Self-Help (Personal Development)</option>
+                  <option value="business">💼 Business (Professional & Strategy)</option>
+                  <option value="health">🏥 Health & Wellness</option>
+                  <option value="travel">✈️ Travel & Adventure</option>
+                  <option value="cooking">🍳 Cooking & Recipe</option>
+                  <option value="history">🏛️ Historical (Events & Periods)</option>
+                  <option value="science">🔬 Science & Technology</option>
+                  <option value="philosophy">🤔 Philosophy & Ethics</option>
+                  <option value="psychology">🧠 Psychology & Mental Health</option>
+                  <option value="children">🧸 Children's (Kids & Young Adult)</option>
+                  <option value="poetry">🎭 Poetry & Creative Writing</option>
+                  <option value="mystery">🔍 Mystery & Thriller</option>
+                  <option value="romance">💕 Romance & Relationships</option>
+                  <option value="fantasy">🐉 Fantasy & Science Fiction</option>
+                  <option value="horror">👻 Horror & Supernatural</option>
+                  <option value="memoir">📝 Memoir & Personal Stories</option>
+                  <option value="educational">📚 Educational & Textbook</option>
+                  <option value="spiritual">🙏 Spiritual & Religious</option>
+                  <option value="finance">💰 Finance & Investment</option>
                 </select>
               </div>
             </div>
