@@ -67,7 +67,7 @@ const PaymentSuccess = () => {
 
   const fetchCreditBalance = async () => {
     try {
-      const token = localStorage.getItem('session_token');
+      const token = localStorage.getItem('auth_token');
       const response = await axios.get(`${API_URL}/api/credits/balance`, {
         headers: { Authorization: `Bearer ${token}` }
       });
