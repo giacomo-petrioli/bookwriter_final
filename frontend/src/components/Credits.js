@@ -69,17 +69,17 @@ const Credits = () => {
   };
 
   const PackageCard = ({ packageId, packageData }) => (
-    <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow">
+    <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-lg hover:bg-white/15 transition-all duration-200">
       <div className="text-center">
-        <h3 className="text-xl font-bold text-gray-900 mb-2">{packageData.name}</h3>
-        <div className="text-3xl font-bold text-indigo-600 mb-2">
+        <h3 className="text-xl font-bold text-white mb-2">{packageData.name}</h3>
+        <div className="text-3xl font-bold text-cyan-400 mb-2">
           €{packageData.price.toFixed(2)}
         </div>
-        <div className="text-lg text-gray-600 mb-3">
+        <div className="text-lg text-gray-300 mb-3">
           {packageData.credits} Credits
         </div>
-        <p className="text-sm text-gray-500 mb-4">{packageData.description}</p>
-        <div className="text-xs text-gray-400 mb-4">
+        <p className="text-sm text-gray-400 mb-4">{packageData.description}</p>
+        <div className="text-xs text-gray-500 mb-4">
           €{(packageData.price / packageData.credits).toFixed(2)} per credit
         </div>
         <button
@@ -87,8 +87,8 @@ const Credits = () => {
           disabled={loading}
           className={`w-full py-2 px-4 rounded-lg font-semibold transition-colors ${
             loading
-              ? 'bg-gray-300 cursor-not-allowed'
-              : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+              ? 'bg-gray-600 cursor-not-allowed text-gray-400'
+              : 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white'
           }`}
         >
           {loading ? 'Processing...' : 'Purchase'}
@@ -98,31 +98,31 @@ const Credits = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Purchase Credits</h1>
-          <p className="text-gray-600">Choose a credit package to continue writing your books</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Purchase Credits</h1>
+          <p className="text-gray-300">Choose a credit package to continue writing your books</p>
         </div>
 
         {/* Current Balance */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-6 mb-8 shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Current Balance</h2>
-              <p className="text-gray-600">Your available credits for generating chapters</p>
+              <h2 className="text-lg font-semibold text-white">Current Balance</h2>
+              <p className="text-gray-300">Your available credits for generating chapters</p>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold text-indigo-600">{creditBalance}</div>
-              <div className="text-sm text-gray-500">credits</div>
+              <div className="text-3xl font-bold text-cyan-400">{creditBalance}</div>
+              <div className="text-sm text-gray-400">credits</div>
             </div>
           </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          <div className="bg-red-500/20 border border-red-400/50 text-red-300 px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}
@@ -139,8 +139,8 @@ const Credits = () => {
         </div>
 
         {/* Features */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">What you get with credits:</h3>
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-lg">
+          <h3 className="text-lg font-semibold text-white mb-4">What you get with credits:</h3>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="flex items-start">
               <div className="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-3 mt-0.5">
@@ -149,8 +149,8 @@ const Credits = () => {
                 </svg>
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">AI Chapter Generation</h4>
-                <p className="text-sm text-gray-600">Generate high-quality book chapters with AI</p>
+                <h4 className="font-medium text-white">AI Chapter Generation</h4>
+                <p className="text-sm text-gray-300">Generate high-quality book chapters with AI</p>
               </div>
             </div>
             <div className="flex items-start">
@@ -160,8 +160,8 @@ const Credits = () => {
                 </svg>
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Multiple Writing Styles</h4>
-                <p className="text-sm text-gray-600">Story, descriptive, academic, and more</p>
+                <h4 className="font-medium text-white">Multiple Writing Styles</h4>
+                <p className="text-sm text-gray-300">Story, descriptive, academic, and more</p>
               </div>
             </div>
             <div className="flex items-start">
@@ -171,8 +171,8 @@ const Credits = () => {
                 </svg>
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Export Options</h4>
-                <p className="text-sm text-gray-600">Download as HTML, PDF, or DOCX</p>
+                <h4 className="font-medium text-white">Export Options</h4>
+                <p className="text-sm text-gray-300">Download as HTML, PDF, or DOCX</p>
               </div>
             </div>
             <div className="flex items-start">
@@ -182,15 +182,15 @@ const Credits = () => {
                 </svg>
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Unlimited Editing</h4>
-                <p className="text-sm text-gray-600">Edit and refine your content</p>
+                <h4 className="font-medium text-white">Unlimited Editing</h4>
+                <p className="text-sm text-gray-300">Edit and refine your content</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Credit Usage Info */}
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="mt-6 bg-blue-500/20 border border-blue-400/30 rounded-lg p-4">
           <div className="flex">
             <div className="flex-shrink-0">
               <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -198,8 +198,8 @@ const Credits = () => {
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">Credit Usage</h3>
-              <div className="mt-2 text-sm text-blue-700">
+              <h3 className="text-sm font-medium text-blue-300">Credit Usage</h3>
+              <div className="mt-2 text-sm text-blue-400">
                 <p>• 1 credit = 1 chapter generation</p>
                 <p>• No credit cost for editing existing chapters</p>
                 <p>• No credit cost for outline generation</p>
