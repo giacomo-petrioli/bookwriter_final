@@ -406,6 +406,41 @@ const BookWriter = () => {
                 </div>
               </div>
 
+              {/* Credits Section */}
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border border-indigo-200 p-6">
+                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                  <span className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center mr-3">
+                    <span className="text-white">💳</span>
+                  </span>
+                  Credits
+                </h3>
+                
+                <div className="text-center mb-4">
+                  <div className="text-3xl font-bold text-indigo-600 mb-1">
+                    {creditBalance !== null ? creditBalance : (userStats?.credit_balance ?? '—')}
+                  </div>
+                  <p className="text-sm text-slate-600">Available Credits</p>
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-600">Cost per chapter:</span>
+                    <span className="font-medium text-slate-900">1 credit</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-600">Outline generation:</span>
+                    <span className="font-medium text-green-600">Free</span>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => window.location.href = '/credits'}
+                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-2 px-4 rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 font-medium"
+                >
+                  Buy More Credits
+                </button>
+              </div>
+
               {/* User Progress */}
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center">
