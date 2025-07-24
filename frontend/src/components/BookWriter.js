@@ -102,7 +102,7 @@ const BookWriter = () => {
   const loadProjects = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API}/projects`);
+      const response = await makeAuthenticatedRequest('GET', `${API}/projects`);
       setProjects(response.data);
     } catch (error) {
       console.error("Error loading projects:", error);
