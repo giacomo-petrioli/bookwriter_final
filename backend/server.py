@@ -1789,7 +1789,7 @@ async def generate_outline(request: OutlineRequest, current_user: User = Depends
         
         # Initialize Gemini chat with updated model
         chat = LlmChat(
-            api_key=os.environ.get('GEMINI_API_KEY'),
+            api_key="AIzaSyDYSBIsBp1KEENEDihvS0Nl0A6lGsgzMgM",
             session_id=f"outline_{project_obj.id}",
             system_message="You are an expert book writing assistant. You create detailed, well-structured book outlines that serve as comprehensive guides for content generation."
         ).with_model("gemini", "gemini-2.5-flash-lite-preview-06-17")
