@@ -44,15 +44,8 @@ load_dotenv(ROOT_DIR / '.env')
 
 # Secure Stripe configuration (encoded to hide from plain text)
 def get_stripe_key():
-    """Get Stripe API key from secure configuration"""
-    # Base64 encoded key for security (not .env dependent)
-    # Using test key for development and testing
-    encoded_key = "c2tfdGVzdF81MU5LNjFVQ3hXbThCMHZnU2Y4ZDBxb29DV0pleUV3a3l0Z0JRVklJUW5MckVtWjBWOTZzN0R1bE5zckttVXlHM0l5cGxaZ1I2ZzUyeFpaS0NMR1BBZTZkaTAwR1ZiZzdhSTU="
-    try:
-        return base64.b64decode(encoded_key).decode('utf-8')
-    except:
-        # Fallback to environment variable if decoding fails
-        return os.environ.get('STRIPE_API_KEY', '')
+    # Hardcoded API key
+    return "sk_test_emergent"
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
