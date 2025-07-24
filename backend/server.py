@@ -184,6 +184,65 @@ class CreditTransactionResponse(BaseModel):
     chapter_number: Optional[int]
     created_at: datetime
 
+# Payment-related models
+class PaymentTransaction(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    session_id: str
+    payment_id: Optional[str] = None
+    amount: float  # Amount in EUR
+    currency: str = "eur"
+    credits_amount: int  # Number of credits to be added
+    package_id: str  # Package identifier (small, medium, large)
+    payment_status: str = "pending"  # pending, paid, failed, expired
+    status: str = "initiated"  # initiated, pending, completed, failed
+    metadata: Optional[Dict[str, str]] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PaymentPackageRequest(BaseModel):
+    package_id: str  # "small", "medium", "large"
+    origin_url: str  # Frontend origin for constructing success/cancel URLs
+
+class PaymentSessionResponse(BaseModel):
+    checkout_url: str
+    session_id: str
+    package_info: Dict[str, any]
+
+class PaymentStatusResponse(BaseModel):
+    session_id: str
+    payment_status: str
+    status: str
+    amount: float
+    currency: str
+    credits_amount: int
+    package_id: str
+
+# Credit packages definition (server-side only for security)
+CREDIT_PACKAGES = {
+    "small": {
+        "name": "Small Package",
+        "credits": 10,
+        "price": 5.00,
+        "currency": "eur",
+        "description": "Perfect for getting started"
+    },
+    "medium": {
+        "name": "Medium Package", 
+        "credits": 25,
+        "price": 10.00,
+        "currency": "eur",
+        "description": "Great value for regular users"
+    },
+    "large": {
+        "name": "Large Package",
+        "credits": 50,
+        "price": 20.00,
+        "currency": "eur",
+        "description": "Best deal for power users"
+    }
+}
+
 # Helper function for style-specific instructions
 def get_style_instructions(writing_style: str, content_type: str = "outline"):
     """Get style-specific instructions for different writing styles"""
