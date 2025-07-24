@@ -114,7 +114,7 @@ const BookWriter = () => {
   const loadUserStats = async () => {
     try {
       setStatsLoading(true);
-      const response = await axios.get(`${API}/user/stats`);
+      const response = await makeAuthenticatedRequest('GET', `${API}/user/stats`);
       setUserStats(response.data);
       // Update credit balance from user stats
       if (response.data.credit_balance !== undefined) {
