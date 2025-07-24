@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import BookWriter from './components/BookWriter';
+import Credits from './components/Credits';
+import PaymentSuccess from './components/PaymentSuccess';
 import './App.css';
 
 function App() {
@@ -39,9 +42,25 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <AuthProvider>
-        <ProtectedRoute>
-          <BookWriter />
-        </ProtectedRoute>
+        <Router>
+          <Routes>
+            <Route path="/payment-success" element={
+              <ProtectedRoute>
+                <PaymentSuccess />
+              </ProtectedRoute>
+            } />
+            <Route path="/credits" element={
+              <ProtectedRoute>
+                <Credits />
+              </ProtectedRoute>
+            } />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <BookWriter />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </Router>
       </AuthProvider>
     </GoogleOAuthProvider>
   );
