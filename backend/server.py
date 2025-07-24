@@ -1438,25 +1438,220 @@ async def calculate_book_cost_endpoint(request: BookCostRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error calculating book cost: {str(e)}")
 
-@api_router.post("/credits/purchase")
-async def purchase_credits(request: CreditPurchaseRequest, current_user: User = Depends(get_current_user)):
-    """Purchase credits (placeholder for future payment integration)"""
+@api_router.get("/credits/packages")
+async def get_credit_packages():
+    """Get available credit packages"""
+    return {"packages": CREDIT_PACKAGES}
+
+@api_router.post("/payments/create-session", response_model=PaymentSessionResponse)
+async def create_payment_session(request: PaymentPackageRequest, current_user: User = Depends(get_current_user)):
+    """Create a Stripe checkout session for credit purchase"""
     try:
-        # For now, we'll add credits directly (in production, integrate with payment processor)
-        new_balance = await add_credits(
-            current_user.id,
-            request.amount,
-            "credit_purchase",
-            f"Purchased {request.amount} credits"
+        # Validate package ID
+        if request.package_id not in CREDIT_PACKAGES:
+            raise HTTPException(status_code=400, detail="Invalid package ID")
+        
+        package = CREDIT_PACKAGES[request.package_id]
+        
+        # Initialize Stripe checkout
+        stripe_api_key = os.environ.get('STRIPE_API_KEY')
+        if not stripe_api_key:
+            raise HTTPException(status_code=500, detail="Stripe API key not configured")
+        
+        # Construct webhook URL (will be handled by FastAPI)
+        webhook_url = f"{request.origin_url}/api/webhook/stripe"
+        stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
+        
+        # Construct success and cancel URLs
+        success_url = f"{request.origin_url}/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
+        cancel_url = f"{request.origin_url}/credits"
+        
+        # Create checkout session request
+        checkout_request = CheckoutSessionRequest(
+            amount=package["price"],
+            currency=package["currency"],
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={
+                "user_id": current_user.id,
+                "package_id": request.package_id,
+                "credits_amount": str(package["credits"]),
+                "source": "web_checkout"
+            }
         )
         
-        return {
-            "success": True,
-            "message": f"Successfully added {request.amount} credits",
-            "new_balance": new_balance
-        }
+        # Create Stripe checkout session
+        session_response: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_request)
+        
+        # Create payment transaction record in database
+        payment_transaction = PaymentTransaction(
+            user_id=current_user.id,
+            session_id=session_response.session_id,
+            amount=package["price"],
+            currency=package["currency"],
+            credits_amount=package["credits"],
+            package_id=request.package_id,
+            payment_status="pending",
+            status="initiated",
+            metadata={
+                "user_id": current_user.id,
+                "package_id": request.package_id,
+                "credits_amount": str(package["credits"]),
+                "source": "web_checkout"
+            }
+        )
+        
+        await db.payment_transactions.insert_one(payment_transaction.dict())
+        
+        return PaymentSessionResponse(
+            checkout_url=session_response.url,
+            session_id=session_response.session_id,
+            package_info={
+                "name": package["name"],
+                "credits": package["credits"],
+                "price": package["price"],
+                "currency": package["currency"],
+                "description": package["description"]
+            }
+        )
+        
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Credit purchase failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create payment session: {str(e)}")
+
+@api_router.get("/payments/status/{session_id}", response_model=PaymentStatusResponse)
+async def get_payment_status(session_id: str, current_user: User = Depends(get_current_user)):
+    """Get payment status and process successful payments"""
+    try:
+        # Find payment transaction in database
+        payment_record = await db.payment_transactions.find_one({"session_id": session_id, "user_id": current_user.id})
+        if not payment_record:
+            raise HTTPException(status_code=404, detail="Payment session not found")
+        
+        # Initialize Stripe checkout to check status
+        stripe_api_key = os.environ.get('STRIPE_API_KEY')
+        if not stripe_api_key:
+            raise HTTPException(status_code=500, detail="Stripe API key not configured")
+        
+        # Use a dummy webhook URL since we're just checking status
+        webhook_url = "https://dummy.webhook.url"
+        stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
+        
+        # Get checkout status from Stripe
+        checkout_status: CheckoutStatusResponse = await stripe_checkout.get_checkout_status(session_id)
+        
+        # Update payment record with latest status
+        updated_payment = {
+            "payment_status": checkout_status.payment_status,
+            "status": checkout_status.status,
+            "updated_at": datetime.utcnow()
+        }
+        
+        # If payment is successful and not already processed
+        if (checkout_status.payment_status == "paid" and 
+            payment_record.get("payment_status") != "paid"):
+            
+            # Add credits to user account
+            credits_to_add = payment_record["credits_amount"]
+            new_balance = await add_credits(
+                current_user.id,
+                credits_to_add,
+                "credit_purchase",
+                f"Purchased {credits_to_add} credits via Stripe - Package: {payment_record['package_id']}"
+            )
+            
+            # Update payment record as completed
+            updated_payment["status"] = "completed"
+        
+        # Update payment record in database
+        await db.payment_transactions.update_one(
+            {"session_id": session_id, "user_id": current_user.id},
+            {"$set": updated_payment}
+        )
+        
+        return PaymentStatusResponse(
+            session_id=session_id,
+            payment_status=checkout_status.payment_status,
+            status=updated_payment["status"],
+            amount=payment_record["amount"],
+            currency=payment_record["currency"],
+            credits_amount=payment_record["credits_amount"],
+            package_id=payment_record["package_id"]
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get payment status: {str(e)}")
+
+@api_router.post("/webhook/stripe")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhook events"""
+    try:
+        # Get webhook payload and signature
+        body = await request.body()
+        signature = request.headers.get("stripe-signature")
+        
+        if not signature:
+            raise HTTPException(status_code=400, detail="Missing Stripe signature")
+        
+        # Initialize Stripe checkout
+        stripe_api_key = os.environ.get('STRIPE_API_KEY')
+        if not stripe_api_key:
+            raise HTTPException(status_code=500, detail="Stripe API key not configured")
+        
+        webhook_url = "https://dummy.webhook.url"  # Not used for webhook handling
+        stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
+        
+        # Handle webhook event
+        webhook_response = await stripe_checkout.handle_webhook(body, signature)
+        
+        # Process the webhook event
+        if webhook_response.event_type in ["checkout.session.completed", "payment_intent.succeeded"]:
+            session_id = webhook_response.session_id
+            
+            # Find and update payment record
+            payment_record = await db.payment_transactions.find_one({"session_id": session_id})
+            if payment_record:
+                # Update payment status
+                await db.payment_transactions.update_one(
+                    {"session_id": session_id},
+                    {
+                        "$set": {
+                            "payment_status": webhook_response.payment_status,
+                            "status": "completed" if webhook_response.payment_status == "paid" else "failed",
+                            "updated_at": datetime.utcnow()
+                        }
+                    }
+                )
+                
+                # Add credits if payment successful and not already processed
+                if (webhook_response.payment_status == "paid" and 
+                    payment_record.get("payment_status") != "paid"):
+                    
+                    credits_to_add = payment_record["credits_amount"]
+                    await add_credits(
+                        payment_record["user_id"],
+                        credits_to_add,
+                        "credit_purchase",
+                        f"Purchased {credits_to_add} credits via Stripe webhook - Package: {payment_record['package_id']}"
+                    )
+        
+        return {"status": "success"}
+        
+    except Exception as e:
+        logging.error(f"Stripe webhook error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Webhook processing failed: {str(e)}")
+
+@api_router.post("/credits/purchase")
+async def purchase_credits_legacy(request: CreditPurchaseRequest, current_user: User = Depends(get_current_user)):
+    """Legacy credit purchase endpoint - redirects to new payment system"""
+    return {
+        "message": "Please use the new payment system with credit packages",
+        "redirect_to": "/credits",
+        "packages_available": list(CREDIT_PACKAGES.keys())
+    }
 
 # Helper function to extract chapter titles from outline
 def extract_chapter_titles(outline: str) -> dict:
