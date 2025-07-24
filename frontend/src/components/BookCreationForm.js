@@ -45,17 +45,17 @@ const BookCreationForm = ({ onSubmit, loading = false, initialData = {} }) => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="px-8 py-6 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-slate-200">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Create Your Book Project</h2>
-          <p className="text-slate-600">Tell us about your book and we'll help you bring it to life</p>
+      <div className="bg-white/10 backdrop-blur-sm rounded-3xl border border-white/20 overflow-hidden shadow-lg">
+        <div className="px-8 py-6 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-b border-white/20">
+          <h2 className="text-2xl font-bold text-white mb-2">Create Your Book Project</h2>
+          <p className="text-gray-300">Tell us about your book and we'll help you bring it to life</p>
         </div>
         
         <div className="p-8">
           <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             {/* Book Title */}
             <div>
-              <label htmlFor="book-title" className="block text-sm font-semibold text-slate-700 mb-3">
+              <label htmlFor="book-title" className="block text-sm font-semibold text-gray-300 mb-3">
                 Book Title *
               </label>
               <input
@@ -65,14 +65,14 @@ const BookCreationForm = ({ onSubmit, loading = false, initialData = {} }) => {
                 value={localFormData.title}
                 onChange={handleInputChange}
                 placeholder="Enter your book title..."
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 required
               />
             </div>
             
             {/* Book Description */}
             <div>
-              <label htmlFor="book-description" className="block text-sm font-semibold text-slate-700 mb-3">
+              <label htmlFor="book-description" className="block text-sm font-semibold text-gray-300 mb-3">
                 Book Description *
               </label>
               <textarea
@@ -82,7 +82,7 @@ const BookCreationForm = ({ onSubmit, loading = false, initialData = {} }) => {
                 onChange={handleInputChange}
                 rows="4"
                 placeholder="Describe what your book is about..."
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none"
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none"
                 required
               />
             </div>
@@ -90,7 +90,7 @@ const BookCreationForm = ({ onSubmit, loading = false, initialData = {} }) => {
             {/* Pages and Chapters */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="target-pages" className="block text-sm font-semibold text-slate-700 mb-3">
+                <label htmlFor="target-pages" className="block text-sm font-semibold text-gray-300 mb-3">
                   Target Pages
                 </label>
                 <input
@@ -101,12 +101,12 @@ const BookCreationForm = ({ onSubmit, loading = false, initialData = {} }) => {
                   onChange={handleInputChange}
                   min="10"
                   max="1000"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
               
               <div>
-                <label htmlFor="num-chapters" className="block text-sm font-semibold text-slate-700 mb-3">
+                <label htmlFor="num-chapters" className="block text-sm font-semibold text-gray-300 mb-3">
                   Number of Chapters
                 </label>
                 <input
@@ -117,7 +117,7 @@ const BookCreationForm = ({ onSubmit, loading = false, initialData = {} }) => {
                   onChange={handleInputChange}
                   min="1"
                   max="50"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
             </div>
@@ -125,7 +125,7 @@ const BookCreationForm = ({ onSubmit, loading = false, initialData = {} }) => {
             {/* Language and Writing Style */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="book-language" className="block text-sm font-semibold text-slate-700 mb-3">
+                <label htmlFor="book-language" className="block text-sm font-semibold text-gray-300 mb-3">
                   Language
                 </label>
                 <select
@@ -133,7 +133,7 @@ const BookCreationForm = ({ onSubmit, loading = false, initialData = {} }) => {
                   name="language"
                   value={localFormData.language}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 >
                   <option value="English">English</option>
                   <option value="Spanish">Spanish</option>
@@ -149,7 +149,7 @@ const BookCreationForm = ({ onSubmit, loading = false, initialData = {} }) => {
               </div>
               
               <div>
-                <label htmlFor="writing-style" className="block text-sm font-semibold text-slate-700 mb-3">
+                <label htmlFor="writing-style" className="block text-sm font-semibold text-gray-300 mb-3">
                   Writing Style
                 </label>
                 <select
@@ -157,7 +157,7 @@ const BookCreationForm = ({ onSubmit, loading = false, initialData = {} }) => {
                   name="writing_style"
                   value={localFormData.writing_style}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 >
                   <option value="story">📚 Story (Narrative Fiction)</option>
                   <option value="descriptive">📖 Descriptive (Structured Non-Fiction)</option>
