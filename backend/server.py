@@ -1542,7 +1542,7 @@ async def get_payment_status(session_id: str, current_user: User = Depends(get_c
             raise HTTPException(status_code=404, detail="Payment session not found")
         
         # Initialize Stripe checkout to check status
-        stripe_api_key = os.environ.get('STRIPE_API_KEY')
+        stripe_api_key = get_stripe_key()
         if not stripe_api_key:
             raise HTTPException(status_code=500, detail="Stripe API key not configured")
         
