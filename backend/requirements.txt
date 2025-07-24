@@ -3,7 +3,6 @@ uvicorn==0.25.0
 boto3>=1.34.129
 requests-oauthlib>=2.0.0
 cryptography>=42.0.8
-python-dotenv>=1.0.1
 pymongo==4.5.0
 pydantic>=2.6.4
 email-validator>=2.2.0
@@ -33,7 +32,7 @@ httpx
 multidict
 attrs
 yarl
-aiohappyeyeballs
+aiohttps://9d11d4db-9c50-475a-af20-eb678e6827a1.preview.emergentagent.com
 aiosignal
 distro
 httpcore
