@@ -158,7 +158,7 @@ const BookWriter = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post(`${API}/projects`, formDataToSubmit);
+      const response = await makeAuthenticatedRequest('POST', `${API}/projects`, formDataToSubmit);
       setCurrentProject(response.data);
       setFormData(formDataToSubmit); // Update parent state
       setCurrentStep(2);
