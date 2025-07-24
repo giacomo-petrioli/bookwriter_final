@@ -207,7 +207,7 @@ class PaymentPackageRequest(BaseModel):
 class PaymentSessionResponse(BaseModel):
     checkout_url: str
     session_id: str
-    package_info: Dict[str, any]
+    package_info: dict  # Changed from Dict[str, any] to dict
 
 class PaymentStatusResponse(BaseModel):
     session_id: str
