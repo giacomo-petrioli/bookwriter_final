@@ -46,7 +46,7 @@ load_dotenv(ROOT_DIR / '.env')
 def get_stripe_key():
     """Get Stripe API key from secure configuration"""
     # Base64 encoded key for security (not .env dependent)
-    encoded_key = "c2tfbGl2ZV81MU5LNjFVQ3hXbThCMHZnU2ZFSE5WNjhWdERBZDhKZGFobGFqYVRoRExNZ04wZXEwNnhGSHlYam1WU0tzR3lDaGdnMm9TZkpOWThHR0wxQ05vOGpHTlAwczAwRDRRSnBmV1k="
+    encoded_key = "c2tfbGl2ZV81MU5LNjFVQ3hXbThCMHZnU2ZFSE5WNjhWdERBZDhKZGFobGFqYVRoRExNZ04wZXEwNnhGSHlYam1WU0tzR3lDaGd3Mm9TZkpOWThHR0wxQ05vOGpHTlAwczAwRDRRSnBmV1k="
     try:
         return base64.b64decode(encoded_key).decode('utf-8')
     except:
