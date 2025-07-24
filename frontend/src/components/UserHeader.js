@@ -8,7 +8,7 @@ const UserHeader = ({ children }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [creditBalance, setCreditBalance] = useState(null);
 
-  const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+  const API_URL = 'https://9d11d4db-9c50-475a-af20-eb678e6827a1.preview.emergentagent.com';
 
   // Fetch credit balance
   useEffect(() => {
