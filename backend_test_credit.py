@@ -17,7 +17,7 @@ import sys
 from datetime import datetime
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://9d11d4db-9c50-475a-af20-eb678e6827a1.preview.emergentagent.com/api"
+BACKEND_URL = "https://6826ce60-43b4-4dcf-983b-e1a4a4074c3c.preview.emergentagent.com/api"
 
 class CreditSystemTester:
     def __init__(self):
