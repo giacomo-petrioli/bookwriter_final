@@ -99,10 +99,10 @@ const UserHeader = ({ children }) => {
             </button>
             
             {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-slate-800/90 backdrop-blur-sm rounded-lg border border-slate-700/50 shadow-xl">
+              <div className="absolute right-0 mt-2 w-64 bg-slate-800/90 backdrop-blur-sm rounded-lg border border-slate-700/50 shadow-xl">
                 <div className="p-4 border-b border-slate-700/50">
-                  <p className="text-white font-semibold">{user?.name}</p>
-                  <p className="text-gray-400 text-sm">{user?.email}</p>
+                  <p className="text-white font-semibold truncate">{user?.name}</p>
+                  <p className="text-gray-400 text-sm truncate break-all" title={user?.email}>{user?.email}</p>
                 </div>
                 <div className="p-2">
                   <button
