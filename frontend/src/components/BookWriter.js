@@ -23,6 +23,41 @@ const BookWriter = () => {
   const [currentProject, setCurrentProject] = useState(null);
   const [loading, setLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(true);
+
+  // Utility function for authenticated API calls
+  const makeAuthenticatedRequest = async (method, url, data = null, options = {}) => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      logout();
+      throw new Error('No authentication token found');
+    }
+    
+    const config = {
+      method,
+      url,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      timeout: options.timeout || 60000,
+      ...options
+    };
+    
+    if (data) {
+      config.data = data;
+    }
+    
+    try {
+      return await axios(config);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        console.error("Authentication failed - redirecting to login");
+        logout();
+      }
+      throw error;
+    }
+  };
   const [formData, setFormData] = useState({
     title: "",
     description: "",
