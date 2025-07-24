@@ -45,7 +45,7 @@ const Credits = () => {
     setError('');
 
     try {
-      const token = localStorage.getItem('session_token');
+      const token = localStorage.getItem('auth_token');
       const originUrl = window.location.origin;
 
       const response = await axios.post(
