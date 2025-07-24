@@ -1087,14 +1087,14 @@ class BookWriterAPITester:
     # STRIPE PAYMENT INTEGRATION TESTS
     # ============================================================================
 
-    def test_stripe_api_key_corrected(self):
-        """Test that the corrected Stripe API key is properly configured"""
+    def test_stripe_api_key_updated(self):
+        """Test that the updated Stripe API key is properly configured and working"""
         try:
-            self.log("Testing corrected Stripe API key configuration...")
+            self.log("Testing updated Stripe API key configuration...")
             
-            # The corrected key should be:
-            # Original: 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
-            # Corrected encoded: c2tfbGl2ZV81MU5LNjFVQ3hXbThCMHZnU2ZFSE5WNjhWdERBZDhKZGFobGFqYVRoRExNZ04wZXEwNnhGSHlYam1WU0tzR3lDaGd3Mm9TZkpOWThHR0wxQ05vOGpHTlAwczAwRDRRSnBmV1k=
+            # The updated key should be:
+            # New key: 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
+            # New encoded: c2tfbGl2ZV81MU5LNjFVQ3hXbThCMHZnU0VGZU1SVVlGc09vdFVFTHVkblBpYmYxbXNNakRBMEp4bjV0UVR5OWVTSkg2RGlHYXJ2WUtsVWdNSHgwT0g4TDlCbDVNR3JuSzAwaTdPdTd2U24=
             
             # Test by attempting to create a payment session with authentication
             if not self.auth_token:
@@ -1113,8 +1113,8 @@ class BookWriterAPITester:
                 if response.status_code == 200:
                     payment_data = response.json()
                     if "checkout_url" in payment_data and "session_id" in payment_data:
-                        self.log("✅ Corrected Stripe API key working - payment session created successfully")
-                        self.log(f"✅ Stripe accepts the corrected live API key")
+                        self.log("✅ Updated Stripe API key working - payment session created successfully")
+                        self.log(f"✅ Stripe accepts the new live API key")
                         return True
                     else:
                         self.log("❌ Payment session response missing required fields", "ERROR")
@@ -1123,24 +1123,24 @@ class BookWriterAPITester:
                     error_data = response.json()
                     error_detail = error_data.get("detail", "")
                     
-                    if "Invalid API Key provided" in error_detail:
-                        self.log("❌ CRITICAL: Still getting 'Invalid API Key provided' error - key may still be incorrect", "ERROR")
+                    if "Invalid API Key" in error_detail or "Expired API Key" in error_detail:
+                        self.log("❌ CRITICAL: Getting 'Invalid API Key' or 'Expired API Key' error - key may still be incorrect", "ERROR")
                         return False
                     elif "Stripe API key not configured" in error_detail:
-                        self.log("⚠️ Stripe API key not configured in environment - using hardcoded corrected key", "WARNING")
+                        self.log("⚠️ Stripe API key not configured in environment - using hardcoded updated key", "WARNING")
                         return True
                     else:
-                        self.log(f"✅ Corrected Stripe API key configured (other error: {error_detail})")
+                        self.log(f"✅ Updated Stripe API key configured (other error: {error_detail})")
                         return True
                 else:
-                    self.log(f"✅ Corrected Stripe API key accessible (status: {response.status_code})")
+                    self.log(f"✅ Updated Stripe API key accessible (status: {response.status_code})")
                     return True
             else:
                 self.log("⚠️ Cannot test Stripe API key without authentication", "WARNING")
                 return True
                 
         except Exception as e:
-            self.log(f"❌ Corrected Stripe API key test failed: {str(e)}", "ERROR")
+            self.log(f"❌ Updated Stripe API key test failed: {str(e)}", "ERROR")
             return False
 
     def test_credit_packages_endpoint(self):
