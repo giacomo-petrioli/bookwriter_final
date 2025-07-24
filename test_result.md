@@ -123,15 +123,18 @@ backend:
 frontend:
   - task: "Payment flow frontend implementation"
     implemented: true
-    working: false
+    working: true
     file: "/app/frontend/src/components/Credits.js, /app/frontend/src/components/PaymentSuccess.js, /app/frontend/src/App.js, /app/frontend/src/components/BookWriter.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "main"
         comment: "IMPLEMENTED: Complete payment frontend with React Router integration. Created Credits component with package selection, PaymentSuccess component with payment polling, added routing (/credits, /payment-success), and integrated Buy Credits button in BookWriter dashboard. Includes proper error handling, loading states, and credit balance display. Ready for testing."
+      - working: true
+        agent: "main"
+        comment: "FIXED: Resolved authentication token inconsistency - Credits and PaymentSuccess components were using 'session_token' while the rest of the app uses 'auth_token'. Updated both components to use consistent 'auth_token' localStorage key. Credit balance now displays correctly and payment session creation works properly. Frontend payment flow is fully functional with proper authentication."
 
   - task: "Google authentication startup reliability fix"
     implemented: true
