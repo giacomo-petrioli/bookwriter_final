@@ -1609,7 +1609,7 @@ async def stripe_webhook(request: Request):
             raise HTTPException(status_code=400, detail="Missing Stripe signature")
         
         # Initialize Stripe checkout
-        stripe_api_key = os.environ.get('STRIPE_API_KEY')
+        stripe_api_key = get_stripe_key()
         if not stripe_api_key:
             raise HTTPException(status_code=500, detail="Stripe API key not configured")
         
