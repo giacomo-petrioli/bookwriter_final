@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [backendReady, setBackendReady] = useState(false);
 
-  const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+  const API_URL = 'https://9d11d4db-9c50-475a-af20-eb678e6827a1.preview.emergentagent.com';
 
   // Backend health check with retry logic
   const checkBackendHealth = async (maxRetries = 5, delay = 1000) => {
