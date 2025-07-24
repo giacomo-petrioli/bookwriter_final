@@ -39,7 +39,6 @@ from typing import Dict
 import base64
 
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
 
 # Secure Stripe configuration (encoded to hide from plain text)
 def get_stripe_key():
