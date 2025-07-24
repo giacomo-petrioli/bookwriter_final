@@ -15,7 +15,6 @@ from emergentintegrations.llm.chat import LlmChat, UserMessage, FileContentWithM
 import httpx
 import secrets
 import asyncio
-import base64
 import tempfile
 import io
 from reportlab.lib.pagesizes import letter, A4
