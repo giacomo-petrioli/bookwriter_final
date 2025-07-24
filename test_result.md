@@ -104,6 +104,32 @@
 
 user_problem_statement: "Build a web app that helps users write entire books with AI. The app should guide users through creating book projects, generating AI outlines, and writing chapters with Gemini AI assistance. CONTINUATION REQUEST: Fix several issues - app crashes after outline generation but outline is still created, need loading screens during generation, HTML code blocks appearing in edited text, export book and save chapter buttons not working, and poor text formatting with everything attached without proper spacing. NEW CONTINUATION REQUEST: 1 want to use Gemini 2.5 Flash-Lite instead of the model i use now, i want the user to be able to download the book in pdf or docx format and not only in html, i want the user to be able to choose between more styles, i want the prompt to be better optimized to get better result, and make sure that in each chapter is present the chapter name at the start of it. LATEST CONTINUATION REQUEST: 1) Maintain consistent point of view (avoid switching between first-person and third-person) 2) Improve language naturalness, especially in other languages like Italian 3) Optimize PDF and DOCX export speed and formatting 4) Include only title and table of contents in exports (remove outline section) 5) Fix Chapter 1 editor bug where content appears empty initially 6) Separate demo book from main page - create dedicated section for user's books. NEWEST CONTINUATION REQUEST: Refine and enhance literary content by addressing critical issues: lack of stylistic variety in dialogue and scenes, heavy descriptions with stiff language, generic chapter titles, characters speaking in same register as narrator, unnatural dialogue, narrative lacks balance between poetic and concrete scenes, emotionally artificial narration, and poor visual structure. CURRENT CONTINUATION REQUEST: Fix formatting consistency between PDF/DOCX exports, enable outline editing, improve export button placement, fix page scroll bug, enhance logo visibility, and implement additional authentication methods (email/password, Google, GitHub). LATEST CONTINUATION REQUEST: Finish the Google OAuth authentication implementation with provided credentials. CURRENT CONTINUATION REQUEST: Remove the logo from the dashboard and make the dashboard look more clean and more modern, professional and beautiful but include also all the most important info about the site, make also the login with google account better and add the email and password login method. NEW CONTINUATION REQUEST: remove the logo from the main page, and when logging in from the home page, after i log in with my email i get still taken to the home page and not the actual app, fix this things. LATEST CONTINUATION REQUEST: after i click generate book i got sent to a page where it says that that page hasn't been created yet, create, i think it has already been created but with a different style, fix that. NEWEST CONTINUATION REQUEST: the generate all chapters button doesn't work, in addiction when editing the outline i can't see the text because it is white over white, fix that, the Writing & Editing write is of a similar color of the bar so it difficult to read, the editing chapter window is a bit longer than its container so it overflow from the bottom, in addiction fix the fact that when clicking generate all the chapters you not remain in the same page but add a bit of loading bar or something to let the user know at which point is the work. CURRENT CONTINUATION REQUEST: many times when i run for the first time the web app i have the same problem, the google account auth doesn't work and i got sent to home page because it fails, fix this error and make sure that each time i start the web app the google auth works fine and i will never get this error anymore in the future. LATEST CONTINUATION REQUEST: implement a payment method to buy the credits like stripe or others"
 
+backend:
+  - task: "Stripe payment integration for credit purchases"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTED: Complete Stripe payment integration with emergentintegrations library. Added payment models (PaymentTransaction), fixed credit packages (Small: 10 credits for €5, Medium: 25 credits for €10, Large: 50 credits for €20), implemented payment endpoints (/api/credits/packages, /api/payments/create-session, /api/payments/status/{session_id}, /api/webhook/stripe), and webhook handling. Added security measures where packages and prices are defined server-side only. Ready for testing."
+
+frontend:
+  - task: "Payment flow frontend implementation"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/Credits.js, /app/frontend/src/components/PaymentSuccess.js, /app/frontend/src/App.js, /app/frontend/src/components/BookWriter.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTED: Complete payment frontend with React Router integration. Created Credits component with package selection, PaymentSuccess component with payment polling, added routing (/credits, /payment-success), and integrated Buy Credits button in BookWriter dashboard. Includes proper error handling, loading states, and credit balance display. Ready for testing."
+
   - task: "Google authentication startup reliability fix"
     implemented: true
     working: true
