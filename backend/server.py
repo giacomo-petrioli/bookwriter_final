@@ -1466,7 +1466,7 @@ async def create_payment_session(request: PaymentPackageRequest, current_user: U
         package = CREDIT_PACKAGES[request.package_id]
         
         # Initialize Stripe checkout
-        stripe_api_key = os.environ.get('STRIPE_API_KEY')
+        stripe_api_key = get_stripe_key()
         if not stripe_api_key:
             raise HTTPException(status_code=500, detail="Stripe API key not configured")
         
