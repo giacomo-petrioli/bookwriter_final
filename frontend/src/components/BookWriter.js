@@ -198,7 +198,7 @@ const BookWriter = () => {
   const loadProject = async (projectId) => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API}/projects/${projectId}`);
+      const response = await makeAuthenticatedRequest('GET', `${API}/projects/${projectId}`);
       setCurrentProject(response.data);
       setOutline(response.data.outline || "");
       setAllChapters(response.data.chapters_content || {});
