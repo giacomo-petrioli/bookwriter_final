@@ -4300,26 +4300,41 @@ def test_backend_book_creation_workflow(self):
         return False
 
 def main():
-    """Main function to run backend book creation workflow tests"""
+    """Main function to run Stripe payment integration tests"""
     tester = BookWriterAPITester()
     
-    print("🚀 Starting Backend Book Creation Workflow Testing...")
+    print("🚀 Starting Stripe Payment Integration Testing...")
     print(f"Backend URL: {BACKEND_URL}")
     print("=" * 80)
     
-    # Test the backend components that support book creation workflow
-    workflow_success = tester.test_backend_book_creation_workflow()
+    # First, ensure we have authentication for protected endpoints
+    print("Setting up authentication for payment tests...")
+    auth_success = tester.test_email_password_registration()
+    if not auth_success:
+        print("⚠️ Authentication setup failed, trying login...")
+        auth_success = tester.test_email_password_login()
+    
+    if auth_success:
+        print("✅ Authentication setup successful")
+    else:
+        print("⚠️ Authentication setup failed - some tests may be limited")
     
     print("\n" + "=" * 80)
     
-    if workflow_success:
-        print("🎉 ALL BACKEND WORKFLOW TESTS PASSED!")
-        print("✅ Backend book creation workflow is fully functional")
-        print("✅ Backend supports frontend text input functionality properly")
+    # Test the Stripe payment integration
+    payment_success = tester.test_stripe_payment_integration_comprehensive()
+    
+    print("\n" + "=" * 80)
+    
+    if payment_success:
+        print("🎉 ALL STRIPE PAYMENT INTEGRATION TESTS PASSED!")
+        print("✅ Stripe payment integration is fully functional")
+        print("✅ Credit management system working properly")
+        print("✅ Payment endpoints properly secured with authentication")
         sys.exit(0)
     else:
-        print("❌ SOME BACKEND WORKFLOW TESTS FAILED!")
-        print("⚠️ Backend book creation workflow needs attention")
+        print("❌ SOME STRIPE PAYMENT INTEGRATION TESTS FAILED!")
+        print("⚠️ Stripe payment integration needs attention")
         sys.exit(1)
 
 if __name__ == "__main__":
