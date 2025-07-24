@@ -34,7 +34,7 @@ const PaymentSuccess = () => {
     }
 
     try {
-      const token = localStorage.getItem('session_token');
+      const token = localStorage.getItem('auth_token');
       const response = await axios.get(
         `${API_URL}/api/payments/status/${sessionId}`,
         {
