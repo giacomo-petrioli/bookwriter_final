@@ -1974,7 +1974,7 @@ async def generate_chapter(request: ChapterRequest, current_user: User = Depends
         
         # Initialize Gemini chat for this chapter with updated model
         chat = LlmChat(
-            api_key=os.environ.get('GEMINI_API_KEY'),
+            api_key="AIzaSyDYSBIsBp1KEENEDihvS0Nl0A6lGsgzMgM",
             session_id=f"chapter_{project_obj.id}_{request.chapter_number}",
             system_message="You are an expert book writer. You write engaging, well-structured chapters based on outlines. Use HTML formatting for headings, bold text, and structure. Always start each chapter with its proper title."
         ).with_model("gemini", "gemini-2.5-flash-lite-preview-06-17")
