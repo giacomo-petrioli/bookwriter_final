@@ -65,8 +65,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth = OAuth()
 oauth.register(
     name='google',
-    client_id=os.environ['GOOGLE_CLIENT_ID'],
-    client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
+    client_id="758478706314-pn8dh4u94p8mt06qialfdigaqs5glj9s.apps.googleusercontent.com",
+    client_secret="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",
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={
         'scope': 'openid email profile'
