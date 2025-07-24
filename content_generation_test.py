@@ -12,7 +12,7 @@ import re
 from datetime import datetime
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://43336fda-caff-40cd-a722-a58a0bb9eab7.preview.emergentagent.com/api"
+BACKEND_URL = "https://ce40edb2-6fe4-45bf-820f-3010770c069a.preview.emergentagent.com/api"
 
 class ContentGenerationTester:
     def __init__(self):
