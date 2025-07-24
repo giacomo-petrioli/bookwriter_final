@@ -637,29 +637,16 @@ const BookWriter = () => {
 
       setGeneratingOutline(true);
       try {
-        // Get the auth token and set headers explicitly
-        const token = localStorage.getItem('auth_token');
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
-        
-        const response = await axios.post(`${API}/generate-outline`, {
+        const response = await makeAuthenticatedRequest('POST', `${API}/generate-outline`, {
           project_id: currentProject.id
         }, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          timeout: 120000 // 2 minutes timeout
+          timeout: 120000 // 2 minutes timeout for outline generation
         });
         setOutline(response.data.outline);
         setCurrentStep(3);
       } catch (error) {
         console.error("Error generating outline:", error);
-        if (error.response?.status === 401) {
-          console.error("Authentication failed - redirecting to login");
-          logout();
-        } else if (error.response?.data?.detail) {
+        if (error.response?.data?.detail) {
           console.error("API Error:", error.response.data.detail);
         }
       } finally {
