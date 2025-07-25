@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background with gradient -->
+  <rect width="64" height="64" rx="12" fill="url(#logoGradient)" />
+  
+  <!-- Book icon -->
+  <path d="M16.032 8L8 32V56h48v-24L51.032 8H16.032zm5.301 0h21.334L48 26.667V50.667H16V26.667l5.333-18.667zm8 10.667v5.333h10.667v-5.333h-10.667zm0 8v5.333h10.667v-5.333h-10.667z" fill="white"/>
+</svg>
