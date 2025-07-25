@@ -9,7 +9,7 @@ import time
 from datetime import datetime
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://6826ce60-43b4-4dcf-983b-e1a4a4074c3c.preview.emergentagent.com/api"
+BACKEND_URL = "https://e41a5635-7390-4f7c-a1c4-21e882609c38.preview.emergentagent.com/api"
 
 def log(message, level="INFO"):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
