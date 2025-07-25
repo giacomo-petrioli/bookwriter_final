@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <defs>
+    <linearGradient id="appleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background with gradient and rounded corners for iOS -->
+  <rect width="180" height="180" rx="30" fill="url(#appleGradient)" />
+  
+  <!-- Book icon scaled for 180x180 -->
+  <path d="M45.09 22.5L22.5 90V157.5h135v-67.5L144.09 22.5H45.09zm14.91 0h60.0L150 75V135H30V75l15-52.5zm22.5 30v15h30v-15h-30zm0 22.5v15h30v-15h-30z" fill="white"/>
+</svg>
