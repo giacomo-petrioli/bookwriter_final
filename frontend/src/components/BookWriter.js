@@ -819,7 +819,7 @@ const BookWriter = () => {
       </div>
     );
 
-    // Step 1-2: Handled by form submission (goes directly to step 3)
+    // Step 1-2: Show loading for outline generation or manual generation option
     if (currentStep <= 2) {
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -832,14 +832,29 @@ const BookWriter = () => {
               {renderProgressSteps()}
               
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-8 shadow-lg">
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">⏳</div>
-                  <h2 className="text-2xl font-bold text-white mb-4">Generating Your Book Outline</h2>
-                  <p className="text-gray-300 mb-6">Please wait while we create a comprehensive outline for your book...</p>
-                  <div className="w-full bg-white/20 rounded-full h-2 max-w-md mx-auto">
-                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                {generatingOutline ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">⏳</div>
+                    <h2 className="text-2xl font-bold text-white mb-4">Generating Your Book Outline</h2>
+                    <p className="text-gray-300 mb-6">Please wait while we create a comprehensive outline for your book...</p>
+                    <div className="w-full bg-white/20 rounded-full h-2 max-w-md mx-auto">
+                      <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">📝</div>
+                    <h2 className="text-2xl font-bold text-white mb-4">Ready to Generate Outline</h2>
+                    <p className="text-gray-300 mb-6">Click below to generate a comprehensive outline for your book.</p>
+                    <button
+                      onClick={generateOutline}
+                      disabled={generatingOutline}
+                      className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 disabled:opacity-50"
+                    >
+                      {generatingOutline ? "Generating..." : "Generate Outline"}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
