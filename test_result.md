@@ -118,7 +118,7 @@ backend:
         comment: "IDENTIFIED ISSUE: App was getting stuck on loading screen after clicking 'Create Book Project'. The problem was that after project creation, the app was setting currentStep to 2 but step 2 only showed a loading screen without actually triggering outline generation."
       - working: true
         agent: "main"
-        comment: "FIXED: Updated both handleFormSubmit and handleFormSubmitDirect functions to automatically generate outline after project creation. If outline generation succeeds, app goes directly to step 3 (outline review). If it fails, app stays on step 2 with manual generation option. Also updated step 2 UI to show either loading state or manual generation button based on outline generation status."
+        comment: "FIXED: Updated both handleFormSubmit and handleFormSubmitDirect functions to automatically generate outline after project creation. If outline generation succeeds, app goes directly to step 3 (outline review). If it fails, app stays on step 2 with manual generation option. Also updated step 2 UI to show either loading state or manual generation button based on outline generation status. ADDITIONAL FIX: Removed dual loading states issue from App.js - eliminated redundant appReady state that was causing infinite loading screen. Now AuthContext is the single source of truth for app initialization."
 
   - task: "Stripe payment integration for credit purchases"
     implemented: true
