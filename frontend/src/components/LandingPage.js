@@ -518,7 +518,7 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-white/10">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             <div className="col-span-2">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-xl flex items-center justify-center">
@@ -544,17 +544,6 @@ const LandingPage = () => {
                 <div>Professional Export</div>
                 <div>Rich Text Editor</div>
                 <div>Credit System</div>
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-semibold mb-4">Support</h4>
-              <div className="space-y-2 text-gray-300 text-sm">
-                <div>Help Center</div>
-                <div>Writing Guides</div>
-                <div>AI Best Practices</div>
-                <div>Export Formats</div>
-                <div>Pricing FAQ</div>
               </div>
             </div>
           </div>
