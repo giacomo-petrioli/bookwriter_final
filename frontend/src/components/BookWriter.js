@@ -196,7 +196,23 @@ const BookWriter = () => {
       setLoading(true);
       const response = await makeAuthenticatedRequest('POST', `${API}/projects`, formData);
       setCurrentProject(response.data);
-      setCurrentStep(2);
+      
+      // Immediately start outline generation after project creation
+      const project = response.data;
+      try {
+        const outlineResponse = await makeAuthenticatedRequest('POST', `${API}/generate-outline`, {
+          project_id: project.id
+        }, {
+          timeout: 120000 // 2 minutes timeout for outline generation
+        });
+        setOutline(outlineResponse.data.outline);
+        setCurrentStep(3); // Go directly to outline review
+      } catch (outlineError) {
+        console.error("Error generating outline:", outlineError);
+        // If outline generation fails, go to step 2 with manual generation option
+        setCurrentStep(2);
+      }
+      
       setCurrentView('writing');
       await loadProjects();
       await loadUserStats(); // Refresh stats
