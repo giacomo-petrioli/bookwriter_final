@@ -234,7 +234,7 @@ const BookWriter = () => {
       setCurrentProject(response.data);
       setOutline(response.data.outline || "");
       setAllChapters(response.data.chapters_content || {});
-      setCurrentStep(response.data.outline ? 3 : 2);
+      setCurrentStep(4); // Go directly to writing interface
       setCurrentView('writing');
     } catch (error) {
       console.error("Error loading project:", error);
