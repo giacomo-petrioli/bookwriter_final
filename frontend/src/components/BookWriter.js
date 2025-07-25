@@ -477,7 +477,7 @@ const BookWriter = () => {
               <div className="bg-gradient-to-br from-indigo-500/20 to-purple-500/20 backdrop-blur-sm rounded-2xl border border-indigo-400/30 p-6 shadow-lg">
                 <h3 className="text-lg font-bold text-white mb-4 flex items-center">
                   <span className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center mr-3">
-                    <span className="text-white">💳</span>
+                    <span className="text-white text-xl">₵</span>
                   </span>
                   Credits
                 </h3>
