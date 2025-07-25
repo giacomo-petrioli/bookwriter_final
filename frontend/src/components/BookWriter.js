@@ -610,24 +610,6 @@ const BookWriter = () => {
                     </div>
                     
                     <div className="flex gap-3">
-                      {/* Show Edit Book if chapters exist, otherwise Generate All Chapters */}
-                      {allChapters && Object.keys(allChapters).length > 0 ? (
-                        <button
-                          onClick={editBook}
-                          className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg font-medium hover:from-green-600 hover:to-teal-600 transition-all duration-200"
-                        >
-                          Edit Book
-                        </button>
-                      ) : (
-                        <button
-                          onClick={generateAllChapters}
-                          disabled={loading || generatingAllChapters}
-                          className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg font-medium hover:from-green-600 hover:to-teal-600 transition-all duration-200 disabled:opacity-50"
-                        >
-                          {generatingAllChapters ? "Generating..." : "Generate All Chapters"}
-                        </button>
-                      )}
-                      
                       <button
                         onClick={() => loadProject(project.id)}
                         className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all duration-200"
