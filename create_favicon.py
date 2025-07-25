@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+"""
+Create favicon files for BookCraft AI
+"""
+
+# For simplicity, I'll create the ICO file as a simplified version
+# In a real production environment, you'd use proper image generation tools
+
+# Create a simple HTML preview file to test the favicon
+html_content = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookCraft AI - Favicon Test</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .favicon-preview { display: flex; align-items: center; gap: 10px; margin: 20px 0; }
+        .favicon-preview img { width: 32px; height: 32px; }
+    </style>
+</head>
+<body>
+    <h1>BookCraft AI - Favicon Test</h1>
+    <div class="favicon-preview">
+        <img src="/favicon.svg" alt="BookCraft AI Logo">
+        <span>Your tab should show the BookCraft AI logo</span>
+    </div>
+    <p>Check the browser tab to see the favicon in action!</p>
+</body>
+</html>
+"""
+
+with open('/app/frontend/public/favicon-test.html', 'w') as f:
+    f.write(html_content)
+
+print("Created favicon test file!")
