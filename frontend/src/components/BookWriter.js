@@ -740,18 +740,22 @@ const BookWriter = () => {
 
       setSavingChapter(true);
       try {
-        await axios.put(`${API}/update-chapter`, {
+        await makeAuthenticatedRequest('PUT', `${API}/update-chapter`, {
           project_id: currentProject.id,
           chapter_number: selectedChapter,
-          chapter_content: editableChapter
+          content: editableChapter
         });
 
         setAllChapters(prev => ({
           ...prev,
           [selectedChapter]: editableChapter
         }));
+        
+        // Show success message
+        console.log("Chapter saved successfully!");
       } catch (error) {
         console.error("Error saving chapter:", error);
+        alert("Failed to save chapter. Please try again.");
       } finally {
         setSavingChapter(false);
       }
