@@ -10,8 +10,8 @@ import time
 import sys
 from datetime import datetime
 
-# Get backend URL from frontend .env
-BACKEND_URL = "https://e41a5635-7390-4f7c-a1c4-21e882609c38.preview.emergentagent.com/api"
+# Get backend URL - using localhost for internal testing
+BACKEND_URL = "http://localhost:8001/api"
 
 class BookWriterAPITester:
     def __init__(self):
