@@ -73,7 +73,7 @@ const Credits = () => {
       <div className="text-center">
         <h3 className="text-xl font-bold text-white mb-2">{packageData.name}</h3>
         <div className="text-3xl font-bold text-cyan-400 mb-2">
-          €{packageData.price.toFixed(2)}
+          ${packageData.price.toFixed(2)}
         </div>
         <div className="text-lg text-gray-300 mb-3">
           {packageData.credits} Credits
