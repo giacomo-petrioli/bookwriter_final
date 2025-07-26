@@ -2623,6 +2623,9 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
         
         content.append(PageBreak())
         
+        # Check if user has made purchases for watermark
+        has_purchased = await user_has_made_purchase(current_user.id)
+        
         # Chapters with improved formatting
         if project_obj.chapters_content:
             for i in range(1, project_obj.chapters + 1):
@@ -2630,11 +2633,15 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
                 if chapter_content:
                     # Get chapter title
                     chapter_title = chapter_titles.get(i, f"Chapter {i}")
+                    
+                    # Ensure consistent formatting
+                    formatted_content = ensure_consistent_chapter_formatting(chapter_content, i, chapter_title)
+                    
                     content.append(Paragraph(f"Chapter {i}: {chapter_title}", chapter_title_style))  # Standardized format
                     content.append(Spacer(1, 20))
                     
                     # Process HTML content for better formatting
-                    processed_content = process_html_for_pdf(chapter_content, chapter_body_style, dialogue_style)
+                    processed_content = process_html_for_pdf(formatted_content, chapter_body_style, dialogue_style)
                     content.extend(processed_content)
                 else:
                     content.append(Paragraph(f"Chapter {i}", chapter_title_style))
@@ -2643,6 +2650,9 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
                 
                 if i < project_obj.chapters:  # Don't add page break after last chapter
                     content.append(PageBreak())
+        
+        # Add watermark if user hasn't purchased
+        content = add_watermark_to_pdf_content(content, has_purchased)
         
         # Build PDF
         doc.build(content)
