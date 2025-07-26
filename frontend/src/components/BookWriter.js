@@ -955,7 +955,9 @@ const BookWriter = () => {
                         <button
                           onClick={() => {
                             setEditingOutline(false);
-                            setEditableOutline(outline);
+                            // Reset structured chapters to original state
+                            const chapters = parseOutlineToChapters(outline);
+                            setStructuredChapters(chapters);
                           }}
                           className="px-4 py-2 border border-white/30 text-gray-300 rounded-lg hover:bg-white/10 transition-colors"
                         >
