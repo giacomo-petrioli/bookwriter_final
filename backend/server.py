@@ -2985,81 +2985,110 @@ async def export_book_docx(project_id: str, current_user: User = Depends(get_cur
 
 def process_html_for_docx(html_content, doc, body_style, dialogue_style):
     """Process HTML content for better DOCX formatting"""
+    if not html_content or not html_content.strip():
+        return
+    
     # Apply asterisk formatting fixes
     html_content = process_asterisk_formatting(html_content)
     
-    # Debug: print raw content to understand the structure
-    print(f"DEBUG DOCX: Raw HTML content length: {len(html_content)}")
-    print(f"DEBUG DOCX: Raw HTML content preview: {html_content[:200]}...")
-    
-    # Clean content but preserve structure better
-    # Don't remove h2 tags completely - just extract them
-    h2_matches = re.findall(r'<h2[^>]*>(.*?)</h2>', html_content, re.IGNORECASE)
+    # Remove any remaining chapter headers since we add them separately in the main export function
     cleaned_content = re.sub(r'<h2[^>]*>.*?</h2>', '', html_content, flags=re.IGNORECASE)
     
-    # Split by different patterns to get all content
+    # Split content into paragraphs using multiple approaches to catch all content
     paragraphs = []
     
-    # First, split by paragraph tags
-    p_splits = re.split(r'<p[^>]*>|</p>', cleaned_content)
+    # Method 1: Split by <p> tags
+    p_sections = re.split(r'<p[^>]*>(.*?)</p>', cleaned_content, flags=re.DOTALL)
+    for i, section in enumerate(p_sections):
+        if i % 2 == 1 and section.strip():  # Odd indices contain paragraph content
+            paragraphs.append(section.strip())
     
-    # Also split by line breaks for content that might not be in <p> tags
-    for split_content in p_splits:
-        if split_content.strip():
-            # Further split by double line breaks
-            line_splits = split_content.split('\n\n')
-            paragraphs.extend(line_splits)
+    # Method 2: If we didn't get good paragraphs, try splitting by double line breaks
+    if not paragraphs or len(paragraphs) < 2:
+        paragraphs = []
+        # Remove HTML tags first and split by line breaks
+        text_only = re.sub(r'<[^>]+>', '', cleaned_content)
+        text_only = unescape(text_only)
+        
+        # Split by double line breaks
+        parts = text_only.split('\n\n')
+        for part in parts:
+            part = part.strip()
+            if part and len(part) > 20:  # Only include substantial paragraphs
+                paragraphs.append(part)
     
-    # Also split by single line breaks if content is not properly structured
-    if not paragraphs or all(len(p.strip()) < 50 for p in paragraphs):
-        line_splits = cleaned_content.split('\n')
-        paragraphs.extend(line_splits)
+    # Method 3: If still no good content, split by single line breaks  
+    if not paragraphs:
+        text_only = re.sub(r'<[^>]+>', '', cleaned_content)
+        text_only = unescape(text_only)
+        lines = text_only.split('\n')
+        current_paragraph = []
+        
+        for line in lines:
+            line = line.strip()
+            if line:
+                current_paragraph.append(line)
+            elif current_paragraph:
+                full_paragraph = ' '.join(current_paragraph)
+                if len(full_paragraph) > 20:  # Only substantial content
+                    paragraphs.append(full_paragraph)
+                current_paragraph = []
+        
+        # Add remaining paragraph
+        if current_paragraph:
+            full_paragraph = ' '.join(current_paragraph)
+            if len(full_paragraph) > 20:
+                paragraphs.append(full_paragraph)
     
-    print(f"DEBUG DOCX: Found {len(paragraphs)} paragraphs")
-    
-    for paragraph in paragraphs:
-        if paragraph.strip():
-            # Remove HTML tags but preserve line breaks and bold formatting
-            clean_text = re.sub(r'<br\s*/?>', '\n', paragraph)
+    # Convert paragraphs to DOCX content
+    for paragraph_text in paragraphs:
+        if paragraph_text.strip():
+            # Create paragraph
+            doc_paragraph = doc.add_paragraph()
             
-            # Handle bold formatting by tracking it separately
-            bold_parts = []
-            temp_text = clean_text
+            # Check if it's dialogue (contains quotation marks)
+            if '"' in paragraph_text or '"' in paragraph_text or '"' in paragraph_text or "'" in paragraph_text:
+                doc_paragraph.style = dialogue_style
+            else:
+                doc_paragraph.style = body_style
             
-            # Find all bold sections
-            for match in re.finditer(r'<strong>(.*?)</strong>', temp_text):
-                bold_parts.append((match.start(), match.end(), match.group(1)))
+            # Handle bold formatting within the paragraph
+            # Find bold sections and create runs accordingly
+            bold_pattern = r'<strong>(.*?)</strong>'
+            current_pos = 0
             
-            # Remove HTML tags
-            clean_text = re.sub(r'<[^>]+>', '', temp_text).strip()
-            clean_text = unescape(clean_text)
+            for match in re.finditer(bold_pattern, paragraph_text):
+                # Add text before bold section
+                if match.start() > current_pos:
+                    before_text = paragraph_text[current_pos:match.start()]
+                    before_text = re.sub(r'<[^>]+>', '', before_text)
+                    before_text = unescape(before_text)
+                    if before_text:
+                        doc_paragraph.add_run(before_text)
+                
+                # Add bold text
+                bold_text = match.group(1)
+                bold_text = re.sub(r'<[^>]+>', '', bold_text)
+                bold_text = unescape(bold_text)
+                if bold_text:
+                    bold_run = doc_paragraph.add_run(bold_text)
+                    bold_run.bold = True
+                
+                current_pos = match.end()
             
-            print(f"DEBUG DOCX: Processing paragraph: {clean_text[:100]}...")
+            # Add remaining text after last bold section
+            if current_pos < len(paragraph_text):
+                remaining_text = paragraph_text[current_pos:]
+                remaining_text = re.sub(r'<[^>]+>', '', remaining_text)
+                remaining_text = unescape(remaining_text)
+                if remaining_text:
+                    doc_paragraph.add_run(remaining_text)
             
-            if clean_text:
-                # Split by line breaks for better formatting
-                lines = clean_text.split('\n')
-                for line in lines:
-                    line = line.strip()
-                    if line:
-                        # Create paragraph
-                        doc_paragraph = doc.add_paragraph()
-                        
-                        # Check if it's dialogue (contains quotation marks)
-                        if '"' in line or '"' in line or '"' in line or "'" in line:
-                            doc_paragraph.style = dialogue_style
-                        else:
-                            doc_paragraph.style = body_style
-                        
-                        # Handle bold formatting within the line
-                        # For simplicity, if the original had <strong> tags, make the whole line bold
-                        run = doc_paragraph.add_run(line)
-                        if '<strong>' in paragraph and '</strong>' in paragraph:
-                            # Check if this line contains bold content
-                            for bold_start, bold_end, bold_content in bold_parts:
-                                if bold_content.strip() in line:
-                                    run.bold = True
-                                    break
+            # If no bold formatting found, add the whole paragraph
+            if not re.search(bold_pattern, paragraph_text):
+                clean_text = re.sub(r'<[^>]+>', '', paragraph_text)
+                clean_text = unescape(clean_text)
+                doc_paragraph.add_run(clean_text)
 
 @api_router.put("/update-outline")
 async def update_outline(request: dict):
