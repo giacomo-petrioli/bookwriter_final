@@ -2140,6 +2140,114 @@ async def update_chapter(request: ChapterUpdate, current_user: User = Depends(ge
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating chapter: {str(e)}")
+async def user_has_made_purchase(user_id: str) -> bool:
+    """Check if user has made any credit purchases"""
+    try:
+        purchase_transaction = await db.credit_transactions.find_one({
+            "user_id": user_id,
+            "transaction_type": "credit_purchase"
+        })
+        return purchase_transaction is not None
+    except Exception:
+        return False
+
+def process_asterisk_formatting(text: str) -> str:
+    """Process asterisk formatting - convert to bold or remove"""
+    # Convert single asterisks around words to bold HTML
+    text = re.sub(r'\*([^*\n]+?)\*', r'<strong>\1</strong>', text)
+    # Convert double asterisks to bold HTML  
+    text = re.sub(r'\*\*([^*\n]+?)\*\*', r'<strong>\1</strong>', text)
+    # Remove any remaining standalone asterisks
+    text = re.sub(r'\*+', '', text)
+    return text
+
+def ensure_consistent_chapter_formatting(content: str, chapter_num: int, chapter_title: str = None) -> str:
+    """Ensure consistent chapter formatting across all exports"""
+    # Clean existing content
+    content = process_asterisk_formatting(content)
+    
+    # Ensure chapter starts with proper title if not already present
+    if chapter_title and not content.strip().startswith(f'<h2>'):
+        content = f'<h2>Chapter {chapter_num}: {chapter_title}</h2>\n\n{content}'
+    elif not content.strip().startswith(f'<h2>Chapter {chapter_num}'):
+        content = f'<h2>Chapter {chapter_num}</h2>\n\n{content}'
+    
+    # Ensure proper paragraph structure
+    content = re.sub(r'\n\n+', '</p>\n<p>', content)
+    if not content.strip().startswith('<p>'):
+        # Find first non-h2 content and wrap in paragraph
+        parts = content.split('</h2>')
+        if len(parts) > 1:
+            header_part = parts[0] + '</h2>'
+            body_part = parts[1].strip()
+            if body_part and not body_part.startswith('<p>'):
+                body_part = f'<p>{body_part}'
+            if body_part and not body_part.endswith('</p>'):
+                body_part = f'{body_part}</p>'
+            content = f'{header_part}\n{body_part}'
+    
+    return content
+
+def add_watermark_to_pdf_content(content: list, has_purchased: bool):
+    """Add watermark to PDF content if user hasn't purchased"""
+    if not has_purchased:
+        # Add watermark style
+        from reportlab.lib.styles import getSampleStyleSheet
+        styles = getSampleStyleSheet()
+        watermark_style = ParagraphStyle(
+            'Watermark',
+            parent=styles['Normal'],
+            fontSize=8,
+            textColor=HexColor('#cccccc'),
+            alignment=1,  # Center alignment
+            spaceBefore=6,
+            spaceAfter=6
+        )
+        
+        # Insert watermark after every few paragraphs
+        watermarked_content = []
+        for i, item in enumerate(content):
+            watermarked_content.append(item)
+            # Add watermark every 5 content items
+            if i > 0 and i % 5 == 0:
+                watermarked_content.append(
+                    Paragraph("Generated with BookCraft AI - Purchase credits to remove this watermark", watermark_style)
+                )
+        return watermarked_content
+    return content
+
+def add_watermark_to_docx(doc, has_purchased: bool):
+    """Add watermark to DOCX document if user hasn't purchased"""
+    if not has_purchased:
+        from docx.enum.style import WD_STYLE_TYPE
+        
+        # Create watermark style
+        styles = doc.styles
+        try:
+            watermark_style = styles.add_style('WatermarkStyle', WD_STYLE_TYPE.PARAGRAPH)
+            watermark_style.font.name = 'Times New Roman'
+            watermark_style.font.size = Inches(0.11)  # 8pt
+            watermark_style.font.color.rgb = RGBColor(204, 204, 204)  # Light gray
+            watermark_style.paragraph_format.alignment = 1  # Center
+        except:
+            # Style might already exist, get it
+            watermark_style = styles['WatermarkStyle']
+        
+        # Add watermark paragraphs throughout document
+        paragraphs = doc.paragraphs
+        paragraph_count = len(paragraphs)
+        
+        # Insert watermarks at regular intervals
+        for i in range(5, paragraph_count, 10):  # Every 10 paragraphs starting from 5th
+            try:
+                # Insert watermark paragraph
+                watermark_p = paragraphs[i].insert_paragraph_before()
+                watermark_p.style = watermark_style
+                watermark_p.add_run("Generated with BookCraft AI - Purchase credits to remove this watermark")
+            except:
+                # If insertion fails, continue without watermark at this position
+                continue
+
 
 @api_router.get("/export-book/{project_id}")
 async def export_book(project_id: str, current_user: User = Depends(get_current_user)):
