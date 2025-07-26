@@ -704,6 +704,25 @@ const BookWriter = () => {
       }
     }, [selectedChapter, allChapters]);
 
+    // Parse outline to structured chapters when outline changes
+    useEffect(() => {
+      if (outline) {
+        const chapters = parseOutlineToChapters(outline);
+        setStructuredChapters(chapters);
+      }
+    }, [outline]);
+
+    // Update a specific chapter in structured chapters
+    const updateChapterData = (chapterNumber, field, value) => {
+      setStructuredChapters(prev => 
+        prev.map(chapter => 
+          chapter.number === chapterNumber 
+            ? { ...chapter, [field]: value }
+            : chapter
+        )
+      );
+    };
+
     const generateOutline = async () => {
       if (!currentProject) return;
 
