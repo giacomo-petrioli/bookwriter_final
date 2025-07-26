@@ -9,7 +9,7 @@ axios.defaults.timeout = 120000; // 2 minutes timeout for individual requests
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
-const BACKEND_URL = 'https://bc34adc4-cefc-4873-aff9-a3a535069d2f.preview.emergentagent.com';
+const BACKEND_URL = 'https://a4a476c4-1ae3-4338-af34-da4cf0f722a1.preview.emergentagent.com';
 const API = `${BACKEND_URL}/api`;
 
 const BookWriter = () => {

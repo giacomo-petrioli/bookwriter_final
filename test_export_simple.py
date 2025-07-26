@@ -8,7 +8,7 @@ import json
 import time
 
 # Backend URL
-BACKEND_URL = "https://bc34adc4-cefc-4873-aff9-a3a535069d2f.preview.emergentagent.com/api"
+BACKEND_URL = "https://a4a476c4-1ae3-4338-af34-da4cf0f722a1.preview.emergentagent.com/api"
 
 def test_export_functionality():
     session = requests.Session()
