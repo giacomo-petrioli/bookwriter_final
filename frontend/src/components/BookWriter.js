@@ -1163,7 +1163,27 @@ const BookWriter = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <UserHeader>
-          <span className="text-white font-medium">Writing & Editing</span>
+          <div className="flex items-center justify-between w-full">
+            <button
+              onClick={() => {
+                setCurrentView('dashboard');
+                setCurrentStep(1);
+                setCurrentProject(null);
+                setOutline("");
+                setAllChapters({});
+              }}
+              className="flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-colors group"
+            >
+              <svg className="w-4 h-4 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="text-gray-300 group-hover:text-white font-medium transition-colors">Back to Dashboard</span>
+            </button>
+            
+            <span className="text-white font-medium">Writing & Editing</span>
+            
+            <div className="w-40"></div> {/* Spacer for centering the title */}
+          </div>
         </UserHeader>
         
         <div className="container mx-auto px-6 py-8">
