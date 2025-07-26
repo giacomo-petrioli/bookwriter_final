@@ -629,10 +629,66 @@ const BookWriter = () => {
     </div>
   );
 
+  // Helper functions for structured outline editing
+  const parseOutlineToChapters = (htmlOutline) => {
+    if (!htmlOutline) return [];
+    
+    // Create a temporary div to parse HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlOutline;
+    
+    const chapters = [];
+    const headings = tempDiv.querySelectorAll('h1, h2, h3');
+    
+    headings.forEach((heading, index) => {
+      const chapterMatch = heading.textContent.match(/Chapter\s+(\d+):\s*(.+)/i);
+      if (chapterMatch) {
+        const chapterNum = parseInt(chapterMatch[1]);
+        const title = chapterMatch[2].trim();
+        
+        // Get description by finding content between this heading and the next
+        let description = "";
+        let nextSibling = heading.nextSibling;
+        const nextHeading = headings[index + 1];
+        
+        while (nextSibling && nextSibling !== nextHeading) {
+          if (nextSibling.nodeType === Node.TEXT_NODE) {
+            description += nextSibling.textContent.trim();
+          } else if (nextSibling.tagName === 'P') {
+            description += nextSibling.textContent.trim() + ' ';
+          }
+          nextSibling = nextSibling.nextSibling;
+        }
+        
+        chapters.push({
+          number: chapterNum,
+          title: title,
+          description: description.trim()
+        });
+      }
+    });
+    
+    return chapters.sort((a, b) => a.number - b.number);
+  };
+
+  const reconstructOutlineFromChapters = (chapters) => {
+    let html = '<h1>Book Outline</h1>\n';
+    
+    chapters.forEach(chapter => {
+      html += `<h2>Chapter ${chapter.number}: ${chapter.title}</h2>\n`;
+      if (chapter.description) {
+        html += `<p>${chapter.description}</p>\n`;
+      }
+    });
+    
+    return html;
+  };
+
   // Comprehensive Writing Interface with Multi-Step Workflow
   const WritingInterface = () => {
     const [editableOutline, setEditableOutline] = useState(outline || "");
     const [editingOutline, setEditingOutline] = useState(false);
+    const [structuredChapters, setStructuredChapters] = useState([]);
     const [selectedChapter, setSelectedChapter] = useState(1);
     const [editableChapter, setEditableChapter] = useState("");
     const [savingChapter, setSavingChapter] = useState(false);
