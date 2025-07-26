@@ -2648,11 +2648,13 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
         # Check if user has made purchases for watermark
         has_purchased = await user_has_made_purchase(current_user.id)
         
-        # Create PDF with custom canvas for watermarks
+        # Create PDF with custom canvas for watermarks if needed
+        def custom_canvas_factory(filename):
+            from reportlab.pdfgen import canvas
+            c = canvas.Canvas(filename, pagesize=A4)
+            return WatermarkCanvas(c, None, has_purchased)
+        
         if not has_purchased:
-            # Use custom canvas that adds watermarks
-            def custom_canvas_factory(canvas, doc):
-                return WatermarkCanvas(canvas, doc, has_purchased)
             doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72, canvasmaker=custom_canvas_factory)
         
         # Chapters with improved formatting
