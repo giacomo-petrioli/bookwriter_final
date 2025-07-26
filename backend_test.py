@@ -1034,7 +1034,199 @@ class BookWriterAPITester:
             self.log(f"❌ Comprehensive email/password authentication test failed: {str(e)}", "ERROR")
             return False
 
-    def test_authentication_system_comprehensive(self):
+    def test_export_functionality_comprehensive(self):
+        """Test all three export formats: HTML, PDF, and DOCX"""
+        try:
+            self.log("=" * 70)
+            self.log("COMPREHENSIVE EXPORT FUNCTIONALITY TESTING")
+            self.log("=" * 70)
+            
+            # Step 1: Authenticate user
+            self.log("Step 1: Authenticating user...")
+            auth_success = self.test_email_password_registration()
+            if not auth_success or not self.auth_token:
+                self.log("❌ Authentication failed - cannot test export functionality", "ERROR")
+                return False
+            
+            # Step 2: Create a test book project
+            self.log("Step 2: Creating test book project...")
+            project_data = {
+                "title": "AI Export Test Book",
+                "description": "A comprehensive test book for export functionality testing",
+                "pages": 50,
+                "chapters": 5,
+                "language": "English",
+                "writing_style": "story"
+            }
+            
+            auth_headers = {'Authorization': f'Bearer {self.auth_token}'}
+            response = self.session.post(f"{self.base_url}/projects", json=project_data, headers=auth_headers)
+            
+            if response.status_code != 200:
+                self.log(f"❌ Project creation failed with status {response.status_code}: {response.text}", "ERROR")
+                return False
+            
+            project = response.json()
+            project_id = project.get("id")
+            if not project_id:
+                self.log("❌ Project ID not returned from creation", "ERROR")
+                return False
+            
+            self.log(f"✅ Created test project: {project.get('title')} (ID: {project_id})")
+            
+            # Step 3: Generate outline for the project
+            self.log("Step 3: Generating outline...")
+            outline_data = {"project_id": project_id}
+            response = self.session.post(f"{self.base_url}/generate-outline", json=outline_data, headers=auth_headers)
+            
+            if response.status_code != 200:
+                self.log(f"❌ Outline generation failed with status {response.status_code}: {response.text}", "ERROR")
+                return False
+            
+            outline_result = response.json()
+            outline_content = outline_result.get("outline", "")
+            if not outline_content:
+                self.log("❌ No outline content generated", "ERROR")
+                return False
+            
+            self.log(f"✅ Generated outline ({len(outline_content)} characters)")
+            
+            # Step 4: Generate at least one chapter
+            self.log("Step 4: Generating Chapter 1...")
+            chapter_data = {"project_id": project_id, "chapter_number": 1}
+            response = self.session.post(f"{self.base_url}/generate-chapter", json=chapter_data, headers=auth_headers)
+            
+            if response.status_code != 200:
+                self.log(f"❌ Chapter generation failed with status {response.status_code}: {response.text}", "ERROR")
+                return False
+            
+            chapter_result = response.json()
+            chapter_content = chapter_result.get("content", "")
+            if not chapter_content:
+                self.log("❌ No chapter content generated", "ERROR")
+                return False
+            
+            self.log(f"✅ Generated Chapter 1 ({len(chapter_content)} characters)")
+            
+            # Step 5: Test HTML Export
+            self.log("Step 5: Testing HTML Export...")
+            response = self.session.get(f"{self.base_url}/export-book/{project_id}", headers=auth_headers)
+            
+            if response.status_code != 200:
+                self.log(f"❌ HTML export failed with status {response.status_code}: {response.text}", "ERROR")
+                return False
+            
+            try:
+                html_data = response.json()
+                html_content = html_data.get("html", "")
+                filename = html_data.get("filename", "")
+                
+                if not html_content:
+                    self.log("❌ HTML export returned empty content", "ERROR")
+                    return False
+                
+                if not filename:
+                    self.log("❌ HTML export missing filename", "ERROR")
+                    return False
+                
+                # Verify HTML content structure
+                if "<html>" not in html_content or "</html>" not in html_content:
+                    self.log("❌ HTML export missing proper HTML structure", "ERROR")
+                    return False
+                
+                if project.get("title") not in html_content:
+                    self.log("❌ HTML export missing book title", "ERROR")
+                    return False
+                
+                self.log(f"✅ HTML Export successful: {len(html_content)} characters, filename: {filename}")
+                
+            except Exception as e:
+                self.log(f"❌ HTML export response parsing failed: {str(e)}", "ERROR")
+                return False
+            
+            # Step 6: Test PDF Export
+            self.log("Step 6: Testing PDF Export...")
+            response = self.session.get(f"{self.base_url}/export-book-pdf/{project_id}", headers=auth_headers)
+            
+            if response.status_code != 200:
+                self.log(f"❌ PDF export failed with status {response.status_code}: {response.text}", "ERROR")
+                return False
+            
+            # Verify PDF response
+            content_type = response.headers.get('content-type', '')
+            if 'application/pdf' not in content_type:
+                self.log(f"❌ PDF export wrong content type: {content_type}", "ERROR")
+                return False
+            
+            pdf_data = response.content
+            if len(pdf_data) < 1000:  # PDF should be at least 1KB
+                self.log(f"❌ PDF export too small: {len(pdf_data)} bytes", "ERROR")
+                return False
+            
+            # Check PDF header
+            if not pdf_data.startswith(b'%PDF-'):
+                self.log("❌ PDF export missing PDF header", "ERROR")
+                return False
+            
+            self.log(f"✅ PDF Export successful: {len(pdf_data)} bytes, content-type: {content_type}")
+            
+            # Step 7: Test DOCX Export
+            self.log("Step 7: Testing DOCX Export...")
+            response = self.session.get(f"{self.base_url}/export-book-docx/{project_id}", headers=auth_headers)
+            
+            if response.status_code != 200:
+                self.log(f"❌ DOCX export failed with status {response.status_code}: {response.text}", "ERROR")
+                return False
+            
+            # Verify DOCX response
+            content_type = response.headers.get('content-type', '')
+            if 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' not in content_type:
+                self.log(f"❌ DOCX export wrong content type: {content_type}", "ERROR")
+                return False
+            
+            docx_data = response.content
+            if len(docx_data) < 1000:  # DOCX should be at least 1KB
+                self.log(f"❌ DOCX export too small: {len(docx_data)} bytes", "ERROR")
+                return False
+            
+            # Check DOCX header (ZIP signature)
+            if not docx_data.startswith(b'PK'):
+                self.log("❌ DOCX export missing ZIP header", "ERROR")
+                return False
+            
+            self.log(f"✅ DOCX Export successful: {len(docx_data)} bytes, content-type: {content_type}")
+            
+            # Step 8: Test authentication protection
+            self.log("Step 8: Testing authentication protection...")
+            
+            # Test without auth token
+            no_auth_response = self.session.get(f"{self.base_url}/export-book/{project_id}")
+            if no_auth_response.status_code != 401:
+                self.log(f"❌ Export endpoints should require authentication but returned {no_auth_response.status_code}", "ERROR")
+                return False
+            
+            self.log("✅ Export endpoints properly protected with authentication")
+            
+            # Summary
+            self.log("\n" + "=" * 70)
+            self.log("EXPORT FUNCTIONALITY TEST RESULTS")
+            self.log("=" * 70)
+            self.log("✅ Authentication: PASSED")
+            self.log("✅ Project Creation: PASSED")
+            self.log("✅ Outline Generation: PASSED")
+            self.log("✅ Chapter Generation: PASSED")
+            self.log("✅ HTML Export: PASSED")
+            self.log("✅ PDF Export: PASSED")
+            self.log("✅ DOCX Export: PASSED")
+            self.log("✅ Authentication Protection: PASSED")
+            self.log("=" * 70)
+            self.log("🎉 ALL EXPORT FUNCTIONALITY TESTS PASSED!")
+            
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Export functionality test failed: {str(e)}", "ERROR")
+            return False
         """Run comprehensive authentication system tests"""
         try:
             self.log("=" * 60)
