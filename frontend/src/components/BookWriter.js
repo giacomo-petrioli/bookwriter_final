@@ -1173,27 +1173,32 @@ const BookWriter = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <UserHeader>
-          <div className="flex items-center justify-between w-full">
+          <div className="flex items-center space-x-6">
+            {/* Back to Dashboard Button */}
             <button
               onClick={navigateBackToDashboard}
-              className="flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-colors group"
+              className="flex items-center space-x-2 px-3 py-2 bg-slate-800/50 hover:bg-slate-700/50 rounded-lg border border-slate-700/50 transition-colors group"
             >
               <svg className="w-4 h-4 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              <span className="text-gray-300 group-hover:text-white font-medium transition-colors">Back to Dashboard</span>
+              <span className="text-gray-300 group-hover:text-white text-sm font-medium transition-colors">Dashboard</span>
             </button>
             
-            <div className="text-center">
-              <span className="text-white font-medium">Writing & Editing</span>
-              {currentProject && (
-                <div className="text-sm text-gray-300 mt-1">
-                  {currentProject.title}
+            {/* Current Project Info */}
+            {currentProject && (
+              <div className="flex items-center space-x-3 px-4 py-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-blue-500/30 rounded-lg">
+                <div className="w-5 h-5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">📚</span>
                 </div>
-              )}
-            </div>
-            
-            <div className="w-40"></div> {/* Spacer for centering the title */}
+                <div>
+                  <div className="text-white text-sm font-medium">Writing & Editing</div>
+                  <div className="text-gray-300 text-xs truncate max-w-48" title={currentProject.title}>
+                    {currentProject.title}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </UserHeader>
         
