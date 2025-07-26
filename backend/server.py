@@ -2706,11 +2706,35 @@ def process_html_for_pdf(html_content, body_style, dialogue_style):
     # Apply asterisk formatting fixes
     html_content = process_asterisk_formatting(html_content)
     
-    # Clean and process content with better HTML parsing
-    cleaned_content = re.sub(r'<h2[^>]*>.*?</h2>', '', html_content)  # Remove h2 tags (already handled)
+    # Debug: print raw content to understand the structure
+    print(f"DEBUG: Raw HTML content length: {len(html_content)}")
+    print(f"DEBUG: Raw HTML content preview: {html_content[:200]}...")
     
-    # Split by paragraph tags more carefully
-    paragraphs = re.split(r'<p[^>]*>|</p>', cleaned_content)
+    # Clean content but preserve structure better
+    # Don't remove h2 tags completely - just extract them
+    h2_matches = re.findall(r'<h2[^>]*>(.*?)</h2>', html_content, re.IGNORECASE)
+    cleaned_content = re.sub(r'<h2[^>]*>.*?</h2>', '', html_content, flags=re.IGNORECASE)
+    
+    # Also try splitting by different paragraph patterns
+    # Split by both <p> tags and line breaks to catch all content
+    paragraphs = []
+    
+    # First, split by paragraph tags
+    p_splits = re.split(r'<p[^>]*>|</p>', cleaned_content)
+    
+    # Also split by line breaks for content that might not be in <p> tags
+    for split_content in p_splits:
+        if split_content.strip():
+            # Further split by double line breaks
+            line_splits = split_content.split('\n\n')
+            paragraphs.extend(line_splits)
+    
+    # Also split by single line breaks if content is not properly structured
+    if not paragraphs or all(len(p.strip()) < 50 for p in paragraphs):
+        line_splits = cleaned_content.split('\n')
+        paragraphs.extend(line_splits)
+    
+    print(f"DEBUG: Found {len(paragraphs)} paragraphs")
     
     for paragraph in paragraphs:
         if paragraph.strip():
@@ -2720,10 +2744,13 @@ def process_html_for_pdf(html_content, body_style, dialogue_style):
             # Handle bold formatting for PDF
             # Convert <strong> tags to reportlab markup
             clean_text = re.sub(r'<strong>(.*?)</strong>', r'<b>\1</b>', clean_text)
+            clean_text = re.sub(r'<b>(.*?)</b>', r'<b>\1</b>', clean_text)  # Keep existing bold
             
-            # Remove other HTML tags
+            # Remove other HTML tags except bold
             clean_text = re.sub(r'<(?!/?b>)[^>]+>', '', clean_text).strip()
             clean_text = unescape(clean_text)
+            
+            print(f"DEBUG: Processing paragraph: {clean_text[:100]}...")
             
             if clean_text:
                 # Split by line breaks for better formatting
@@ -2739,6 +2766,7 @@ def process_html_for_pdf(html_content, body_style, dialogue_style):
                         
                         content.append(Spacer(1, 6))
     
+    print(f"DEBUG: Generated {len(content)} content items for PDF")
     return content
 
 @api_router.get("/export-book-docx/{project_id}")
