@@ -2444,12 +2444,17 @@ async def export_book(project_id: str, current_user: User = Depends(get_current_
         
         # Add chapters with proper formatting
         if project_obj.chapters_content:
+            chapter_titles = extract_chapter_titles(project_obj.outline or "")
             for i in range(1, project_obj.chapters + 1):
                 chapter_content = project_obj.chapters_content.get(str(i), "")
                 if chapter_content:
+                    # Get chapter title and ensure consistent formatting
+                    chapter_title = chapter_titles.get(i, f"Chapter {i}")
+                    formatted_content = ensure_consistent_chapter_formatting(chapter_content, i, chapter_title)
+                    
                     html_content += f"""
         <div class="chapter">
-            {chapter_content}
+            {formatted_content}
         </div>"""
                 else:
                     html_content += f"""
