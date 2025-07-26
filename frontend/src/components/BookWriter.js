@@ -1023,9 +1023,18 @@ const BookWriter = () => {
                               </label>
                               <textarea
                                 value={chapter.description}
-                                onChange={(e) => updateChapterData(chapter.number, 'description', e.target.value)}
-                                rows="3"
-                                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                onChange={(e) => {
+                                  updateChapterData(chapter.number, 'description', e.target.value);
+                                  // Auto-resize textarea
+                                  e.target.style.height = 'auto';
+                                  e.target.style.height = Math.max(80, e.target.scrollHeight) + 'px';
+                                }}
+                                rows="4"
+                                style={{ 
+                                  minHeight: '80px',
+                                  height: Math.max(80, (chapter.description.length / 80) * 20 + 60) + 'px'
+                                }}
+                                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
                                 placeholder="Describe what happens in this chapter..."
                               />
                             </div>
