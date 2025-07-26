@@ -2959,11 +2959,34 @@ def process_html_for_docx(html_content, doc, body_style, dialogue_style):
     # Apply asterisk formatting fixes
     html_content = process_asterisk_formatting(html_content)
     
-    # Clean and process content with better HTML parsing
-    cleaned_content = re.sub(r'<h2[^>]*>.*?</h2>', '', html_content)  # Remove h2 tags (already handled)
+    # Debug: print raw content to understand the structure
+    print(f"DEBUG DOCX: Raw HTML content length: {len(html_content)}")
+    print(f"DEBUG DOCX: Raw HTML content preview: {html_content[:200]}...")
     
-    # Split by paragraph tags more carefully
-    paragraphs = re.split(r'<p[^>]*>|</p>', cleaned_content)
+    # Clean content but preserve structure better
+    # Don't remove h2 tags completely - just extract them
+    h2_matches = re.findall(r'<h2[^>]*>(.*?)</h2>', html_content, re.IGNORECASE)
+    cleaned_content = re.sub(r'<h2[^>]*>.*?</h2>', '', html_content, flags=re.IGNORECASE)
+    
+    # Split by different patterns to get all content
+    paragraphs = []
+    
+    # First, split by paragraph tags
+    p_splits = re.split(r'<p[^>]*>|</p>', cleaned_content)
+    
+    # Also split by line breaks for content that might not be in <p> tags
+    for split_content in p_splits:
+        if split_content.strip():
+            # Further split by double line breaks
+            line_splits = split_content.split('\n\n')
+            paragraphs.extend(line_splits)
+    
+    # Also split by single line breaks if content is not properly structured
+    if not paragraphs or all(len(p.strip()) < 50 for p in paragraphs):
+        line_splits = cleaned_content.split('\n')
+        paragraphs.extend(line_splits)
+    
+    print(f"DEBUG DOCX: Found {len(paragraphs)} paragraphs")
     
     for paragraph in paragraphs:
         if paragraph.strip():
@@ -2981,6 +3004,8 @@ def process_html_for_docx(html_content, doc, body_style, dialogue_style):
             # Remove HTML tags
             clean_text = re.sub(r'<[^>]+>', '', temp_text).strip()
             clean_text = unescape(clean_text)
+            
+            print(f"DEBUG DOCX: Processing paragraph: {clean_text[:100]}...")
             
             if clean_text:
                 # Split by line breaks for better formatting
