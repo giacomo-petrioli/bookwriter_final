@@ -334,21 +334,21 @@ const LandingPage = () => {
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 hover:bg-white/10 transition-all duration-300">
               <div className="text-center">
                 <h3 className="text-xl font-bold text-white mb-2">Large Package</h3>
-                <div className="text-3xl font-bold text-emerald-400 mb-2">€20</div>
-                <div className="text-lg text-gray-300 mb-4">50 Credits</div>
-                <div className="text-sm text-gray-400 mb-6">€0.40 per credit</div>
+                <div className="text-3xl font-bold text-emerald-400 mb-2">$49.99</div>
+                <div className="text-lg text-gray-300 mb-4">100 Credits</div>
+                <div className="text-sm text-gray-400 mb-6">$0.50 per credit</div>
                 <div className="space-y-2 text-sm text-gray-300">
                   <div className="flex items-center">
                     <svg className="w-4 h-4 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                     </svg>
-                    Generate 50 chapters
+                    Generate 100 chapters
                   </div>
                   <div className="flex items-center">
                     <svg className="w-4 h-4 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                     </svg>
-                    Perfect for large projects
+                    Most convenient for large projects
                   </div>
                 </div>
               </div>
