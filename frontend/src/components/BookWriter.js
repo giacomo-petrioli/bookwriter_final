@@ -636,7 +636,6 @@ const BookWriter = () => {
     setCurrentProject(null);
     setOutline("");
     setAllChapters({});
-    setEditingOutline(false);
     setIsEditingOutline(false);
   };
 
