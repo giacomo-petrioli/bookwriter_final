@@ -413,7 +413,7 @@ const LandingPage = () => {
                 </div>
               </div>
               <p className="text-gray-300 mb-4">
-                "BookCraft AI transformed my writing process completely. What used to take months now takes weeks. The AI assistance is incredible!"
+                "BookCraft AI transformed my writing process completely. What used to take months now takes minutes. The AI assistance is incredible!"
               </p>
               <div className="flex text-yellow-400">
                 {[...Array(5)].map((_, i) => (
