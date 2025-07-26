@@ -2169,25 +2169,41 @@ def ensure_consistent_chapter_formatting(content: str, chapter_num: int, chapter
     # Clean existing content
     content = process_asterisk_formatting(content)
     
-    # Ensure chapter starts with proper title if not already present
-    if chapter_title and not content.strip().startswith(f'<h2>'):
-        content = f'<h2>Chapter {chapter_num}: {chapter_title}</h2>\n\n{content}'
-    elif not content.strip().startswith(f'<h2>Chapter {chapter_num}'):
-        content = f'<h2>Chapter {chapter_num}</h2>\n\n{content}'
+    # Don't add chapter title if it's already there - just ensure clean formatting
+    # The PDF/DOCX export will add the title separately
+    
+    # Remove any existing chapter titles from content to avoid duplication
+    content = re.sub(r'<h2[^>]*>Chapter\s+\d+[^<]*</h2>', '', content, flags=re.IGNORECASE)
+    content = re.sub(r'^#+\s*Chapter\s+\d+[^\n]*\n', '', content, flags=re.MULTILINE)
     
     # Ensure proper paragraph structure
-    content = re.sub(r'\n\n+', '</p>\n<p>', content)
-    if not content.strip().startswith('<p>'):
-        # Find first non-h2 content and wrap in paragraph
-        parts = content.split('</h2>')
-        if len(parts) > 1:
-            header_part = parts[0] + '</h2>'
-            body_part = parts[1].strip()
-            if body_part and not body_part.startswith('<p>'):
-                body_part = f'<p>{body_part}'
-            if body_part and not body_part.endswith('</p>'):
-                body_part = f'{body_part}</p>'
-            content = f'{header_part}\n{body_part}'
+    content = content.strip()
+    
+    # If content doesn't start with a paragraph tag, wrap the beginning
+    if content and not content.startswith('<p>'):
+        # Split by existing paragraph tags and wrap sections
+        parts = re.split(r'(<p[^>]*>|</p>)', content)
+        formatted_parts = []
+        in_paragraph = False
+        
+        for part in parts:
+            if part.startswith('<p'):
+                in_paragraph = True
+                formatted_parts.append(part)
+            elif part == '</p>':
+                in_paragraph = False
+                formatted_parts.append(part)
+            elif part.strip():
+                if not in_paragraph:
+                    formatted_parts.append(f'<p>{part}</p>')
+                else:
+                    formatted_parts.append(part)
+        
+        content = ''.join(formatted_parts)
+    
+    # Ensure content ends with closing paragraph tag if it starts with opening
+    if content.startswith('<p>') and not content.rstrip().endswith('</p>'):
+        content = content.rstrip() + '</p>'
     
     return content
 
