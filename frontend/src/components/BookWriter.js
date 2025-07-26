@@ -704,6 +704,8 @@ const BookWriter = () => {
     const [savingChapter, setSavingChapter] = useState(false);
     const [generatingOutline, setGeneratingOutline] = useState(false);
     const [generatingChapter, setGeneratingChapter] = useState(false);
+    const [showUserMenu, setShowUserMenu] = useState(false);
+    const [creditBalance, setCreditBalance] = useState(null);
 
     // Load chapter content when selectedChapter changes
     useEffect(() => {
