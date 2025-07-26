@@ -2192,64 +2192,78 @@ def ensure_consistent_chapter_formatting(content: str, chapter_num: int, chapter
     return content
 
 def add_watermark_to_pdf_content(content: list, has_purchased: bool):
-    """Add watermark to PDF content if user hasn't purchased"""
-    if not has_purchased:
-        # Add watermark style
-        from reportlab.lib.styles import getSampleStyleSheet
-        styles = getSampleStyleSheet()
-        watermark_style = ParagraphStyle(
-            'Watermark',
-            parent=styles['Normal'],
-            fontSize=8,
-            textColor=HexColor('#cccccc'),
-            alignment=1,  # Center alignment
-            spaceBefore=6,
-            spaceAfter=6
-        )
-        
-        # Insert watermark after every few paragraphs
-        watermarked_content = []
-        for i, item in enumerate(content):
-            watermarked_content.append(item)
-            # Add watermark every 5 content items
-            if i > 0 and i % 5 == 0:
-                watermarked_content.append(
-                    Paragraph("Generated with BookCraft AI - Purchase credits to remove this watermark", watermark_style)
-                )
-        return watermarked_content
+    """Add watermark to PDF content if user hasn't purchased - this is a placeholder"""
+    # This function is replaced by the proper page template approach
     return content
+
+class WatermarkCanvas:
+    """Custom canvas class to add watermarks to PDF pages"""
+    def __init__(self, canvas, doc, has_purchased=True):
+        self.canvas = canvas
+        self.doc = doc
+        self.has_purchased = has_purchased
+        
+    def __getattr__(self, name):
+        return getattr(self.canvas, name)
+        
+    def showPage(self):
+        """Called at the end of each page"""
+        if not self.has_purchased:
+            # Add watermark at bottom center of page
+            from reportlab.lib.pagesizes import A4
+            page_width = A4[0]
+            
+            # Save current state
+            self.canvas.saveState()
+            
+            # Set watermark text properties
+            self.canvas.setFont("Helvetica", 8)
+            self.canvas.setFillColorRGB(0.7, 0.7, 0.7)  # Light gray
+            
+            # Add watermark at bottom center
+            watermark_text = "Generated with BookCraft AI - Purchase credits to remove this watermark"
+            text_width = self.canvas.stringWidth(watermark_text, "Helvetica", 8)
+            x_position = (page_width - text_width) / 2
+            y_position = 30  # 30 points from bottom (same height as page numbers)
+            
+            self.canvas.drawString(x_position, y_position, watermark_text)
+            
+            # Restore state
+            self.canvas.restoreState()
+        
+        # Call the original showPage
+        self.canvas.showPage()
 
 def add_watermark_to_docx(doc, has_purchased: bool):
     """Add watermark to DOCX document if user hasn't purchased"""
     if not has_purchased:
-        from docx.enum.style import WD_STYLE_TYPE
+        from docx.oxml import OxmlElement
+        from docx.oxml.ns import qn
         
-        # Create watermark style
-        styles = doc.styles
         try:
-            watermark_style = styles.add_style('WatermarkStyle', WD_STYLE_TYPE.PARAGRAPH)
-            watermark_style.font.name = 'Times New Roman'
-            watermark_style.font.size = Inches(0.11)  # 8pt
-            watermark_style.font.color.rgb = RGBColor(204, 204, 204)  # Light gray
-            watermark_style.paragraph_format.alignment = 1  # Center
-        except:
-            # Style might already exist, get it
-            watermark_style = styles['WatermarkStyle']
-        
-        # Add watermark paragraphs throughout document
-        paragraphs = doc.paragraphs
-        paragraph_count = len(paragraphs)
-        
-        # Insert watermarks at regular intervals
-        for i in range(5, paragraph_count, 10):  # Every 10 paragraphs starting from 5th
-            try:
-                # Insert watermark paragraph
-                watermark_p = paragraphs[i].insert_paragraph_before()
-                watermark_p.style = watermark_style
-                watermark_p.add_run("Generated with BookCraft AI - Purchase credits to remove this watermark")
-            except:
-                # If insertion fails, continue without watermark at this position
-                continue
+            # Create footer with watermark for each section
+            sections = doc.sections
+            for section in sections:
+                # Get or create footer
+                footer = section.footer
+                
+                # Clear existing footer content
+                footer._element.clear_content()
+                
+                # Create watermark paragraph in footer
+                watermark_p = footer.paragraphs[0] if footer.paragraphs else footer.add_paragraph()
+                watermark_p.alignment = 1  # Center alignment
+                
+                # Add watermark run
+                watermark_run = watermark_p.add_run("Generated with BookCraft AI - Purchase credits to remove this watermark")
+                watermark_run.font.name = 'Times New Roman'
+                watermark_run.font.size = Inches(0.11)  # 8pt
+                watermark_run.font.color.rgb = RGBColor(180, 180, 180)  # Light gray
+                
+        except Exception as e:
+            # If watermark creation fails, continue without it
+            print(f"Could not add DOCX watermark: {e}")
+            pass
 
 
 @api_router.get("/export-book/{project_id}")
