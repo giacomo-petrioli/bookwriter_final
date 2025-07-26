@@ -2902,6 +2902,9 @@ async def export_book_docx(project_id: str, current_user: User = Depends(get_cur
 
 def process_html_for_docx(html_content, doc, body_style, dialogue_style):
     """Process HTML content for better DOCX formatting"""
+    # Apply asterisk formatting fixes
+    html_content = process_asterisk_formatting(html_content)
+    
     # Clean and process content with better HTML parsing
     cleaned_content = re.sub(r'<h2[^>]*>.*?</h2>', '', html_content)  # Remove h2 tags (already handled)
     
@@ -2910,9 +2913,19 @@ def process_html_for_docx(html_content, doc, body_style, dialogue_style):
     
     for paragraph in paragraphs:
         if paragraph.strip():
-            # Remove HTML tags but preserve line breaks
+            # Remove HTML tags but preserve line breaks and bold formatting
             clean_text = re.sub(r'<br\s*/?>', '\n', paragraph)
-            clean_text = re.sub(r'<[^>]+>', '', clean_text).strip()
+            
+            # Handle bold formatting by tracking it separately
+            bold_parts = []
+            temp_text = clean_text
+            
+            # Find all bold sections
+            for match in re.finditer(r'<strong>(.*?)</strong>', temp_text):
+                bold_parts.append((match.start(), match.end(), match.group(1)))
+            
+            # Remove HTML tags
+            clean_text = re.sub(r'<[^>]+>', '', temp_text).strip()
             clean_text = unescape(clean_text)
             
             if clean_text:
@@ -2930,7 +2943,15 @@ def process_html_for_docx(html_content, doc, body_style, dialogue_style):
                         else:
                             doc_paragraph.style = body_style
                         
-                        doc_paragraph.add_run(line)
+                        # Handle bold formatting within the line
+                        # For simplicity, if the original had <strong> tags, make the whole line bold
+                        run = doc_paragraph.add_run(line)
+                        if '<strong>' in paragraph and '</strong>' in paragraph:
+                            # Check if this line contains bold content
+                            for bold_start, bold_end, bold_content in bold_parts:
+                                if bold_content.strip() in line:
+                                    run.bold = True
+                                    break
 
 @api_router.put("/update-outline")
 async def update_outline(request: dict):
