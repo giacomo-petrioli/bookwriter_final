@@ -1186,19 +1186,21 @@ const BookWriter = () => {
             </button>
             
             {/* Current Project Info */}
-            {currentProject && (
-              <div className="flex items-center space-x-3 px-4 py-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-blue-500/30 rounded-lg">
-                <div className="w-5 h-5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">📚</span>
-                </div>
-                <div>
-                  <div className="text-white text-sm font-medium">Writing & Editing</div>
+            <div className="flex items-center space-x-3 px-4 py-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-blue-500/30 rounded-lg">
+              <div className="w-5 h-5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-white">📚</span>
+              </div>
+              <div>
+                <div className="text-white text-sm font-medium">Writing & Editing</div>
+                {currentProject ? (
                   <div className="text-gray-300 text-xs truncate max-w-48" title={currentProject.title}>
                     {currentProject.title}
                   </div>
-                </div>
+                ) : (
+                  <div className="text-gray-400 text-xs">No project selected</div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </UserHeader>
         
