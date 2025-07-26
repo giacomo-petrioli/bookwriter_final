@@ -2559,24 +2559,32 @@ def process_html_for_pdf(html_content, body_style, dialogue_style):
     """Process HTML content for better PDF formatting"""
     content = []
     
-    # Clean and split content
+    # Clean and process content with better HTML parsing
     cleaned_content = re.sub(r'<h2[^>]*>.*?</h2>', '', html_content)  # Remove h2 tags (already handled)
-    paragraphs = re.split(r'<p>|</p>', cleaned_content)
+    
+    # Split by paragraph tags more carefully
+    paragraphs = re.split(r'<p[^>]*>|</p>', cleaned_content)
     
     for paragraph in paragraphs:
         if paragraph.strip():
-            # Remove HTML tags
-            clean_text = re.sub(r'<[^>]+>', '', paragraph).strip()
+            # Remove HTML tags but preserve line breaks
+            clean_text = re.sub(r'<br\s*/?>', '\n', paragraph)
+            clean_text = re.sub(r'<[^>]+>', '', clean_text).strip()
             clean_text = unescape(clean_text)
             
             if clean_text:
-                # Check if it's dialogue (contains quotation marks)
-                if '"' in clean_text or '"' in clean_text or '"' in clean_text:
-                    content.append(Paragraph(clean_text, dialogue_style))
-                else:
-                    content.append(Paragraph(clean_text, body_style))
-                
-                content.append(Spacer(1, 6))
+                # Split by line breaks for better formatting
+                lines = clean_text.split('\n')
+                for line in lines:
+                    line = line.strip()
+                    if line:
+                        # Check if it's dialogue (contains quotation marks)
+                        if '"' in line or '"' in line or '"' in line or "'" in line:
+                            content.append(Paragraph(line, dialogue_style))
+                        else:
+                            content.append(Paragraph(line, body_style))
+                        
+                        content.append(Spacer(1, 6))
     
     return content
 
