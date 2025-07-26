@@ -2648,6 +2648,13 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
         # Check if user has made purchases for watermark
         has_purchased = await user_has_made_purchase(current_user.id)
         
+        # Create PDF with custom canvas for watermarks
+        if not has_purchased:
+            # Use custom canvas that adds watermarks
+            def custom_canvas_factory(canvas, doc):
+                return WatermarkCanvas(canvas, doc, has_purchased)
+            doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72, canvasmaker=custom_canvas_factory)
+        
         # Chapters with improved formatting
         if project_obj.chapters_content:
             for i in range(1, project_obj.chapters + 1):
@@ -2672,9 +2679,6 @@ async def export_book_pdf(project_id: str, current_user: User = Depends(get_curr
                 
                 if i < project_obj.chapters:  # Don't add page break after last chapter
                     content.append(PageBreak())
-        
-        # Add watermark if user hasn't purchased
-        content = add_watermark_to_pdf_content(content, has_purchased)
         
         # Build PDF
         doc.build(content)
