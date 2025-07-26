@@ -945,6 +945,9 @@ def clean_ai_response(response: str) -> str:
     cleaned_response = re.sub(r'\n{3,}', '\n\n', cleaned_response)
     cleaned_response = cleaned_response.strip()
     
+    # Apply asterisk formatting cleanup
+    cleaned_response = process_asterisk_formatting(cleaned_response)
+    
     # Final cleanup of any remaining unwanted text patterns
     cleaned_response = re.sub(r'^[^<]*?(?=<h2>)', '', cleaned_response, flags=re.DOTALL)
     
