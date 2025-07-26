@@ -1045,7 +1045,7 @@ const BookWriter = () => {
                                 rows="4"
                                 style={{ 
                                   minHeight: '80px',
-                                  height: Math.max(80, (chapter.description.length / 80) * 20 + 60) + 'px'
+                                  height: Math.max(80, Math.ceil(chapter.description.length / 70) * 22 + 60) + 'px'
                                 }}
                                 className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
                                 placeholder="Describe what happens in this chapter..."
