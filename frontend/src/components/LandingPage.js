@@ -311,9 +311,9 @@ const LandingPage = () => {
               </div>
               <div className="text-center">
                 <h3 className="text-xl font-bold text-white mb-2">Medium Package</h3>
-                <div className="text-3xl font-bold text-purple-400 mb-2">€10</div>
+                <div className="text-3xl font-bold text-purple-400 mb-2">$19.99</div>
                 <div className="text-lg text-gray-300 mb-4">25 Credits</div>
-                <div className="text-sm text-gray-400 mb-6">€0.40 per credit</div>
+                <div className="text-sm text-gray-400 mb-6">$0.80 per credit</div>
                 <div className="space-y-2 text-sm text-gray-300">
                   <div className="flex items-center">
                     <svg className="w-4 h-4 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
