@@ -629,6 +629,17 @@ const BookWriter = () => {
     </div>
   );
 
+  // Function to navigate back to dashboard
+  const navigateBackToDashboard = () => {
+    setCurrentView('dashboard');
+    setCurrentStep(1);
+    setCurrentProject(null);
+    setOutline("");
+    setAllChapters({});
+    setEditingOutline(false);
+    setIsEditingOutline(false);
+  };
+
   // Helper functions for structured outline editing
   const parseOutlineToChapters = (htmlOutline) => {
     if (!htmlOutline) return [];
