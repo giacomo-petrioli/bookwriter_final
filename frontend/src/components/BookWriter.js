@@ -1175,13 +1175,7 @@ const BookWriter = () => {
         <UserHeader>
           <div className="flex items-center justify-between w-full">
             <button
-              onClick={() => {
-                setCurrentView('dashboard');
-                setCurrentStep(1);
-                setCurrentProject(null);
-                setOutline("");
-                setAllChapters({});
-              }}
+              onClick={navigateBackToDashboard}
               className="flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-colors group"
             >
               <svg className="w-4 h-4 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
