@@ -2677,6 +2677,9 @@ def process_html_for_pdf(html_content, body_style, dialogue_style):
     """Process HTML content for better PDF formatting"""
     content = []
     
+    # Apply asterisk formatting fixes
+    html_content = process_asterisk_formatting(html_content)
+    
     # Clean and process content with better HTML parsing
     cleaned_content = re.sub(r'<h2[^>]*>.*?</h2>', '', html_content)  # Remove h2 tags (already handled)
     
@@ -2685,9 +2688,15 @@ def process_html_for_pdf(html_content, body_style, dialogue_style):
     
     for paragraph in paragraphs:
         if paragraph.strip():
-            # Remove HTML tags but preserve line breaks
+            # Remove HTML tags but preserve line breaks and bold formatting
             clean_text = re.sub(r'<br\s*/?>', '\n', paragraph)
-            clean_text = re.sub(r'<[^>]+>', '', clean_text).strip()
+            
+            # Handle bold formatting for PDF
+            # Convert <strong> tags to reportlab markup
+            clean_text = re.sub(r'<strong>(.*?)</strong>', r'<b>\1</b>', clean_text)
+            
+            # Remove other HTML tags
+            clean_text = re.sub(r'<(?!/?b>)[^>]+>', '', clean_text).strip()
             clean_text = unescape(clean_text)
             
             if clean_text:
