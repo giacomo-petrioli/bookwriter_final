@@ -2765,28 +2765,35 @@ async def export_book_docx(project_id: str, current_user: User = Depends(get_cur
 
 def process_html_for_docx(html_content, doc, body_style, dialogue_style):
     """Process HTML content for better DOCX formatting"""
-    # Clean and split content
+    # Clean and process content with better HTML parsing
     cleaned_content = re.sub(r'<h2[^>]*>.*?</h2>', '', html_content)  # Remove h2 tags (already handled)
-    paragraphs = re.split(r'<p>|</p>', cleaned_content)
+    
+    # Split by paragraph tags more carefully
+    paragraphs = re.split(r'<p[^>]*>|</p>', cleaned_content)
     
     for paragraph in paragraphs:
         if paragraph.strip():
-            # Remove HTML tags
-            clean_text = re.sub(r'<[^>]+>', '', paragraph).strip()
+            # Remove HTML tags but preserve line breaks
+            clean_text = re.sub(r'<br\s*/?>', '\n', paragraph)
+            clean_text = re.sub(r'<[^>]+>', '', clean_text).strip()
             clean_text = unescape(clean_text)
             
             if clean_text:
-                # Create paragraph
-                doc_paragraph = doc.add_paragraph()
-                
-                # Check if it's dialogue (contains quotation marks)
-                if '"' in clean_text or '"' in clean_text or '"' in clean_text:
-                    doc_paragraph.style = dialogue_style
-                else:
-                    doc_paragraph.style = body_style
-                
-                # Add text
-                doc_paragraph.add_run(clean_text)
+                # Split by line breaks for better formatting
+                lines = clean_text.split('\n')
+                for line in lines:
+                    line = line.strip()
+                    if line:
+                        # Create paragraph
+                        doc_paragraph = doc.add_paragraph()
+                        
+                        # Check if it's dialogue (contains quotation marks)
+                        if '"' in line or '"' in line or '"' in line or "'" in line:
+                            doc_paragraph.style = dialogue_style
+                        else:
+                            doc_paragraph.style = body_style
+                        
+                        doc_paragraph.add_run(line)
 
 @api_router.put("/update-outline")
 async def update_outline(request: dict):
