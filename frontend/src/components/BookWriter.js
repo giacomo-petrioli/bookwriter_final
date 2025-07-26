@@ -750,11 +750,15 @@ const BookWriter = () => {
 
       setSavingOutline(true);
       try {
+        // Reconstruct HTML outline from structured chapters
+        const reconstructedOutline = reconstructOutlineFromChapters(structuredChapters);
+        
         await axios.put(`${API}/update-outline`, {
           project_id: currentProject.id,
-          outline: editableOutline
+          outline: reconstructedOutline
         });
-        setOutline(editableOutline);
+        
+        setOutline(reconstructedOutline);
         setEditingOutline(false);
       } catch (error) {
         console.error("Error updating outline:", error);
