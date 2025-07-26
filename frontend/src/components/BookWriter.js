@@ -1184,7 +1184,14 @@ const BookWriter = () => {
               <span className="text-gray-300 group-hover:text-white font-medium transition-colors">Back to Dashboard</span>
             </button>
             
-            <span className="text-white font-medium">Writing & Editing</span>
+            <div className="text-center">
+              <span className="text-white font-medium">Writing & Editing</span>
+              {currentProject && (
+                <div className="text-sm text-gray-300 mt-1">
+                  {currentProject.title}
+                </div>
+              )}
+            </div>
             
             <div className="w-40"></div> {/* Spacer for centering the title */}
           </div>
