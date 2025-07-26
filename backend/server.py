@@ -2845,6 +2845,9 @@ async def export_book_docx(project_id: str, current_user: User = Depends(get_cur
         
         doc.add_page_break()
         
+        # Check if user has made purchases for watermark
+        has_purchased = await user_has_made_purchase(current_user.id)
+        
         # Chapters with professional formatting
         if project_obj.chapters_content:
             for i in range(1, project_obj.chapters + 1):
@@ -2852,12 +2855,16 @@ async def export_book_docx(project_id: str, current_user: User = Depends(get_cur
                 if chapter_content:
                     # Add chapter title with standardized format
                     chapter_title = chapter_titles.get(i, f"Chapter {i}")
+                    
+                    # Ensure consistent formatting
+                    formatted_content = ensure_consistent_chapter_formatting(chapter_content, i, chapter_title)
+                    
                     chapter_heading = doc.add_paragraph()
                     chapter_heading.style = chapter_title_style
                     chapter_heading.add_run(f"Chapter {i}: {chapter_title}")  # Standardized format
                     
                     # Process and add chapter content
-                    process_html_for_docx(chapter_content, doc, body_style, dialogue_style)
+                    process_html_for_docx(formatted_content, doc, body_style, dialogue_style)
                 else:
                     chapter_heading = doc.add_paragraph()
                     chapter_heading.style = chapter_title_style
@@ -2869,6 +2876,9 @@ async def export_book_docx(project_id: str, current_user: User = Depends(get_cur
                 
                 if i < project_obj.chapters:  # Don't add page break after last chapter
                     doc.add_page_break()
+        
+        # Add watermark if user hasn't purchased
+        add_watermark_to_docx(doc, has_purchased)
         
         # Save to buffer
         buffer = io.BytesIO()
