@@ -225,23 +225,23 @@ CREDIT_PACKAGES = {
     "small": {
         "name": "Small Package",
         "credits": 10,
-        "price": 5.00,
-        "currency": "eur",
+        "price": 9.99,
+        "currency": "usd",
         "description": "Perfect for getting started"
     },
     "medium": {
         "name": "Medium Package", 
         "credits": 25,
-        "price": 10.00,
-        "currency": "eur",
-        "description": "Great value for regular users"
+        "price": 19.99,
+        "currency": "usd",
+        "description": "Most popular - Great value for regular users"
     },
     "large": {
         "name": "Large Package",
-        "credits": 50,
-        "price": 20.00,
-        "currency": "eur",
-        "description": "Best deal for power users"
+        "credits": 100,
+        "price": 49.99,
+        "currency": "usd",
+        "description": "Most convenient - Best deal for power users"
     }
 }
 
