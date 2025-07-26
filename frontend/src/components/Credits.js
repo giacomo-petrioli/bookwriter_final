@@ -80,7 +80,7 @@ const Credits = () => {
         </div>
         <p className="text-sm text-gray-400 mb-4">{packageData.description}</p>
         <div className="text-xs text-gray-500 mb-4">
-          €{(packageData.price / packageData.credits).toFixed(2)} per credit
+          ${(packageData.price / packageData.credits).toFixed(2)} per credit
         </div>
         <button
           onClick={() => handlePurchase(packageId)}
