@@ -750,20 +750,22 @@ const BookWriter = () => {
 
       setExportingBook(true);
       try {
-        const response = await axios.get(`${API}/export-book${format === 'html' ? '' : `-${format}`}/${currentProject.id}`, {
+        const response = await makeAuthenticatedRequest('GET', `${API}/export-book${format === 'html' ? '' : `-${format}`}/${currentProject.id}`, null, {
           responseType: format === 'html' ? 'json' : 'blob'
         });
 
         if (format === 'html') {
-          const blob = new Blob([response.data.html_content], { type: 'text/html' });
+          // Backend returns 'html' field, not 'html_content'
+          const blob = new Blob([response.data.html], { type: 'text/html' });
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.style.display = 'none';
           a.href = url;
-          a.download = `${currentProject.title}.html`;
+          a.download = response.data.filename || `${currentProject.title}.html`;
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
         } else {
           const url = window.URL.createObjectURL(new Blob([response.data]));
           const a = document.createElement('a');
@@ -773,7 +775,10 @@ const BookWriter = () => {
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
         }
+        
+        alert(`Successfully exported as ${format.toUpperCase()}!`);
       } catch (error) {
         console.error(`Error exporting as ${format}:`, error);
         alert(`Failed to export as ${format.toUpperCase()}. Please try again.`);
