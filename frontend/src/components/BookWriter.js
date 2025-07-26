@@ -737,6 +737,33 @@ const BookWriter = () => {
       }
     }, [structuredChapters, editingOutline]);
 
+    // Fetch credit balance
+    useEffect(() => {
+      const fetchCreditBalance = async () => {
+        try {
+          const token = localStorage.getItem('auth_token');
+          if (token) {
+            const response = await axios.get(`${API}/credits/balance`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            setCreditBalance(response.data.credit_balance);
+          }
+        } catch (error) {
+          console.error('Failed to fetch credit balance:', error);
+        }
+      };
+
+      if (user) {
+        fetchCreditBalance();
+      }
+    }, [user]);
+
+    // Handle logout
+    const handleLogout = async () => {
+      await logout();
+      setShowUserMenu(false);
+    };
+
     // Update a specific chapter in structured chapters
     const updateChapterData = (chapterNumber, field, value) => {
       setStructuredChapters(prev => 
