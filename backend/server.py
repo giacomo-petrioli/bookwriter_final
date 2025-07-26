@@ -2721,70 +2721,81 @@ def process_html_for_pdf(html_content, body_style, dialogue_style):
     """Process HTML content for better PDF formatting"""
     content = []
     
+    if not html_content or not html_content.strip():
+        return content
+    
     # Apply asterisk formatting fixes
     html_content = process_asterisk_formatting(html_content)
     
-    # Debug: print raw content to understand the structure
-    print(f"DEBUG: Raw HTML content length: {len(html_content)}")
-    print(f"DEBUG: Raw HTML content preview: {html_content[:200]}...")
-    
-    # Clean content but preserve structure better
-    # Don't remove h2 tags completely - just extract them
-    h2_matches = re.findall(r'<h2[^>]*>(.*?)</h2>', html_content, re.IGNORECASE)
+    # Remove any remaining chapter headers since we add them separately in the main export function
     cleaned_content = re.sub(r'<h2[^>]*>.*?</h2>', '', html_content, flags=re.IGNORECASE)
     
-    # Also try splitting by different paragraph patterns
-    # Split by both <p> tags and line breaks to catch all content
+    # Split content into paragraphs using multiple approaches to catch all content
     paragraphs = []
     
-    # First, split by paragraph tags
-    p_splits = re.split(r'<p[^>]*>|</p>', cleaned_content)
+    # Method 1: Split by <p> tags
+    p_sections = re.split(r'<p[^>]*>(.*?)</p>', cleaned_content, flags=re.DOTALL)
+    for i, section in enumerate(p_sections):
+        if i % 2 == 1 and section.strip():  # Odd indices contain paragraph content
+            paragraphs.append(section.strip())
     
-    # Also split by line breaks for content that might not be in <p> tags
-    for split_content in p_splits:
-        if split_content.strip():
-            # Further split by double line breaks
-            line_splits = split_content.split('\n\n')
-            paragraphs.extend(line_splits)
+    # Method 2: If we didn't get good paragraphs, try splitting by double line breaks
+    if not paragraphs or len(paragraphs) < 2:
+        paragraphs = []
+        # Remove HTML tags first and split by line breaks
+        text_only = re.sub(r'<[^>]+>', '', cleaned_content)
+        text_only = unescape(text_only)
+        
+        # Split by double line breaks
+        parts = text_only.split('\n\n')
+        for part in parts:
+            part = part.strip()
+            if part and len(part) > 20:  # Only include substantial paragraphs
+                paragraphs.append(part)
     
-    # Also split by single line breaks if content is not properly structured
-    if not paragraphs or all(len(p.strip()) < 50 for p in paragraphs):
-        line_splits = cleaned_content.split('\n')
-        paragraphs.extend(line_splits)
+    # Method 3: If still no good content, split by single line breaks  
+    if not paragraphs:
+        text_only = re.sub(r'<[^>]+>', '', cleaned_content)
+        text_only = unescape(text_only)
+        lines = text_only.split('\n')
+        current_paragraph = []
+        
+        for line in lines:
+            line = line.strip()
+            if line:
+                current_paragraph.append(line)
+            elif current_paragraph:
+                full_paragraph = ' '.join(current_paragraph)
+                if len(full_paragraph) > 20:  # Only substantial content
+                    paragraphs.append(full_paragraph)
+                current_paragraph = []
+        
+        # Add remaining paragraph
+        if current_paragraph:
+            full_paragraph = ' '.join(current_paragraph)
+            if len(full_paragraph) > 20:
+                paragraphs.append(full_paragraph)
     
-    print(f"DEBUG: Found {len(paragraphs)} paragraphs")
-    
-    for paragraph in paragraphs:
-        if paragraph.strip():
-            # Remove HTML tags but preserve line breaks and bold formatting
-            clean_text = re.sub(r'<br\s*/?>', '\n', paragraph)
-            
+    # Convert paragraphs to PDF content
+    for paragraph_text in paragraphs:
+        if paragraph_text.strip():
             # Handle bold formatting for PDF
-            # Convert <strong> tags to reportlab markup
-            clean_text = re.sub(r'<strong>(.*?)</strong>', r'<b>\1</b>', clean_text)
-            clean_text = re.sub(r'<b>(.*?)</b>', r'<b>\1</b>', clean_text)  # Keep existing bold
+            paragraph_text = re.sub(r'<strong>(.*?)</strong>', r'<b>\1</b>', paragraph_text)
+            paragraph_text = re.sub(r'<b>(.*?)</b>', r'<b>\1</b>', paragraph_text)  # Keep existing bold
             
-            # Remove other HTML tags except bold
-            clean_text = re.sub(r'<(?!/?b>)[^>]+>', '', clean_text).strip()
-            clean_text = unescape(clean_text)
+            # Remove any remaining HTML tags except bold
+            paragraph_text = re.sub(r'<(?!/?b>)[^>]+>', '', paragraph_text).strip()
+            paragraph_text = unescape(paragraph_text)
             
-            print(f"DEBUG: Processing paragraph: {clean_text[:100]}...")
-            
-            if clean_text:
-                # Split by line breaks for better formatting
-                lines = clean_text.split('\n')
-                for line in lines:
-                    line = line.strip()
-                    if line:
-                        # Check if it's dialogue (contains quotation marks)
-                        if '"' in line or '"' in line or '"' in line or "'" in line:
-                            content.append(Paragraph(line, dialogue_style))
-                        else:
-                            content.append(Paragraph(line, body_style))
-                        
-                        content.append(Spacer(1, 6))
+            if paragraph_text:
+                # Check if it's dialogue (contains quotation marks)
+                if '"' in paragraph_text or '"' in paragraph_text or '"' in paragraph_text or "'" in paragraph_text:
+                    content.append(Paragraph(paragraph_text, dialogue_style))
+                else:
+                    content.append(Paragraph(paragraph_text, body_style))
+                
+                content.append(Spacer(1, 12))  # Add space between paragraphs
     
-    print(f"DEBUG: Generated {len(content)} content items for PDF")
     return content
 
 @api_router.get("/export-book-docx/{project_id}")
