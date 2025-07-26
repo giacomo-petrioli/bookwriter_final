@@ -983,21 +983,58 @@ const BookWriter = () => {
                 </div>
                 
                 {editingOutline ? (
-                  <div className="mb-6 writing-interface">
-                    <ReactQuill
-                      value={editableOutline}
-                      onChange={setEditableOutline}
-                      style={{ height: '400px' }}
-                      theme="snow"
-                      modules={{
-                        toolbar: [
-                          [{ 'header': [1, 2, 3, false] }],
-                          ['bold', 'italic', 'underline'],
-                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                          ['clean']
-                        ],
-                      }}
-                    />
+                  <div className="mb-6">
+                    <div className="bg-white/5 rounded-lg border border-white/20 p-4 mb-4">
+                      <p className="text-sm text-gray-400 mb-2">📝 Edit your book outline by modifying chapter titles and descriptions below.</p>
+                      <p className="text-xs text-gray-500">Note: You can edit chapter content but cannot delete chapters to maintain book structure.</p>
+                    </div>
+                    
+                    <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                      {structuredChapters.map(chapter => (
+                        <div key={chapter.number} className="bg-white/10 rounded-lg border border-white/20 p-4">
+                          <div className="flex items-center mb-3">
+                            <span className="text-sm font-medium text-blue-400 bg-blue-500/20 px-2 py-1 rounded">
+                              Chapter {chapter.number}
+                            </span>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-1">
+                                Chapter Title
+                              </label>
+                              <input
+                                type="text"
+                                value={chapter.title}
+                                onChange={(e) => updateChapterData(chapter.number, 'title', e.target.value)}
+                                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Enter chapter title..."
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-1">
+                                Chapter Description/Plot
+                              </label>
+                              <textarea
+                                value={chapter.description}
+                                onChange={(e) => updateChapterData(chapter.number, 'description', e.target.value)}
+                                rows="3"
+                                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                placeholder="Describe what happens in this chapter..."
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {structuredChapters.length === 0 && (
+                      <div className="text-center py-8 text-gray-400">
+                        <p>No chapters found in the outline.</p>
+                        <p className="text-sm mt-2">Generate an outline first to start editing chapters.</p>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div 
