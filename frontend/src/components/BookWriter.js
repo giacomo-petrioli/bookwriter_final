@@ -712,6 +712,19 @@ const BookWriter = () => {
       }
     }, [outline]);
 
+    // Auto-resize textareas when structured chapters change
+    useEffect(() => {
+      if (editingOutline && structuredChapters.length > 0) {
+        setTimeout(() => {
+          const textareas = document.querySelectorAll('textarea[placeholder*="chapter"]');
+          textareas.forEach(textarea => {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.max(80, textarea.scrollHeight) + 'px';
+          });
+        }, 100);
+      }
+    }, [structuredChapters, editingOutline]);
+
     // Update a specific chapter in structured chapters
     const updateChapterData = (chapterNumber, field, value) => {
       setStructuredChapters(prev => 
