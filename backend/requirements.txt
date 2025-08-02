@@ -48,3 +48,4 @@ tokenizers
 jinja2>=3.1.0
 markupsafe>=3.0.0
 stripe
+PyYAML>=6.0.0
