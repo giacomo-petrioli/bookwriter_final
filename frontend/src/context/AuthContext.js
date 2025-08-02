@@ -313,7 +313,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const registerWithEmailPassword = async (email, password, name, maxRetries = 3) => {
+  const registerWithEmailPassword = async (email, password, name, maxRetries = 2) => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`Starting registration (attempt ${attempt}/${maxRetries})...`);
