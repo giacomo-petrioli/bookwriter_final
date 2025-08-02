@@ -295,6 +295,28 @@ class BackendTester:
         
         self.log_test("Complete Authentication Flow", True, "All authentication steps completed successfully")
         return True
+    
+    def test_user_stats(self):
+        """Test user statistics endpoint"""
+        try:
+            response = self.make_request("GET", "/user/stats")
+            
+            if response and response.status_code == 200:
+                stats = response.json()
+                required_fields = ["total_books", "completed_books", "total_chapters", "total_words", "credit_balance"]
+                if all(field in stats for field in required_fields):
+                    self.log_test("User Statistics", True, f"Stats retrieved: {stats['total_books']} books, {stats['credit_balance']} credits")
+                    return True
+                else:
+                    missing = [f for f in required_fields if f not in stats]
+                    self.log_test("User Statistics", False, f"Missing fields: {missing}")
+                    return False
+            else:
+                self.log_test("User Statistics", False, f"Status: {response.status_code if response else 'No response'}")
+                return False
+        except Exception as e:
+            self.log_test("User Statistics", False, f"Exception: {str(e)}")
+            return False
         """Test user statistics endpoint"""
         try:
             response = self.make_request("GET", "/user/stats")
