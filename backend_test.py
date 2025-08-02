@@ -365,7 +365,16 @@ class BackendTester:
             if response and response.status_code == 200:
                 balance = response.json()
                 if "credit_balance" in balance and "user_id" in balance:
-                    self.log_test("Credit Balance", True, f"Balance: {balance['credit_balance']} credits")
+                    credit_amount = balance['credit_balance']
+                    self.log_test("Credit Balance", True, f"Balance: {credit_amount} credits for user {balance['user_id']}")
+                    
+                    # Verify the balance is a valid number
+                    if isinstance(credit_amount, int) and credit_amount >= 0:
+                        self.log_test("Credit Balance Format", True, f"Credit balance is valid integer: {credit_amount}")
+                    else:
+                        self.log_test("Credit Balance Format", False, f"Invalid credit balance format: {credit_amount} (type: {type(credit_amount)})")
+                        return False
+                    
                     return True
                 else:
                     self.log_test("Credit Balance", False, "Missing required fields in balance response")
