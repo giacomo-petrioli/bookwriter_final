@@ -1400,7 +1400,6 @@ const BookWriter = () => {
                           ],
                         }}
                       />
-                      <div className="mt-16"></div>
                     </div>
                   ) : (
                     <div className="text-center py-20">
