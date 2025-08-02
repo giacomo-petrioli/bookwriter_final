@@ -1007,12 +1007,49 @@ def main():
     tester = BackendTester()
     
     try:
-        # Run authentication-focused tests as requested
-        results = tester.run_authentication_focused_tests()
+        print("=" * 80)
+        print("💳 CREDIT BALANCE FUNCTIONALITY TESTING")
+        print("=" * 80)
+        print(f"Testing backend at: {BACKEND_URL}")
+        print(f"Focus: Credit balance functionality and authentication")
+        print()
+        
+        # 1. Backend health check
+        print("1️⃣ BACKEND HEALTH CHECK")
+        print("-" * 40)
+        if not tester.test_health_check():
+            print("❌ Backend is not responding. Cannot proceed with credit balance testing.")
+            tester.print_summary()
+            sys.exit(1)
+        
+        # 2. Authentication setup
+        print("\n2️⃣ AUTHENTICATION SETUP")
+        print("-" * 40)
+        if not tester.test_user_registration():
+            print("❌ User registration failed. Cannot proceed with credit balance testing.")
+            tester.print_summary()
+            sys.exit(1)
+        
+        # 3. Comprehensive credit balance testing
+        print("\n3️⃣ COMPREHENSIVE CREDIT BALANCE TESTING")
+        print("-" * 40)
+        tester.test_credit_balance_comprehensive()
+        
+        # 4. Additional credit system tests
+        print("\n4️⃣ ADDITIONAL CREDIT SYSTEM TESTS")
+        print("-" * 40)
+        tester.test_credit_packages()
+        
+        # 5. Cleanup
+        print("\n5️⃣ CLEANUP")
+        print("-" * 40)
+        if tester.session_token:
+            tester.test_logout()
+        
         tester.print_summary()
         
         # Exit with appropriate code
-        if results["failed_tests"] == 0:
+        if tester.results["failed_tests"] == 0:
             sys.exit(0)  # All tests passed
         else:
             sys.exit(1)  # Some tests failed
