@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [backendReady, setBackendReady] = useState(false);
 
-  const API_URL = 'https://a4a476c4-1ae3-4338-af34-da4cf0f722a1.preview.emergentagent.com';
+  const API_URL = 'https://c10640d6-156d-4cc7-a946-a17f5247731a.preview.emergentagent.com';
 
   // Backend health check with retry logic
   const checkBackendHealth = async (maxRetries = 5, delay = 1000) => {

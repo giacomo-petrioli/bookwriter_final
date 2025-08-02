@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
-const API_URL = 'https://a4a476c4-1ae3-4338-af34-da4cf0f722a1.preview.emergentagent.com';
+const API_URL = 'https://c10640d6-156d-4cc7-a946-a17f5247731a.preview.emergentagent.com';
 
 const Credits = () => {
   const { user } = useAuth();
