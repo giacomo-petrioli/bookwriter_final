@@ -35,6 +35,7 @@ from passlib.context import CryptContext
 from passlib.hash import bcrypt
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
 from typing import Dict
+from seo_endpoints import router as seo_router
 
 ROOT_DIR = Path(__file__).parent
 
