@@ -390,7 +390,13 @@ class BackendTester:
         """Test credit balance endpoint with invalid authentication"""
         try:
             # Test with no authentication header
+            print("Testing credit balance without authentication...")
             response = self.make_request("GET", "/credits/balance", headers={})
+            
+            print(f"Response status: {response.status_code if response else 'No response'}")
+            if response:
+                print(f"Response headers: {dict(response.headers)}")
+                print(f"Response content: {response.text[:200]}...")
             
             if response and response.status_code == 401:
                 self.log_test("Credit Balance Auth Failure (No Token)", True, "Correctly rejected request without authentication")
@@ -399,8 +405,13 @@ class BackendTester:
                 return False
             
             # Test with invalid token
+            print("Testing credit balance with invalid token...")
             invalid_headers = {"Authorization": "Bearer invalid_token_12345"}
             response = self.make_request("GET", "/credits/balance", headers=invalid_headers)
+            
+            print(f"Response status: {response.status_code if response else 'No response'}")
+            if response:
+                print(f"Response content: {response.text[:200]}...")
             
             if response and response.status_code == 401:
                 self.log_test("Credit Balance Auth Failure (Invalid Token)", True, "Correctly rejected request with invalid token")
