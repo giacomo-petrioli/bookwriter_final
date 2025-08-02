@@ -1,11 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import BookWriter from './components/BookWriter';
 import Credits from './components/Credits';
 import PaymentSuccess from './components/PaymentSuccess';
+import SEOHelmet from './components/SEOHelmet';
+import { SEO_PAGES } from './hooks/useSEO';
 import './App.css';
 
 function App() {
