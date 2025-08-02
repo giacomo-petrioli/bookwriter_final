@@ -17,12 +17,12 @@ const UserHeader = ({ children }) => {
       try {
         const token = localStorage.getItem('auth_token');
         if (token) {
-          const response = await axios.get(`${API_URL}/api/user/credits`, {
+          const response = await axios.get(`${API_URL}/api/credits/balance`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
           });
-          setCreditBalance(response.data.credits);
+          setCreditBalance(response.data.credit_balance);
         }
       } catch (error) {
         console.error('Error fetching credit balance:', error);
