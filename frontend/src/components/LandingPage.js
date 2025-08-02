@@ -532,7 +532,7 @@ const LandingPage = () => {
                 The most advanced AI-powered book writing platform. Create, edit, and publish professional books with cutting-edge technology.
               </p>
               <div className="text-gray-400 text-sm">
-                © 2025 BookCraft AI. All rights reserved.
+                © 2025 MyBookCrafter AI. All rights reserved.
               </div>
             </div>
             
