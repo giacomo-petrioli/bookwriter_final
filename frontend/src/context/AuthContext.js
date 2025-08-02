@@ -49,6 +49,15 @@ export const AuthProvider = ({ children }) => {
         console.log('Initializing authentication...');
         setLoading(true);
         
+        // Set a maximum timeout for the entire initialization process
+        const initTimeout = setTimeout(() => {
+          console.error('Authentication initialization timed out');
+          setLoading(false);
+          setIsAuthenticated(false);
+          setUser(null);
+          setBackendReady(false);
+        }, 20000); // 20 second timeout
+        
         // Check if backend is available
         const isBackendHealthy = await checkBackendHealth();
         
@@ -58,6 +67,7 @@ export const AuthProvider = ({ children }) => {
           setLoading(false);
           setIsAuthenticated(false);
           setUser(null);
+          clearTimeout(initTimeout);
           return;
         }
 
@@ -72,6 +82,8 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(false);
           setUser(null);
         }
+        
+        clearTimeout(initTimeout);
       } catch (error) {
         console.error('Auth initialization failed:', error);
         setLoading(false);
