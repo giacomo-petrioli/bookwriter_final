@@ -3,6 +3,8 @@ import axios from "axios";
 import { useAuth } from '../context/AuthContext';
 import UserHeader from './UserHeader';
 import BookCreationForm from './BookCreationForm';
+import PerformanceMonitor from './PerformanceMonitor';
+import { useSEO, SEO_PAGES } from '../hooks/useSEO';
 
 // Configure axios timeout
 axios.defaults.timeout = 120000; // 2 minutes timeout for individual requests
