@@ -155,7 +155,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = async (credential, maxRetries = 3) => {
+  const loginWithGoogle = async (credential, maxRetries = 2) => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`Starting Google login (attempt ${attempt}/${maxRetries})...`);
@@ -165,7 +165,7 @@ export const AuthProvider = ({ children }) => {
         // Check if backend is ready before attempting login
         if (!backendReady) {
           console.log('Backend not ready for Google login, checking health...');
-          const isHealthy = await checkBackendHealth(5, 1000);
+          const isHealthy = await checkBackendHealth(2, 1000);
           if (!isHealthy) {
             throw new Error('Backend is not available for authentication');
           }
@@ -176,7 +176,7 @@ export const AuthProvider = ({ children }) => {
         const response = await axios.post(`${API_URL}/api/auth/google/verify`, {
           token: credential
         }, { 
-          timeout: 15000,
+          timeout: 10000,
           validateStatus: (status) => status < 500 // Don't throw on 4xx errors
         });
         
@@ -219,8 +219,8 @@ export const AuthProvider = ({ children }) => {
           throw new Error(`Google authentication failed after ${maxRetries} attempts: ${error.message}`);
         }
         
-        // Wait before retrying (longer delay for each attempt)
-        const delay = 2000 * attempt;
+        // Wait before retrying (shorter delay)
+        const delay = 1500;
         console.log(`Retrying Google login in ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
