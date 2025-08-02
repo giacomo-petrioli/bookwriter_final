@@ -248,7 +248,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithEmailPassword = async (email, password, maxRetries = 3) => {
+  const loginWithEmailPassword = async (email, password, maxRetries = 2) => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`Starting email login (attempt ${attempt}/${maxRetries})...`);
