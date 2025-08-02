@@ -815,7 +815,8 @@ def main():
     tester = BackendTester()
     
     try:
-        results = tester.run_all_tests()
+        # Run authentication-focused tests as requested
+        results = tester.run_authentication_focused_tests()
         tester.print_summary()
         
         # Exit with appropriate code
