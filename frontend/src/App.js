@@ -13,29 +13,34 @@ import './App.css';
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId="758478706314-pn8dh4u94p8mt06qialfdigaqs5glj9s.apps.googleusercontent.com">
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/payment-success" element={
-              <ProtectedRoute>
-                <PaymentSuccess />
-              </ProtectedRoute>
-            } />
-            <Route path="/credits" element={
-              <ProtectedRoute>
-                <Credits />
-              </ProtectedRoute>
-            } />
-            <Route path="/" element={
-              <ProtectedRoute>
-                <BookWriter />
-              </ProtectedRoute>
-            } />
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </GoogleOAuthProvider>
+    <HelmetProvider>
+      <GoogleOAuthProvider clientId="758478706314-pn8dh4u94p8mt06qialfdigaqs5glj9s.apps.googleusercontent.com">
+        <AuthProvider>
+          <Router>
+            <Routes>
+              <Route path="/payment-success" element={
+                <ProtectedRoute>
+                  <SEOHelmet {...SEO_PAGES.payment_success} />
+                  <PaymentSuccess />
+                </ProtectedRoute>
+              } />
+              <Route path="/credits" element={
+                <ProtectedRoute>
+                  <SEOHelmet {...SEO_PAGES.credits} />
+                  <Credits />
+                </ProtectedRoute>
+              } />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <SEOHelmet {...SEO_PAGES.home} />
+                  <BookWriter />
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </Router>
+        </AuthProvider>
+      </GoogleOAuthProvider>
+    </HelmetProvider>
   );
 }
 
