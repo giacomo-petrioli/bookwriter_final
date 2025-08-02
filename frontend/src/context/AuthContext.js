@@ -47,12 +47,14 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = async () => {
       try {
         console.log('Initializing authentication...');
+        setLoading(true);
         
-        // First, check if backend is available
+        // Check if backend is available
         const isBackendHealthy = await checkBackendHealth();
         
         if (!isBackendHealthy) {
-          console.error('Backend not available, skipping auth check');
+          console.error('Backend not available during initialization');
+          setBackendReady(false);
           setLoading(false);
           setIsAuthenticated(false);
           setUser(null);
@@ -75,6 +77,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
         setIsAuthenticated(false);
         setUser(null);
+        setBackendReady(false);
       }
     };
 
