@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const checkAuthStatus = async (maxRetries = 3) => {
+  const checkAuthStatus = async (maxRetries = 2) => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`Checking auth status (attempt ${attempt}/${maxRetries})...`);
