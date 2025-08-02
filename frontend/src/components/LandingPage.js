@@ -1,12 +1,23 @@
 import React, { useState } from 'react';
+import AuthPage from './AuthPage';
 
-const LandingPage = ({ onGetStarted }) => {
+const LandingPage = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
 
   const handleGetStarted = () => {
     setIsLoading(true);
-    onGetStarted();
+    setShowAuth(true);
   };
+
+  const handleBackToHome = () => {
+    setShowAuth(false);
+    setIsLoading(false);
+  };
+
+  if (showAuth) {
+    return <AuthPage onBack={handleBackToHome} />;
+  }
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
