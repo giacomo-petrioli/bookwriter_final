@@ -492,6 +492,7 @@ class BackendTester:
         # Test 2: Valid credit balance retrieval
         print("Test 2: Valid credit balance retrieval...")
         if not self.test_credit_balance():
+            print("❌ Valid credit balance test failed, stopping comprehensive test")
             return False
         
         # Test 3: New user default credits
