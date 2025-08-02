@@ -172,8 +172,8 @@ class BackendTester:
     def test_google_oauth_verify_endpoint(self):
         """Test Google OAuth verification endpoint structure"""
         try:
-            # Test with invalid token to check endpoint accessibility
-            data = {"token": "invalid_test_token"}
+            # Test with invalid but properly formatted token to check endpoint accessibility
+            data = {"token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjdkYzBiMjEyIn0.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiYXVkIjoiNzU4NDc4NzA2MzE0LXBuOGRoNHU5NHA4bXQwNnFpYWxmZGlnYXFzNWdsajlzLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTEwNTU5NzU5NzU5NzU5NzU5NzUiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJuYW1lIjoiVGVzdCBVc2VyIn0.invalid_signature"}
             response = self.make_request("POST", "/auth/google/verify", data, headers={})
             
             # We expect 401 for invalid token, but endpoint should be accessible
