@@ -394,7 +394,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              What Writers Say About BookCraft AI
+              What Writers Say About MyBookCrafter AI
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Join thousands of satisfied writers who've published their books with our platform
