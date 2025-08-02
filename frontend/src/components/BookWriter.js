@@ -16,6 +16,10 @@ const API = `${BACKEND_URL}/api`;
 
 const BookWriter = () => {
   const { user, logout } = useAuth();
+  
+  // Use SEO hook for dynamic meta management
+  useSEO(SEO_PAGES.app);
+  
   const [currentView, setCurrentView] = useState('dashboard');
   const [currentStep, setCurrentStep] = useState(1);
   const [projects, setProjects] = useState([]);
