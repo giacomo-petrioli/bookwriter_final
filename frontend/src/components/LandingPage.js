@@ -40,7 +40,7 @@ const LandingPage = () => {
                 <path d="M6.012 3L3 12V21h18v-9L18.012 3H6.012zm1.988 0h8L18 10v9H6v-9l2-7zm3 4v2h4V7h-4zm0 3v2h4v-2h-4z"/>
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-white">BookCraft AI</h1>
+            <h1 className="text-2xl font-bold text-white">MyBookCrafter AI</h1>
           </div>
           <nav className="hidden md:flex space-x-8">
             <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
