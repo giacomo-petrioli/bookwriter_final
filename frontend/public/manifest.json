@@ -1,0 +1,76 @@
+{
+  "short_name": "MyBookCrafter AI",
+  "name": "MyBookCrafter AI - Write Amazing Books with AI",
+  "description": "Create professional books effortlessly with AI-powered writing assistance. From outline to final draft, MyBookCrafter AI helps you craft compelling stories and content.",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1e293b",
+  "background_color": "#1e293b",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["productivity", "writing", "education"],
+  "screenshots": [
+    {
+      "src": "screenshot-desktop.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide"
+    },
+    {
+      "src": "screenshot-mobile.jpg",
+      "sizes": "750x1334",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Create New Book",
+      "short_name": "New Book",
+      "description": "Start creating a new book with AI assistance",
+      "url": "/?action=new-book",
+      "icons": [
+        {
+          "src": "icon-new-book.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "My Books",
+      "short_name": "My Books",
+      "description": "View and manage your existing books",
+      "url": "/?action=my-books",
+      "icons": [
+        {
+          "src": "icon-my-books.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}
