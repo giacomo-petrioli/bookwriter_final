@@ -386,7 +386,149 @@ class BackendTester:
             self.log_test("Credit Balance", False, f"Exception: {str(e)}")
             return False
     
-    def test_credit_packages(self):
+    def test_credit_balance_authentication_failure(self):
+        """Test credit balance endpoint with invalid authentication"""
+        try:
+            # Test with no authentication header
+            response = self.make_request("GET", "/credits/balance", headers={})
+            
+            if response and response.status_code == 401:
+                self.log_test("Credit Balance Auth Failure (No Token)", True, "Correctly rejected request without authentication")
+            else:
+                self.log_test("Credit Balance Auth Failure (No Token)", False, f"Expected 401, got {response.status_code if response else 'No response'}")
+                return False
+            
+            # Test with invalid token
+            invalid_headers = {"Authorization": "Bearer invalid_token_12345"}
+            response = self.make_request("GET", "/credits/balance", headers=invalid_headers)
+            
+            if response and response.status_code == 401:
+                self.log_test("Credit Balance Auth Failure (Invalid Token)", True, "Correctly rejected request with invalid token")
+                return True
+            else:
+                self.log_test("Credit Balance Auth Failure (Invalid Token)", False, f"Expected 401, got {response.status_code if response else 'No response'}")
+                return False
+        except Exception as e:
+            self.log_test("Credit Balance Auth Failure", False, f"Exception: {str(e)}")
+            return False
+    
+    def test_new_user_default_credits(self):
+        """Test that new users get default starting credits (10 credits)"""
+        try:
+            # Create a new user specifically for this test
+            unique_email = f"credit_test_{int(time.time())}@bookcraft.ai"
+            data = {
+                "email": unique_email,
+                "name": "Credit Test User",
+                "password": TEST_USER_PASSWORD
+            }
+            
+            response = self.make_request("POST", "/auth/register", data, headers={})
+            
+            if response and response.status_code == 200:
+                result = response.json()
+                if "session_token" in result:
+                    # Store current session info
+                    old_token = self.session_token
+                    old_user_id = self.user_id
+                    
+                    # Use new user's session
+                    self.session_token = result["session_token"]
+                    self.user_id = result["user"]["id"]
+                    
+                    # Check credit balance for new user
+                    balance_response = self.make_request("GET", "/credits/balance")
+                    
+                    if balance_response and balance_response.status_code == 200:
+                        balance = balance_response.json()
+                        credit_amount = balance.get('credit_balance', 0)
+                        
+                        if credit_amount == 10:
+                            self.log_test("New User Default Credits", True, f"New user correctly received 10 starting credits")
+                            success = True
+                        else:
+                            self.log_test("New User Default Credits", False, f"New user received {credit_amount} credits instead of 10")
+                            success = False
+                    else:
+                        self.log_test("New User Default Credits", False, "Could not retrieve credit balance for new user")
+                        success = False
+                    
+                    # Restore original session
+                    self.session_token = old_token
+                    self.user_id = old_user_id
+                    
+                    return success
+                else:
+                    self.log_test("New User Default Credits", False, "Failed to create new user for testing")
+                    return False
+            else:
+                self.log_test("New User Default Credits", False, f"User registration failed: {response.status_code if response else 'No response'}")
+                return False
+        except Exception as e:
+            self.log_test("New User Default Credits", False, f"Exception: {str(e)}")
+            return False
+    
+    def test_credit_balance_comprehensive(self):
+        """Comprehensive credit balance functionality test"""
+        print("\n💳 COMPREHENSIVE CREDIT BALANCE TESTING")
+        print("-" * 50)
+        
+        # Test 1: Authentication failure scenarios
+        print("Test 1: Authentication failure scenarios...")
+        if not self.test_credit_balance_authentication_failure():
+            return False
+        
+        # Test 2: Valid credit balance retrieval
+        print("Test 2: Valid credit balance retrieval...")
+        if not self.test_credit_balance():
+            return False
+        
+        # Test 3: New user default credits
+        print("Test 3: New user default credits...")
+        if not self.test_new_user_default_credits():
+            return False
+        
+        # Test 4: Credit balance consistency with user stats
+        print("Test 4: Credit balance consistency with user stats...")
+        if not self.test_credit_balance_consistency():
+            return False
+        
+        self.log_test("Comprehensive Credit Balance Testing", True, "All credit balance tests completed successfully")
+        return True
+    
+    def test_credit_balance_consistency(self):
+        """Test that credit balance is consistent between different endpoints"""
+        try:
+            # Get credit balance from /credits/balance endpoint
+            balance_response = self.make_request("GET", "/credits/balance")
+            
+            if not balance_response or balance_response.status_code != 200:
+                self.log_test("Credit Balance Consistency", False, "Could not retrieve credit balance")
+                return False
+            
+            balance_data = balance_response.json()
+            credits_from_balance = balance_data.get('credit_balance', -1)
+            
+            # Get credit balance from /user/stats endpoint
+            stats_response = self.make_request("GET", "/user/stats")
+            
+            if not stats_response or stats_response.status_code != 200:
+                self.log_test("Credit Balance Consistency", False, "Could not retrieve user stats")
+                return False
+            
+            stats_data = stats_response.json()
+            credits_from_stats = stats_data.get('credit_balance', -1)
+            
+            # Compare the two values
+            if credits_from_balance == credits_from_stats:
+                self.log_test("Credit Balance Consistency", True, f"Credit balance consistent across endpoints: {credits_from_balance} credits")
+                return True
+            else:
+                self.log_test("Credit Balance Consistency", False, f"Credit balance inconsistent: /credits/balance={credits_from_balance}, /user/stats={credits_from_stats}")
+                return False
+        except Exception as e:
+            self.log_test("Credit Balance Consistency", False, f"Exception: {str(e)}")
+            return False
         """Test credit packages endpoint"""
         try:
             response = self.make_request("GET", "/credits/packages", headers={})
