@@ -150,7 +150,7 @@ export const AuthProvider = ({ children }) => {
         }
         
         // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
   };
