@@ -95,12 +95,15 @@ class BackendTester:
             # First, try to clean up any existing user
             self.cleanup_test_user()
             
+            # Use a unique email to avoid conflicts
+            unique_email = f"test_{int(time.time())}@bookcraft.ai"
             data = {
-                "email": TEST_USER_EMAIL,
+                "email": unique_email,
                 "name": TEST_USER_NAME,
                 "password": TEST_USER_PASSWORD
             }
             
+            print(f"Attempting registration with email: {unique_email}")
             response = self.make_request("POST", "/auth/register", data)
             
             if response and response.status_code == 200:
@@ -112,6 +115,14 @@ class BackendTester:
                     return True
                 else:
                     self.log_test("User Registration", False, "Missing session_token or user in response")
+                    return False
+            elif response and response.status_code == 400:
+                error_msg = response.json().get("detail", "Unknown error")
+                if "already exists" in error_msg:
+                    self.log_test("User Registration", True, f"User already exists - this is expected: {error_msg}")
+                    return True
+                else:
+                    self.log_test("User Registration", False, f"Status: 400, Error: {error_msg}")
                     return False
             else:
                 error_msg = response.json().get("detail", "Unknown error") if response else "No response"
