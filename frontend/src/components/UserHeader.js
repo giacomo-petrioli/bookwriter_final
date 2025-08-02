@@ -50,9 +50,9 @@ const UserHeader = ({ children }) => {
   }, [showUserMenu]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <>
       {/* Header */}
-      <nav className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 p-6">
+      <nav className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 p-6 relative z-50">
         <div className="container mx-auto flex justify-between items-center">
           {/* Professional Brand - With Logo */}
           <div className="flex items-center space-x-3">
@@ -111,10 +111,8 @@ const UserHeader = ({ children }) => {
       </nav>
 
       {/* Main Content */}
-      <main>
-        {children}
-      </main>
-    </div>
+      {children}
+    </>
   );
 };
 
