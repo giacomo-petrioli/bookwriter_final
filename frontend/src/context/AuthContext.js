@@ -20,11 +20,11 @@ export const AuthProvider = ({ children }) => {
   const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
   // Backend health check with retry logic
-  const checkBackendHealth = async (maxRetries = 5, delay = 1000) => {
+  const checkBackendHealth = async (maxRetries = 2, delay = 1000) => {
     for (let i = 0; i < maxRetries; i++) {
       try {
         console.log(`Backend health check attempt ${i + 1}/${maxRetries}...`);
-        const response = await axios.get(`${API_URL}/api/`, { timeout: 5000 });
+        const response = await axios.get(`${API_URL}/api/`, { timeout: 3000 });
         if (response.status === 200) {
           console.log('Backend is healthy and ready');
           setBackendReady(true);
@@ -35,13 +35,11 @@ export const AuthProvider = ({ children }) => {
         if (i < maxRetries - 1) {
           console.log(`Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 1.5; // Exponential backoff
         }
       }
     }
     console.error('Backend failed to become available after multiple attempts');
     setBackendReady(false);
-    setLoading(false);
     return false;
   };
 
