@@ -529,6 +529,8 @@ class BackendTester:
         except Exception as e:
             self.log_test("Credit Balance Consistency", False, f"Exception: {str(e)}")
             return False
+    
+    def test_credit_packages(self):
         """Test credit packages endpoint"""
         try:
             response = self.make_request("GET", "/credits/packages", headers={})
