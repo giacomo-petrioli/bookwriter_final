@@ -14,10 +14,10 @@ from typing import Dict, Any, Optional
 import uuid
 
 # Configuration
-BACKEND_URL = "http://localhost:8001/api"
-TEST_USER_EMAIL = "testuser@mybookcrafter.ai"
-TEST_USER_NAME = "Test User"
-TEST_USER_PASSWORD = "testpassword123"
+BACKEND_URL = "https://ed9e644b-7694-41c3-b35b-625025142ecb.preview.emergentagent.com/api"
+TEST_USER_EMAIL = "alice.writer@bookcraft.ai"
+TEST_USER_NAME = "Alice Writer"
+TEST_USER_PASSWORD = "SecurePass2024!"
 
 class BackendTester:
     def __init__(self):
