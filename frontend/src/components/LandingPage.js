@@ -478,7 +478,7 @@ const LandingPage = () => {
             Ready to Write Your Book?
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join thousands of writers who've already created amazing books with BookCraft AI. 
+            Join thousands of writers who've already created amazing books with MyBookCrafter AI. 
             Start your writing journey today - it's free to get started!
           </p>
           
