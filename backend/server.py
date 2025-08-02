@@ -3118,6 +3118,7 @@ async def update_outline(request: dict):
 
 # Include the router in the main app
 app.include_router(api_router)
+app.include_router(seo_router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
