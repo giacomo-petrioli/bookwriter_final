@@ -8,7 +8,7 @@ import requests
 import json
 import time
 
-BACKEND_URL = "https://ed9e644b-7694-41c3-b35b-625025142ecb.preview.emergentagent.com/api"
+BACKEND_URL = "https://8397a57c-856b-4a47-b53d-1db799ede760.preview.emergentagent.com/api"
 
 def test_backend_response_times():
     """Test backend response times for key endpoints"""
@@ -51,7 +51,7 @@ def test_cors_headers():
     
     try:
         response = requests.options(f"{BACKEND_URL}/", headers={
-            "Origin": "https://ed9e644b-7694-41c3-b35b-625025142ecb.preview.emergentagent.com",
+            "Origin": "https://8397a57c-856b-4a47-b53d-1db799ede760.preview.emergentagent.com",
             "Access-Control-Request-Method": "POST",
             "Access-Control-Request-Headers": "Content-Type,Authorization"
         })

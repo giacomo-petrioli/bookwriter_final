@@ -14,7 +14,7 @@ from typing import Dict, Any, Optional
 import uuid
 
 # Configuration
-BACKEND_URL = "https://ed9e644b-7694-41c3-b35b-625025142ecb.preview.emergentagent.com/api"
+BACKEND_URL = "https://8397a57c-856b-4a47-b53d-1db799ede760.preview.emergentagent.com/api"
 TEST_USER_EMAIL = "alice.writer@bookcraft.ai"
 TEST_USER_NAME = "Alice Writer"
 TEST_USER_PASSWORD = "SecurePass2024!"
