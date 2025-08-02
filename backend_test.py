@@ -169,7 +169,132 @@ class BackendTester:
             self.log_test("User Profile", False, f"Exception: {str(e)}")
             return False
     
-    def test_user_stats(self):
+    def test_google_oauth_verify_endpoint(self):
+        """Test Google OAuth verification endpoint structure"""
+        try:
+            # Test with invalid token to check endpoint accessibility
+            data = {"token": "invalid_test_token"}
+            response = self.make_request("POST", "/auth/google/verify", data, headers={})
+            
+            # We expect 401 for invalid token, but endpoint should be accessible
+            if response and response.status_code in [401, 400]:
+                self.log_test("Google OAuth Verify Endpoint", True, "Endpoint accessible and responding correctly to invalid token")
+                return True
+            elif response and response.status_code == 500:
+                self.log_test("Google OAuth Verify Endpoint", False, "Server error - endpoint may have issues")
+                return False
+            else:
+                self.log_test("Google OAuth Verify Endpoint", False, f"Unexpected response: {response.status_code if response else 'No response'}")
+                return False
+        except Exception as e:
+            self.log_test("Google OAuth Verify Endpoint", False, f"Exception: {str(e)}")
+            return False
+    
+    def test_session_validation(self):
+        """Test session validation with valid token"""
+        if not self.session_token:
+            self.log_test("Session Validation", False, "No session token available")
+            return False
+        
+        try:
+            # Test session validation by accessing a protected endpoint
+            response = self.make_request("GET", "/auth/profile")
+            
+            if response and response.status_code == 200:
+                profile = response.json()
+                if "id" in profile and "email" in profile:
+                    self.log_test("Session Validation", True, f"Session token valid for user {profile['email']}")
+                    return True
+                else:
+                    self.log_test("Session Validation", False, "Invalid profile response structure")
+                    return False
+            elif response and response.status_code == 401:
+                self.log_test("Session Validation", False, "Session token rejected - authentication issue")
+                return False
+            else:
+                self.log_test("Session Validation", False, f"Unexpected response: {response.status_code if response else 'No response'}")
+                return False
+        except Exception as e:
+            self.log_test("Session Validation", False, f"Exception: {str(e)}")
+            return False
+    
+    def test_protected_endpoints_access(self):
+        """Test access to protected endpoints with authentication"""
+        if not self.session_token:
+            self.log_test("Protected Endpoints Access", False, "No session token available")
+            return False
+        
+        try:
+            # Test multiple protected endpoints
+            endpoints_to_test = [
+                ("/projects", "GET"),
+                ("/user/stats", "GET"),
+                ("/credits/balance", "GET")
+            ]
+            
+            successful_endpoints = 0
+            total_endpoints = len(endpoints_to_test)
+            
+            for endpoint, method in endpoints_to_test:
+                response = self.make_request(method, endpoint)
+                if response and response.status_code == 200:
+                    successful_endpoints += 1
+            
+            if successful_endpoints == total_endpoints:
+                self.log_test("Protected Endpoints Access", True, f"All {total_endpoints} protected endpoints accessible")
+                return True
+            elif successful_endpoints > 0:
+                self.log_test("Protected Endpoints Access", False, f"Only {successful_endpoints}/{total_endpoints} endpoints accessible")
+                return False
+            else:
+                self.log_test("Protected Endpoints Access", False, "No protected endpoints accessible")
+                return False
+        except Exception as e:
+            self.log_test("Protected Endpoints Access", False, f"Exception: {str(e)}")
+            return False
+    
+    def test_authentication_flow_comprehensive(self):
+        """Test complete authentication flow to identify connection issues"""
+        print("\n🔍 COMPREHENSIVE AUTHENTICATION FLOW TESTING")
+        print("-" * 50)
+        
+        # Step 1: Test backend health
+        print("Step 1: Testing backend connectivity...")
+        if not self.test_health_check():
+            return False
+        
+        # Step 2: Test registration
+        print("Step 2: Testing user registration...")
+        if not self.test_user_registration():
+            return False
+        
+        # Step 3: Test session validation immediately after registration
+        print("Step 3: Testing session validation after registration...")
+        if not self.test_session_validation():
+            return False
+        
+        # Step 4: Test logout
+        print("Step 4: Testing logout...")
+        if not self.test_logout():
+            return False
+        
+        # Step 5: Test login
+        print("Step 5: Testing login...")
+        if not self.test_user_login():
+            return False
+        
+        # Step 6: Test session validation after login
+        print("Step 6: Testing session validation after login...")
+        if not self.test_session_validation():
+            return False
+        
+        # Step 7: Test protected endpoints access
+        print("Step 7: Testing protected endpoints access...")
+        if not self.test_protected_endpoints_access():
+            return False
+        
+        self.log_test("Complete Authentication Flow", True, "All authentication steps completed successfully")
+        return True
         """Test user statistics endpoint"""
         try:
             response = self.make_request("GET", "/user/stats")
