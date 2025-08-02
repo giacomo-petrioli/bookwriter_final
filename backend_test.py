@@ -662,7 +662,64 @@ class BackendTester:
         except:
             pass
     
-    def run_all_tests(self):
+    def run_authentication_focused_tests(self):
+        """Run authentication-focused tests as requested in review"""
+        print("=" * 80)
+        print("🔐 COMPREHENSIVE AUTHENTICATION SYSTEM TESTING")
+        print("=" * 80)
+        print(f"Testing backend at: {BACKEND_URL}")
+        print(f"Focus: Authentication system reliability and connection issues")
+        print()
+        
+        # 1. Backend health check - verify /api/ endpoint responds correctly
+        print("1️⃣ BACKEND HEALTH CHECK")
+        print("-" * 40)
+        if not self.test_health_check():
+            print("❌ Backend is not responding. This could be the root cause of 'Connecting to server' issues.")
+            return self.results
+        
+        # 2. Google OAuth authentication endpoint - test /api/auth/google/verify 
+        print("\n2️⃣ GOOGLE OAUTH AUTHENTICATION ENDPOINT")
+        print("-" * 40)
+        self.test_google_oauth_verify_endpoint()
+        
+        # 3. Email/password authentication endpoints - test /api/auth/register and /api/auth/login
+        print("\n3️⃣ EMAIL/PASSWORD AUTHENTICATION ENDPOINTS")
+        print("-" * 40)
+        self.test_user_registration()
+        self.test_user_login()
+        
+        # 4. Session validation - test /api/auth/session with valid tokens
+        print("\n4️⃣ SESSION VALIDATION")
+        print("-" * 40)
+        self.test_session_validation()
+        
+        # 5. Protected endpoints accessibility with authentication
+        print("\n5️⃣ PROTECTED ENDPOINTS ACCESS")
+        print("-" * 40)
+        self.test_protected_endpoints_access()
+        
+        # 6. User profile and stats endpoints
+        print("\n6️⃣ USER PROFILE AND STATS ENDPOINTS")
+        print("-" * 40)
+        self.test_user_profile()
+        self.test_user_stats()
+        
+        # 7. Complete authentication flow test
+        print("\n7️⃣ COMPLETE AUTHENTICATION FLOW TEST")
+        print("-" * 40)
+        # Reset session for complete flow test
+        self.session_token = None
+        self.user_id = None
+        self.test_authentication_flow_comprehensive()
+        
+        # Cleanup
+        print("\n🧹 CLEANUP")
+        print("-" * 40)
+        if self.session_token:
+            self.test_logout()
+        
+        return self.results
         """Run all backend tests"""
         print("=" * 80)
         print("🚀 STARTING COMPREHENSIVE MYBOOKCRAFTER AI BACKEND TESTING")
