@@ -1426,6 +1426,7 @@ const BookWriter = () => {
   // Main render
   return (
     <div className="App min-h-screen">
+      <PerformanceMonitor />
       {currentView === 'dashboard' && <Dashboard />}
       {currentView === 'writing' && <WritingInterface />}
     </div>
