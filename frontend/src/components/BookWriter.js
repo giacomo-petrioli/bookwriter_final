@@ -135,7 +135,7 @@ const BookWriter = () => {
 
   const refreshCreditBalance = async () => {
     try {
-      const response = await axios.get(`${API}/credits/balance`);
+      const response = await makeAuthenticatedRequest('GET', `${API}/credits/balance`);
       setCreditBalance(response.data.credit_balance);
     } catch (error) {
       console.error("Error loading credit balance:", error);
